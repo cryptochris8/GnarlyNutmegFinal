@@ -5845,16 +5845,27 @@
       
       // Map power-up types to display names and descriptions
       const powerUpInfo = {
+        // Core Power-Ups
         'freeze_blast': { name: '🧊 Freeze Blast', desc: 'Freezes nearby opponents for 4 seconds' },
-        'speed_boost': { name: '⚡ Speed Boost', desc: 'Doubles movement speed for 8 seconds' },
-        
-        'fireball': { name: '🔥 Fireball', desc: 'Launches an explosive fireball' },
+        'stamina': { name: '⚡ Stamina Restore', desc: 'Restores stamina and boosts regeneration' },
+        'fireball': { name: '🔥 Fireball', desc: 'Launches an explosive fireball that stuns and burns' },
         'mega_kick': { name: '⚽ Mega Kick', desc: 'Next ball kick has 3x power and speed' },
-        'shield': { name: '🛡️ Shield', desc: 'Blocks one attack' },
-        'speed': { name: '⚡ Speed Enhancement', desc: 'Increased movement speed' },
-        'power': { name: '💪 Power Enhancement', desc: 'Increased shot power' },
-        'precision': { name: '🎯 Precision Enhancement', desc: 'Improved accuracy' },
-        'shuriken': { name: '🥷 Shuriken Throw', desc: 'Launches stunning projectile that can be dodged' }
+        'shield': { name: '🛡️ Shield', desc: 'Blocks one attack for 15 seconds' },
+        'speed': { name: '⚡ Speed Boost', desc: 'Increased movement speed for 8 seconds' },
+        'speed_boost': { name: '⚡ Speed Boost', desc: 'Increased movement speed for 8 seconds' }, // Alias for consistency
+        'power': { name: '💪 Power Enhancement', desc: 'Increased shot power for 15 seconds' },
+        'precision': { name: '🎯 Precision Enhancement', desc: 'Improved accuracy for 15 seconds' },
+        'shuriken': { name: '🥷 Shuriken Throw', desc: 'Launches stunning projectile that can be dodged' },
+
+        // Enhanced Power-Ups
+        'time_slow': { name: '⏰ Time Slow', desc: 'Slows down all opponents for 8 seconds' },
+        'ball_magnet': { name: '🧲 Ball Magnet', desc: 'Ball automatically follows you for 10 seconds' },
+        'crystal_barrier': { name: '💎 Crystal Barrier', desc: 'Creates protective crystal shields for 15 seconds' },
+        'elemental_mastery': { name: '🌊 Elemental Mastery', desc: 'Controls field elements and effects for 12 seconds' },
+        'tidal_wave': { name: '🌊 Tidal Wave', desc: 'Creates splash zones and waves for 6 seconds' },
+        'reality_warp': { name: '🌀 Reality Warp', desc: 'Creates portals and warps space for 15 seconds' },
+        'honey_trap': { name: '🍯 Honey Trap', desc: 'Creates sticky slow zones for 10 seconds' },
+        'star_rain': { name: '⭐ Star Rain', desc: 'Rains stars from the sky (coming soon!)' }
       };
       
       const info = powerUpInfo[powerUpData.type] || { name: powerUpData.type, desc: 'Unknown power-up' };
@@ -9158,6 +9169,7 @@
   // Get human-readable power-up name
   function getPowerupName(powerUpType) {
     const nameMap = {
+      // Core Power-Ups
       'freeze_blast': 'Freeze Blast',
       'fireball': 'Fireball',
       'mega_kick': 'Mega Kick',
@@ -9165,9 +9177,20 @@
       'shield': 'Shield',
       'stamina': 'Stamina Potion',
       'speed': 'Speed Boost',
+      'speed_boost': 'Speed Boost', // Alias for consistency
       'power': 'Power Enhancement',
       'precision': 'Precision Boost',
-      'shuriken': 'Shuriken Throw'
+      'shuriken': 'Shuriken Throw',
+
+      // Enhanced Power-Ups
+      'time_slow': 'Time Slow',
+      'ball_magnet': 'Ball Magnet',
+      'crystal_barrier': 'Crystal Barrier',
+      'elemental_mastery': 'Elemental Mastery',
+      'tidal_wave': 'Tidal Wave',
+      'reality_warp': 'Reality Warp',
+      'honey_trap': 'Honey Trap',
+      'star_rain': 'Star Rain'
     };
     return nameMap[powerUpType] || 'Unknown Power-up';
   }
