@@ -23,11 +23,13 @@ export interface ChatCommandDependencies {
   world: World;
   game: SoccerGame | null;
   aiPlayers: AIPlayerEntity[];
+  audioManager: AudioManager;
+  sharedState: typeof sharedState;
+  spectatorMode: typeof spectatorMode;
+  fifaCrowdManager: FIFACrowdManager;
+  pickupManager: PickupGameManager;
   tournamentManager: TournamentManager;
   arcadeManager: ArcadeEnhancementManager;
-  pickupManager: PickupGameManager;
-  fifaCrowdManager: FIFACrowdManager;
-  audioManager: AudioManager;
 }
 
 export class ChatCommandHandlers {
@@ -41,7 +43,7 @@ export class ChatCommandHandlers {
    * Register all chat commands with the world
    */
   registerAll(): void {
-    logger.info("=Ý Registering chat commands...");
+    logger.info("=ï¿½ Registering chat commands...");
 
     // Game Control Commands
     this.registerStuckCommand();
@@ -341,11 +343,11 @@ export class ChatCommandHandlers {
 
       this.deps.world.chatManager.sendPlayerMessage(
         player,
-        `½ Ball Position: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`
+        `ï¿½ Ball Position: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`
       );
       this.deps.world.chatManager.sendPlayerMessage(
         player,
-        `=Ê Velocity: (${vel.x.toFixed(2)}, ${vel.y.toFixed(2)}, ${vel.z.toFixed(2)})`
+        `=ï¿½ Velocity: (${vel.x.toFixed(2)}, ${vel.y.toFixed(2)}, ${vel.z.toFixed(2)})`
       );
     });
   }
@@ -367,11 +369,11 @@ export class ChatCommandHandlers {
 
       this.deps.world.chatManager.sendPlayerMessage(
         player,
-        `=æ Active Pickups: ${pickupInfo.activeCount}`
+        `=ï¿½ Active Pickups: ${pickupInfo.activeCount}`
       );
       this.deps.world.chatManager.sendPlayerMessage(
         player,
-        `<¯ Spawn Points: ${pickupInfo.spawnPoints}`
+        `<ï¿½ Spawn Points: ${pickupInfo.spawnPoints}`
       );
     });
   }
@@ -563,7 +565,7 @@ export class ChatCommandHandlers {
       const state = this.deps.game.getState();
       this.deps.world.chatManager.sendPlayerMessage(
         player,
-        `½ Score: Red ${state.redScore} - ${state.blueScore} Blue`
+        `ï¿½ Score: Red ${state.redScore} - ${state.blueScore} Blue`
       );
     });
   }
@@ -692,7 +694,7 @@ export class ChatCommandHandlers {
           this.deps.world.chatManager.sendPlayerMessage(player, " Profiler stopped");
           break;
         case "stats":
-          this.deps.world.chatManager.sendPlayerMessage(player, "=Ê Profiler statistics...");
+          this.deps.world.chatManager.sendPlayerMessage(player, "=ï¿½ Profiler statistics...");
           break;
         default:
           this.deps.world.chatManager.sendPlayerMessage(

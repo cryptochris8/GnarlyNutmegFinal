@@ -8,16 +8,16 @@
  */
 
 import { World } from "hytopia";
-import { SoccerGame } from "../core/SoccerGame";
-import { AIPlayerEntity } from "../entities/AIPlayerEntity";
-import { SharedState } from "../state/SharedState";
+import { SoccerGame } from "../../state/gameState";
+import AIPlayerEntity from "../../entities/AIPlayerEntity";
+import sharedState from "../../state/sharedState";
 import { logger } from "../../utils/GameLogger";
 
 export interface GameEventDependencies {
   world: World;
   game: SoccerGame | null;
   aiPlayers: AIPlayerEntity[];
-  sharedState: SharedState;
+  sharedState: typeof sharedState;
 }
 
 /**
@@ -101,7 +101,7 @@ export class GameEventHandlers {
         // CRITICAL: Unlock pointer for UI interactions after reset (Hytopia-compliant approach)
         player.ui.lockPointer(false);
         logger.info(
-          `<¯ Pointer unlocked for ${player.username} after game reset - UI interactions enabled`
+          `<ï¿½ Pointer unlocked for ${player.username} after game reset - UI interactions enabled`
         );
 
         player.ui.sendData({

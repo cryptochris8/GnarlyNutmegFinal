@@ -16,31 +16,30 @@
  * UI event system. Consider splitting into sub-handlers if it grows beyond 2000 lines.
  */
 
-import { World, Player, PlayerUIEvent, EntityEvent } from "hytopia";
-import { SoccerGame } from "../core/SoccerGame";
-import { AIPlayerEntity } from "../entities/AIPlayerEntity";
-import { SoccerPlayerEntity } from "../entities/SoccerPlayerEntity";
+import { World, Player, PlayerUIEvent, EntityEvent, PlayerManager } from "hytopia";
+import { SoccerGame } from "../../state/gameState";
+import AIPlayerEntity from "../../entities/AIPlayerEntity";
+import SoccerPlayerEntity from "../../entities/SoccerPlayerEntity";
 import { AudioManager } from "../core/AudioManager";
 import { logger } from "../../utils/GameLogger";
-import { SharedState } from "../state/SharedState";
-import { SpectatorMode } from "../systems/SpectatorMode";
-import { FIFACrowdManager } from "../systems/FIFACrowdManager";
-import { PickupManager } from "../systems/PickupManager";
-import { TournamentManager } from "../systems/TournamentManager";
-import { PlayerManager } from "../core/PlayerManager";
+import sharedState from "../../state/sharedState";
+import spectatorMode from "../../utils/observerMode";
+import { FIFACrowdManager } from "../../utils/fifaCrowdManager";
+import { PickupGameManager } from "../../state/pickupGameManager";
+import { TournamentManager } from "../../state/tournamentManager";
 import { GameMode, setGameMode, getCurrentModeConfig, isFIFAMode, isArcadeMode } from "../../state/gameModes";
-import { getStartPosition } from "../utils/positions";
-import { getDirectionFromRotation } from "../utils/helpers";
+import { getStartPosition } from "../../utils/positions";
+import { getDirectionFromRotation } from "../../utils/direction";
 
 export interface UIEventDependencies {
   world: World;
   game: SoccerGame | null;
   aiPlayers: AIPlayerEntity[];
   audioManager: AudioManager;
-  sharedState: SharedState;
-  spectatorMode: SpectatorMode;
+  sharedState: typeof sharedState;
+  spectatorMode: typeof spectatorMode;
   fifaCrowdManager: FIFACrowdManager;
-  pickupManager: PickupManager;
+  pickupManager: PickupGameManager;
   tournamentManager: TournamentManager;
   spawnAIPlayers: (team?: string) => Promise<void>;
 }
@@ -182,7 +181,7 @@ export class UIEventHandlers {
       config: getCurrentModeConfig(),
     });
 
-    logger.info("<® Game mode selected - ready for team selection");
+    logger.info("<ï¿½ Game mode selected - ready for team selection");
   }
 
   private handleSinglePlayerSelection(player: Player, data: any): void {
@@ -224,7 +223,7 @@ export class UIEventHandlers {
     const existingEntities = this.deps.world.entityManager.getPlayerEntitiesByPlayer(player);
     if (existingEntities.length > 0) {
       logger.warn(
-        `   Player ${player.username} already has ${existingEntities.length} entities! Cleaning up...`
+        `ï¿½  Player ${player.username} already has ${existingEntities.length} entities! Cleaning up...`
       );
       existingEntities.forEach((entity) => {
         if (entity.isSpawned) {
@@ -308,7 +307,7 @@ export class UIEventHandlers {
 
         // Activate pickup system if in arcade mode
         if (isArcadeMode()) {
-          logger.info(`<¯ Activating pickup system for Arcade Mode`);
+          logger.info(`<ï¿½ Activating pickup system for Arcade Mode`);
           this.deps.pickupManager.activate();
         }
 
@@ -321,7 +320,7 @@ export class UIEventHandlers {
 
           // CRITICAL: Lock pointer for gameplay (Hytopia-compliant approach)
           player.ui.lockPointer(true);
-          logger.info(`<® Pointer locked for ${player.username} - Game controls enabled`);
+          logger.info(`<ï¿½ Pointer locked for ${player.username} - Game controls enabled`);
 
           // Clear loading UI
           player.ui.sendData({
@@ -484,14 +483,14 @@ export class UIEventHandlers {
 
   private handleMobileTeamSelection(player: Player, data: any): void {
     const selectedTeam = data.team;
-    logger.info(`=ñ Mobile team selection: ${player.username} chose ${selectedTeam}`);
+    logger.info(`=ï¿½ Mobile team selection: ${player.username} chose ${selectedTeam}`);
 
     // Use existing team selection logic - same as regular team-selected handler
     // NOTE: This is a simplified version - full implementation would mirror handleTeamSelection
     if (this.deps.game) {
       // Check if player is already on a team
       if (this.deps.game.getTeamOfPlayer(player.username) !== null) {
-        logger.info("=ñ Player already on a team");
+        logger.info("=ï¿½ Player already on a team");
         player.ui.sendData({
           type: "mobile-team-selection-failed",
           message: "Already on a team",
@@ -525,7 +524,7 @@ export class UIEventHandlers {
   }
 
   private handleForcePass(player: Player, data: any): void {
-    logger.info(`<¯ SERVER: Received force-pass request from ${player.username}`);
+    logger.info(`<ï¿½ SERVER: Received force-pass request from ${player.username}`);
 
     // Find the player's entity
     const playerEntity = this.deps.world.entityManager
@@ -598,7 +597,7 @@ export class UIEventHandlers {
       playerWithBall.team === requestingPlayerEntity.team
     ) {
       logger.info(
-        `<¯ HUMAN PLAYER REQUESTING PASS: AI ${playerWithBall.player.username} passing to ${requestingPlayerEntity.player.username}`
+        `<ï¿½ HUMAN PLAYER REQUESTING PASS: AI ${playerWithBall.player.username} passing to ${requestingPlayerEntity.player.username}`
       );
 
       // Calculate a target point slightly in front of the requesting player
@@ -661,7 +660,7 @@ export class UIEventHandlers {
       // CRITICAL: Unlock pointer for UI interactions after manual reset (Hytopia-compliant approach)
       player.ui.lockPointer(false);
       logger.info(
-        `<¯ Pointer unlocked for ${player.username} after manual reset - UI interactions enabled`
+        `<ï¿½ Pointer unlocked for ${player.username} after manual reset - UI interactions enabled`
       );
 
       // Clear AI players list
@@ -688,7 +687,7 @@ export class UIEventHandlers {
   }
 
   private handleStartSecondHalf(player: Player, data: any): void {
-    logger.info(`=€ Player ${player.username} requested to start second half`);
+    logger.info(`=ï¿½ Player ${player.username} requested to start second half`);
 
     // Only allow if game is in halftime
     if (this.deps.game && this.deps.game.getState().isHalftime) {
@@ -714,8 +713,8 @@ export class UIEventHandlers {
   // ============================================================================
 
   private handleTournamentCreate(player: Player, data: any): void {
-    logger.info(`<Æ Player ${player.username} creating tournament:`, data);
-    logger.info(`<Æ Tournament creation request details:`, {
+    logger.info(`<ï¿½ Player ${player.username} creating tournament:`, data);
+    logger.info(`<ï¿½ Tournament creation request details:`, {
       name: data.name,
       type: data.tournamentType,
       gameMode: data.gameMode,
@@ -734,7 +733,7 @@ export class UIEventHandlers {
         player.username
       );
 
-      logger.info(`<Æ Tournament created successfully, sending response to ${player.username}`);
+      logger.info(`<ï¿½ Tournament created successfully, sending response to ${player.username}`);
 
       const tournamentResponse = {
         type: "tournament-created",
@@ -750,12 +749,12 @@ export class UIEventHandlers {
         },
       };
 
-      logger.info(`<Æ Sending tournament-created response:`, tournamentResponse);
+      logger.info(`<ï¿½ Sending tournament-created response:`, tournamentResponse);
       player.ui.sendData(tournamentResponse);
 
       // Broadcast tournament creation to all players
       const allPlayers = PlayerManager.instance.getConnectedPlayers();
-      logger.info(`<Æ Broadcasting tournament list to ${allPlayers.length} players`);
+      logger.info(`<ï¿½ Broadcasting tournament list to ${allPlayers.length} players`);
 
       allPlayers.forEach((p) => {
         p.ui.sendData({
@@ -782,13 +781,13 @@ export class UIEventHandlers {
         message: `Failed to create tournament: ${error.message}`,
       };
 
-      logger.info(`<Æ Sending tournament-error response:`, errorResponse);
+      logger.info(`<ï¿½ Sending tournament-error response:`, errorResponse);
       player.ui.sendData(errorResponse);
     }
   }
 
   private handleTournamentJoin(player: Player, data: any): void {
-    logger.info(`<Æ Player ${player.username} joining tournament: ${data.tournamentId}`);
+    logger.info(`<ï¿½ Player ${player.username} joining tournament: ${data.tournamentId}`);
 
     try {
       const success = this.deps.tournamentManager.registerPlayer(
@@ -850,7 +849,7 @@ export class UIEventHandlers {
   }
 
   private handleTournamentLeave(player: Player, data: any): void {
-    logger.info(`<Æ Player ${player.username} leaving tournament`);
+    logger.info(`<ï¿½ Player ${player.username} leaving tournament`);
 
     const activeTournaments = this.deps.tournamentManager.getPlayerActiveTournaments(
       player.username
@@ -908,7 +907,7 @@ export class UIEventHandlers {
   }
 
   private handleTournamentReady(player: Player, data: any): void {
-    logger.info(`<Æ Player ${player.username} marking ready for tournament match`);
+    logger.info(`<ï¿½ Player ${player.username} marking ready for tournament match`);
 
     const match = this.deps.tournamentManager.getMatchForPlayer(player.username);
     if (match) {
@@ -962,7 +961,7 @@ export class UIEventHandlers {
   }
 
   private handleTournamentGetStatus(player: Player, data: any): void {
-    logger.info(`<Æ Player ${player.username} requesting tournament status`);
+    logger.info(`<ï¿½ Player ${player.username} requesting tournament status`);
 
     const activeTournaments = this.deps.tournamentManager.getPlayerActiveTournaments(
       player.username
@@ -1005,7 +1004,7 @@ export class UIEventHandlers {
   }
 
   private handleTournamentGetList(player: Player, data: any): void {
-    logger.info(`<Æ Player ${player.username} requesting tournament list`);
+    logger.info(`<ï¿½ Player ${player.username} requesting tournament list`);
 
     const tournaments = this.deps.tournamentManager.getActiveTournaments();
 
@@ -1030,17 +1029,17 @@ export class UIEventHandlers {
   // ============================================================================
 
   private handleSpectatorNextPlayer(player: Player, data: any): void {
-    logger.info(`<¥ Spectator ${player.username} wants to switch to next player`);
+    logger.info(`<ï¿½ Spectator ${player.username} wants to switch to next player`);
     this.deps.spectatorMode.nextPlayer(player);
   }
 
   private handleSpectatorNextCamera(player: Player, data: any): void {
-    logger.info(`<¥ Spectator ${player.username} wants to switch camera mode`);
+    logger.info(`<ï¿½ Spectator ${player.username} wants to switch camera mode`);
     this.deps.spectatorMode.nextCameraMode(player);
   }
 
   private handleSpectatorLeave(player: Player, data: any): void {
-    logger.info(`<¥ Spectator ${player.username} wants to leave spectator mode`);
+    logger.info(`<ï¿½ Spectator ${player.username} wants to leave spectator mode`);
     this.deps.spectatorMode.removeSpectator(player);
   }
 
@@ -1049,8 +1048,8 @@ export class UIEventHandlers {
   // ============================================================================
 
   private handleMobileModeEnabled(player: Player, data: any): void {
-    logger.info(`=ñ Player ${player.username} enabled mobile mode`);
-    logger.info(`=ñ Device info:`, data.deviceInfo);
+    logger.info(`=ï¿½ Player ${player.username} enabled mobile mode`);
+    logger.info(`=ï¿½ Device info:`, data.deviceInfo);
 
     // Store mobile mode preference for this player
     (player as any)._isMobilePlayer = true;
@@ -1212,7 +1211,7 @@ export class UIEventHandlers {
     const action = data.action;
     const pressed = data.pressed;
 
-    logger.info(`=ñ Mobile action: ${player.username} ${action} ${pressed ? "pressed" : "released"}`);
+    logger.info(`=ï¿½ Mobile action: ${player.username} ${action} ${pressed ? "pressed" : "released"}`);
 
     // Get the player's soccer entity
     const playerEntity = this.deps.world.entityManager.getPlayerEntitiesByPlayer(player)[0];
@@ -1285,7 +1284,7 @@ export class UIEventHandlers {
     const camera = data.camera;
 
     logger.info(
-      `=ñ Mobile camera: ${player.username} yaw=${camera.yaw.toFixed(3)}, pitch=${camera.pitch.toFixed(3)}`
+      `=ï¿½ Mobile camera: ${player.username} yaw=${camera.yaw.toFixed(3)}, pitch=${camera.pitch.toFixed(3)}`
     );
 
     // Store camera orientation for this mobile player
@@ -1323,7 +1322,7 @@ export class UIEventHandlers {
             player.camera.setFov(85); // Wider FOV for better mobile experience
           }
         } catch (cameraError) {
-          logger.warn(`=ñ Camera control error for ${player.username}:`, cameraError);
+          logger.warn(`=ï¿½ Camera control error for ${player.username}:`, cameraError);
         }
       }
 
@@ -1346,7 +1345,7 @@ export class UIEventHandlers {
     const speed = data.speed;
     const distance = data.distance;
 
-    logger.info(`=ñ Swipe gesture: ${player.username} swiped ${direction} (${speed.toFixed(1)} px/ms)`);
+    logger.info(`=ï¿½ Swipe gesture: ${player.username} swiped ${direction} (${speed.toFixed(1)} px/ms)`);
 
     // Get the player's soccer entity
     const playerEntity = this.deps.world.entityManager.getPlayerEntitiesByPlayer(player)[0];
@@ -1375,7 +1374,7 @@ export class UIEventHandlers {
     const zoom = data.zoom;
     const center = data.center;
 
-    logger.info(`=ñ Zoom gesture: ${player.username} zoom ${zoom.toFixed(2)}x`);
+    logger.info(`=ï¿½ Zoom gesture: ${player.username} zoom ${zoom.toFixed(2)}x`);
 
     // Get the player's soccer entity
     const playerEntity = this.deps.world.entityManager.getPlayerEntitiesByPlayer(player)[0];

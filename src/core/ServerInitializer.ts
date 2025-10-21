@@ -14,23 +14,23 @@
 
 import { World, Audio } from "hytopia";
 import worldMap from "../../assets/maps/soccer.json";
-import { SoccerGame } from "./SoccerGame";
+import { SoccerGame } from "../../state/gameState";
 import { AudioManager } from "./AudioManager";
-import createSoccerBall from "../utils/ball";
+import createSoccerBall from "../../utils/ball";
 import { logger } from "../../utils/GameLogger";
-import { SharedState } from "../state/SharedState";
-import { SpectatorMode } from "../systems/SpectatorMode";
-import { FIFACrowdManager } from "../systems/FIFACrowdManager";
-import { PickupManager } from "../systems/PickupManager";
-import { TournamentManager } from "../systems/TournamentManager";
-import { ArcadeEnhancementManager } from "../systems/ArcadeEnhancements";
+import sharedState from "../../state/sharedState";
+import spectatorMode from "../../utils/observerMode";
+import { FIFACrowdManager } from "../../utils/fifaCrowdManager";
+import { PickupGameManager } from "../../state/pickupGameManager";
+import { TournamentManager } from "../../state/tournamentManager";
+import { ArcadeEnhancementManager } from "../../state/arcadeEnhancements";
 import { PerformanceProfiler } from "../../utils/performanceProfiler";
 import { PerformanceOptimizer } from "../../utils/performanceOptimizations";
 import { PlayerEventHandlers } from "../handlers/PlayerEventHandlers";
 import { UIEventHandlers } from "../handlers/UIEventHandlers";
 import { ChatCommandHandlers } from "../handlers/ChatCommandHandlers";
 import { GameEventHandlers } from "../handlers/GameEventHandlers";
-import { AIPlayerEntity } from "../entities/AIPlayerEntity";
+import AIPlayerEntity from "../../entities/AIPlayerEntity";
 import { spawnAIPlayers as spawnAIPlayersUtil } from "../../utils/aiSpawner";
 
 /**
@@ -40,14 +40,14 @@ export interface ServerSystems {
   // Core game systems
   game: SoccerGame;
   audioManager: AudioManager;
-  sharedState: SharedState;
+  sharedState: typeof sharedState;
 
   // Feature managers
   arcadeManager: ArcadeEnhancementManager;
-  pickupManager: PickupManager;
+  pickupManager: PickupGameManager;
   tournamentManager: TournamentManager;
   fifaCrowdManager: FIFACrowdManager;
-  spectatorMode: SpectatorMode;
+  spectatorMode: typeof spectatorMode;
 
   // Performance systems
   performanceProfiler: PerformanceProfiler;
@@ -92,7 +92,7 @@ export class ServerInitializer {
     // ========================================
     // STEP 3: Initialize Core Systems
     // ========================================
-    const sharedState = new SharedState();
+    // sharedState is imported as a singleton from state/sharedState
     const aiPlayers: AIPlayerEntity[] = [];
     const game = new SoccerGame(this.world, soccerBall, aiPlayers);
 
@@ -106,7 +106,7 @@ export class ServerInitializer {
     (this.world as any)._arcadeManager = arcadeManager;
     game.setArcadeManager(arcadeManager);
 
-    const pickupManager = new PickupManager(this.world);
+    const pickupManager = new PickupGameManager(this.world);
     (this.world as any)._pickupManager = pickupManager;
     game.setPickupManager(pickupManager);
 
@@ -117,7 +117,7 @@ export class ServerInitializer {
     const fifaCrowdManager = new FIFACrowdManager(this.world);
     game.setFIFACrowdManager(fifaCrowdManager);
 
-    const spectatorMode = new SpectatorMode(this.world, game);
+    // spectatorMode is already imported as a singleton from utils/observerMode
 
     // ========================================
     // STEP 5: Initialize Performance Systems

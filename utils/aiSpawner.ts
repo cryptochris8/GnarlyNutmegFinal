@@ -6,8 +6,8 @@
  */
 
 import { World } from "hytopia";
-import { AIPlayerEntity, type SoccerAIRole } from "../entities/AIPlayerEntity";
-import { SharedState } from "../state/SharedState";
+import AIPlayerEntity, { type SoccerAIRole } from "../entities/AIPlayerEntity";
+import sharedState from "../state/sharedState";
 import { getStartPosition } from "./positions";
 import { logger } from "./GameLogger";
 
@@ -21,14 +21,15 @@ import { logger } from "./GameLogger";
  * @param world - The game world
  * @param playerTeam - The team the human player is on ("red" or "blue")
  * @param aiPlayers - Array to store spawned AI players
- * @param sharedState - Shared game state for tracking AI
+ * @param state - Shared game state singleton for tracking AI
  */
 export async function spawnAIPlayers(
   world: World,
   playerTeam: "red" | "blue",
   aiPlayers: AIPlayerEntity[],
-  sharedState: SharedState
+  state: typeof sharedState
 ): Promise<void> {
+  const sharedState = state;
   logger.info(`> Spawning AI players for team ${playerTeam}...`);
 
   // Define full team roles for 6v6 gameplay

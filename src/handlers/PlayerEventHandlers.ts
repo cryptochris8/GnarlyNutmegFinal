@@ -10,15 +10,15 @@
  */
 
 import { World, PlayerEvent, Player } from "hytopia";
-import { SoccerGame } from "../core/SoccerGame";
-import { AIPlayerEntity } from "../entities/AIPlayerEntity";
-import { SoccerPlayerEntity } from "../entities/SoccerPlayerEntity";
+import { SoccerGame } from "../../state/gameState";
+import AIPlayerEntity from "../../entities/AIPlayerEntity";
+import SoccerPlayerEntity from "../../entities/SoccerPlayerEntity";
 import { AudioManager } from "../core/AudioManager";
 import { logger } from "../../utils/GameLogger";
-import { SharedState } from "../state/SharedState";
-import { SpectatorMode } from "../systems/SpectatorMode";
-import { FIFACrowdManager } from "../systems/FIFACrowdManager";
-import { PickupManager } from "../systems/PickupManager";
+import sharedState from "../../state/sharedState";
+import spectatorMode from "../../utils/observerMode";
+import { FIFACrowdManager } from "../../utils/fifaCrowdManager";
+import { PickupGameManager } from "../../state/pickupGameManager";
 import { UIEventHandlers } from "./UIEventHandlers";
 
 export interface PlayerEventDependencies {
@@ -26,10 +26,10 @@ export interface PlayerEventDependencies {
   game: SoccerGame | null;
   aiPlayers: AIPlayerEntity[];
   audioManager: AudioManager;
-  sharedState: SharedState;
-  spectatorMode: SpectatorMode;
+  sharedState: typeof sharedState;
+  spectatorMode: typeof spectatorMode;
   fifaCrowdManager: FIFACrowdManager;
-  pickupManager: PickupManager;
+  pickupManager: PickupGameManager;
   uiEventHandlers: UIEventHandlers;
   musicStarted: { value: boolean }; // Wrapped in object for mutability
 }
@@ -60,7 +60,7 @@ export class PlayerEventHandlers {
       // Welcome message for new players
       this.deps.world.chatManager.sendPlayerMessage(
         player,
-        "<® Welcome to Hytopia Soccer! Use /spectate to watch games when teams are full."
+        "<ï¿½ Welcome to Hytopia Soccer! Use /spectate to watch games when teams are full."
       );
 
       // Load UI first before any game state checks
@@ -68,7 +68,7 @@ export class PlayerEventHandlers {
 
       // CRITICAL: Unlock pointer for UI interactions (Hytopia-compliant approach)
       player.ui.lockPointer(false);
-      logger.debug(`<¯ Pointer unlocked for ${player.username} - UI interactions enabled`);
+      logger.debug(`<ï¿½ Pointer unlocked for ${player.username} - UI interactions enabled`);
 
       // Start opening music when first player joins (if not already started)
       if (!this.deps.musicStarted.value && !this.deps.game?.inProgress()) {
@@ -78,7 +78,7 @@ export class PlayerEventHandlers {
         }
       } else {
         logger.debug(
-          `<µ Music already started or game in progress - musicStarted: ${this.deps.musicStarted.value}, gameInProgress: ${this.deps.game?.inProgress()}`
+          `<ï¿½ Music already started or game in progress - musicStarted: ${this.deps.musicStarted.value}, gameInProgress: ${this.deps.game?.inProgress()}`
         );
       }
 
