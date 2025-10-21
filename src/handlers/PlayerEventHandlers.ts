@@ -70,16 +70,13 @@ export class PlayerEventHandlers {
       player.ui.lockPointer(false);
       logger.debug(`<� Pointer unlocked for ${player.username} - UI interactions enabled`);
 
-      // Start opening music when first player joins (if not already started)
-      if (!this.deps.musicStarted.value && !this.deps.game?.inProgress()) {
-        const success = this.deps.audioManager.playOpeningMusic();
-        if (success) {
-          this.deps.musicStarted.value = true;
-        }
+      // Start opening music when player joins (before game mode/team selection)
+      // AudioManager handles deduplication - won't restart if already playing
+      if (!this.deps.game?.inProgress()) {
+        this.deps.audioManager.playOpeningMusic();
+        logger.info("<� Opening music started for opening screen");
       } else {
-        logger.debug(
-          `<� Music already started or game in progress - musicStarted: ${this.deps.musicStarted.value}, gameInProgress: ${this.deps.game?.inProgress()}`
-        );
+        logger.debug(`<� Game in progress, skipping opening music`);
       }
 
       // Check game state
@@ -170,7 +167,6 @@ export class PlayerEventHandlers {
 
             // Reset music back to opening music
             this.deps.audioManager.playOpeningMusic();
-            this.deps.musicStarted.value = true;
 
             // Stop FIFA crowd atmosphere
             this.deps.fifaCrowdManager.stop();
@@ -187,7 +183,6 @@ export class PlayerEventHandlers {
 
             // Reset music back to opening music
             this.deps.audioManager.playOpeningMusic();
-            this.deps.musicStarted.value = true;
 
             // Stop FIFA crowd atmosphere
             this.deps.fifaCrowdManager.stop();

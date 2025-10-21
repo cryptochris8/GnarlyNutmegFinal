@@ -265,10 +265,14 @@ export class UIEventHandlers {
     // Freeze the human player initially
     playerEntity.freeze();
 
-    // Music change - switch from opening music to gameplay music
+    // Music transition: Stop opening music and start gameplay music
+    // This happens when player spawns into game (after team selection)
+    // Opening music plays during: opening screen, game mode selection, team selection
+    // Gameplay music plays during: actual game (FIFA/Arcade)
     if (this.deps.game) {
       const gameMode = getCurrentModeConfig();
       this.deps.audioManager.playGameplayMusic(gameMode.mode);
+      logger.info(`<� Music transitioned to gameplay (${gameMode.mode} mode)`);
     }
 
     // Start FIFA crowd atmosphere if in FIFA mode
