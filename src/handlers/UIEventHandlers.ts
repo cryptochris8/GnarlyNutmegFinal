@@ -165,6 +165,13 @@ export class UIEventHandlers {
   private handleGameModeSelection(player: Player, data: any): void {
     logger.info(`Player ${player.username} selected game mode: ${data.mode}`);
 
+    // Start opening music on first user interaction (game mode selection)
+    // This is after a user gesture, so browser will allow audio playback
+    if (!this.deps.game?.inProgress()) {
+      this.deps.audioManager.playOpeningMusic();
+      logger.info("<� Opening music started after user interaction");
+    }
+
     // Set the game mode using the imported functions
     if (data.mode === "fifa") {
       setGameMode(GameMode.FIFA);

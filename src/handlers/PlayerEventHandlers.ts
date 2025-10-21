@@ -70,14 +70,8 @@ export class PlayerEventHandlers {
       player.ui.lockPointer(false);
       logger.debug(`<� Pointer unlocked for ${player.username} - UI interactions enabled`);
 
-      // Start opening music when player joins (before game mode/team selection)
-      // AudioManager handles deduplication - won't restart if already playing
-      if (!this.deps.game?.inProgress()) {
-        this.deps.audioManager.playOpeningMusic();
-        logger.info("<� Opening music started for opening screen");
-      } else {
-        logger.debug(`<� Game in progress, skipping opening music`);
-      }
+      // NOTE: Opening music will start when user clicks game mode button
+      // Cannot autoplay audio before user gesture due to browser restrictions
 
       // Check game state
       if (this.deps.game && this.deps.game.inProgress()) {
