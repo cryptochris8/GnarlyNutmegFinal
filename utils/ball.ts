@@ -15,6 +15,7 @@ import { BALL_CONFIG, BALL_SPAWN_POSITION, FIELD_MIN_Y, GAME_CONFIG } from "../s
 import { soccerMap } from "../state/map";
 import type { BoundaryInfo } from "../state/map";
 import SoccerPlayerEntity from "../entities/SoccerPlayerEntity";
+import { EventThrottler } from "./EventThrottler";
 
 // Goal sensor tracking
 let redGoalSensor: Collider | null = null;
@@ -221,6 +222,29 @@ export function setBallResetLockout() {
   console.log('⚽ Ball reset lockout activated (1.5s)');
 }
 
+/**
+ * Throttled stationary status updater
+ * Only updates ball stationary status once every 100ms instead of every tick
+ * Reduces CPU usage for non-critical tracking
+ */
+const throttledStationaryUpdate = EventThrottler.throttle(
+  (currentPos: { x: number; y: number; z: number }) => {
+    sharedState.updateBallStationaryStatus(currentPos);
+  },
+  100 // Update at most 10 times per second
+);
+
+/**
+ * Throttled debug logger for reception assistance
+ * Prevents log spam during gameplay
+ */
+const throttledReceptionLog = EventThrottler.throttle(
+  (username: string, dot: number, assistanceFactor: number) => {
+    console.log(`📥 Reception assist for ${username}: dot=${dot.toFixed(2)}, assist=${((1-assistanceFactor)*100).toFixed(0)}%`);
+  },
+  500 // Log at most once every 500ms
+);
+
 export default function createSoccerBall(world: World) {
   console.log("Creating soccer ball with config:", JSON.stringify(BALL_CONFIG));
   console.log("Ball spawn position:", JSON.stringify(BALL_SPAWN_POSITION));
@@ -333,8 +357,9 @@ export default function createSoccerBall(world: World) {
     // **BALL STATIONARY DETECTION SYSTEM**
     // Update stationary tracking for AI pursuit logic
     // This ensures balls that sit idle get retrieved by AI players
+    // PERFORMANCE: Throttled to 100ms intervals instead of every tick
     const currentPos = { ...entity.position };
-    sharedState.updateBallStationaryStatus(currentPos);
+    throttledStationaryUpdate(currentPos);
     
     const attachedPlayer = sharedState.getAttachedPlayer();
 
@@ -498,9 +523,8 @@ export default function createSoccerBall(world: World) {
                   const assistanceFactor = 0.5 + (dotProduct * 0.3); // Range: 0.5 to 0.8
                   effectiveDistance = distance * assistanceFactor; // Up to 50% easier reception!
 
-                  if (Math.random() < 0.1) { // Log occasionally to avoid spam
-                    console.log(`📥 Reception assist for ${playerEntity.player.username}: dot=${dotProduct.toFixed(2)}, assist=${((1-assistanceFactor)*100).toFixed(0)}%`);
-                  }
+                  // PERFORMANCE: Use throttled logging to prevent spam
+                  throttledReceptionLog(playerEntity.player.username, dotProduct, assistanceFactor);
                 }
               }
             }

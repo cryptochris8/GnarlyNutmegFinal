@@ -18,6 +18,7 @@ export class ArcadeEnhancementManager {
   private playerEnhancements: Map<string, PlayerEnhancement> = new Map();
   private freezeSafetyInterval: NodeJS.Timeout | null = null;
   private activeTimers: TimerReference[] = [];
+  private activeEntities: Set<Entity> = new Set(); // Track spawned entities for cleanup
   private isDestroyed: boolean = false;
 
   constructor(world: World) {
@@ -132,6 +133,41 @@ export class ArcadeEnhancementManager {
     this.activeTimers = [];
   }
 
+  /**
+   * Track an entity for cleanup
+   * @param entity - Entity to track
+   */
+  private trackEntity(entity: Entity): void {
+    this.activeEntities.add(entity);
+  }
+
+  /**
+   * Untrack an entity (when it's properly cleaned up)
+   * @param entity - Entity to untrack
+   */
+  private untrackEntity(entity: Entity): void {
+    this.activeEntities.delete(entity);
+  }
+
+  /**
+   * Cleanup all tracked entities
+   */
+  private cleanupAllEntities(): void {
+    console.log(`🧹 Cleaning up ${this.activeEntities.size} active entities...`);
+
+    this.activeEntities.forEach(entity => {
+      try {
+        if (entity.isSpawned) {
+          entity.despawn();
+        }
+      } catch (error) {
+        console.warn(`⚠️ Failed to despawn entity:`, error);
+      }
+    });
+
+    this.activeEntities.clear();
+  }
+
   private cleanupOldTimers(): void {
     const maxAge = 5 * 60 * 1000; // 5 minutes
     const now = Date.now();
@@ -155,6 +191,11 @@ export class ArcadeEnhancementManager {
     // SAFETY CHECK: Only run in arcade mode
     if (!isArcadeMode()) {
       return; // Exit immediately if not in arcade mode
+    }
+
+    // SAFETY CHECK: Prevent operations after cleanup
+    if (this.isDestroyed) {
+      return;
     }
 
     this.updatePlayerEnhancements();
@@ -337,7 +378,7 @@ export class ArcadeEnhancementManager {
       // Create floating energy orb effect
       const effectEntity = new Entity({
         name: 'stamina-floating-effect',
-        modelUri: 'projectiles/energy-orb-projectile.gltf',
+        modelUri: 'models/projectiles/energy-orb-projectile.gltf',
         modelScale: 0.8,
         rigidBodyOptions: {
           type: RigidBodyType.KINEMATIC_POSITION,
@@ -463,11 +504,17 @@ export class ArcadeEnhancementManager {
   public activatePowerUp(playerId: string, powerUpType: EnhancementType): boolean {
     console.log(`🎮 ARCADE: Attempting to activate ${powerUpType} for player ${playerId}`);
     console.log(`🎮 ARCADE: Current game mode check - isArcadeMode(): ${isArcadeMode()}`);
-    
+
     try {
       // SAFETY CHECK: Only work in arcade mode
       if (!isArcadeMode()) {
         console.log(`🎮 ARCADE: Not in arcade mode, power-up activation blocked`);
+        return false;
+      }
+
+      // SAFETY CHECK: Prevent operations after cleanup
+      if (this.isDestroyed) {
+        console.log(`🎮 ARCADE: Manager destroyed, power-up activation blocked`);
         return false;
       }
 
@@ -973,39 +1020,47 @@ export class ArcadeEnhancementManager {
 
   // Create particle trail effect for fireball projectile
   private createFireballTrail(fireball: Entity): void {
-    const trailInterval = setInterval(() => {
-      if (!fireball.isSpawned) {
-        clearInterval(trailInterval);
-        return;
-      }
-
-      // Create small fire particle at current position
-      const trailParticle = new Entity({
-        name: 'fireball-trail',
-        modelUri: 'models/misc/firework.gltf',
-        modelScale: 0.3 + Math.random() * 0.2, // Varied sizes
-        rigidBodyOptions: {
-          type: RigidBodyType.KINEMATIC_POSITION,
+    const trailInterval = this.registerTimer(
+      setInterval(() => {
+        // SAFETY: Check if destroyed or fireball despawned
+        if (this.isDestroyed || !fireball.isSpawned) {
+          clearInterval(trailInterval);
+          return;
         }
-      });
 
-      // Spawn at fireball position with slight offset
-      trailParticle.spawn(this.world, {
-        x: fireball.position.x + (Math.random() - 0.5) * 0.3,
-        y: fireball.position.y + (Math.random() - 0.5) * 0.3,
-        z: fireball.position.z + (Math.random() - 0.5) * 0.3
-      });
+        // Create small fire particle at current position
+        const trailParticle = new Entity({
+          name: 'fireball-trail',
+          modelUri: 'models/misc/firework.gltf',
+          modelScale: 0.3 + Math.random() * 0.2, // Varied sizes
+          rigidBodyOptions: {
+            type: RigidBodyType.KINEMATIC_POSITION,
+          }
+        });
 
-      // Fade out and remove after short time
-      setTimeout(() => {
-        if (trailParticle.isSpawned) {
-          trailParticle.despawn();
-        }
-      }, 800);
-    }, 50); // Create trail particle every 50ms
+        // Spawn at fireball position with slight offset
+        trailParticle.spawn(this.world, {
+          x: fireball.position.x + (Math.random() - 0.5) * 0.3,
+          y: fireball.position.y + (Math.random() - 0.5) * 0.3,
+          z: fireball.position.z + (Math.random() - 0.5) * 0.3
+        });
 
-    // Store interval reference on fireball for cleanup
-    (fireball as any)._trailInterval = trailInterval;
+        // Track entity for cleanup
+        this.trackEntity(trailParticle);
+
+        // Fade out and remove after short time
+        this.registerTimer(
+          setTimeout(() => {
+            if (trailParticle.isSpawned) {
+              trailParticle.despawn();
+              this.untrackEntity(trailParticle);
+            }
+          }, 800),
+          'timeout'
+        );
+      }, 50), // Create trail particle every 50ms
+      'interval'
+    );
   }
 
   // Track fireball projectile for collision detection and explosion
@@ -1146,7 +1201,7 @@ export class ArcadeEnhancementManager {
     // Create massive explosion visual effect
     const explosionEffect = new Entity({
       name: 'fireball-explosion',
-      modelUri: 'misc/firework.gltf', // Correct path for firework explosion
+      modelUri: 'models/misc/firework.gltf', // Firework explosion visual effect
       modelScale: 8.0, // Huge explosion effect
       rigidBodyOptions: {
         type: RigidBodyType.KINEMATIC_POSITION,
@@ -1489,86 +1544,101 @@ export class ArcadeEnhancementManager {
     let lastPosition = { ...player.position };
     let trailParticles: Entity[] = [];
     const maxTrailLength = 10;
-    
-    const trailInterval = setInterval(() => {
-      if (!player.isSpawned) {
+
+    const trailInterval = this.registerTimer(
+      setInterval(() => {
+        // SAFETY: Check if destroyed or player despawned
+        if (this.isDestroyed || !player.isSpawned) {
+          clearInterval(trailInterval);
+          // Clean up trail particles
+          trailParticles.forEach(particle => {
+            if (particle.isSpawned) {
+              particle.despawn();
+              this.untrackEntity(particle);
+            }
+          });
+          trailParticles = [];
+          return;
+        }
+
+        // Check if player moved significantly
+        const currentPos = player.position;
+        const distance = Math.sqrt(
+          Math.pow(currentPos.x - lastPosition.x, 2) +
+          Math.pow(currentPos.z - lastPosition.z, 2)
+        );
+
+        if (distance > 0.5) {
+          // Create trail particle at last position
+          const trailParticle = new Entity({
+            name: 'speed-trail',
+            modelUri: 'models/misc/selection-indicator.gltf',
+            modelScale: 0.2,
+            rigidBodyOptions: {
+              type: RigidBodyType.KINEMATIC_POSITION,
+            }
+          });
+
+          trailParticle.spawn(this.world, {
+            x: lastPosition.x + (Math.random() - 0.5) * 0.3,
+            y: lastPosition.y + 0.1,
+            z: lastPosition.z + (Math.random() - 0.5) * 0.3
+          });
+
+          // Track entity for cleanup
+          this.trackEntity(trailParticle);
+          trailParticles.push(trailParticle);
+
+          // Remove oldest trail particles if too many
+          if (trailParticles.length > maxTrailLength) {
+            const oldParticle = trailParticles.shift();
+            if (oldParticle && oldParticle.isSpawned) {
+              oldParticle.despawn();
+              this.untrackEntity(oldParticle);
+            }
+          }
+
+          // Fade out this particle after 1 second
+          this.registerTimer(
+            setTimeout(() => {
+              if (trailParticle.isSpawned) {
+                trailParticle.despawn();
+                this.untrackEntity(trailParticle);
+              }
+              // Remove from array
+              const index = trailParticles.indexOf(trailParticle);
+              if (index > -1) {
+                trailParticles.splice(index, 1);
+              }
+            }, 1000),
+            'timeout',
+            player.player.username
+          );
+
+          lastPosition = { ...currentPos };
+        }
+      }, 100), // Check every 100ms
+      'interval',
+      player.player.username
+    );
+
+    // Stop trail after 15 seconds (duration of speed boost)
+    this.registerTimer(
+      setTimeout(() => {
         clearInterval(trailInterval);
-        // Clean up trail particles
+
+        // Clean up remaining trail particles
         trailParticles.forEach(particle => {
           if (particle.isSpawned) {
             particle.despawn();
+            this.untrackEntity(particle);
           }
         });
-        return;
-      }
-      
-      // Check if player moved significantly
-      const currentPos = player.position;
-      const distance = Math.sqrt(
-        Math.pow(currentPos.x - lastPosition.x, 2) +
-        Math.pow(currentPos.z - lastPosition.z, 2)
-      );
-      
-      if (distance > 0.5) {
-        // Create trail particle at last position
-        const trailParticle = new Entity({
-          name: 'speed-trail',
-          modelUri: 'models/misc/selection-indicator.gltf',
-          modelScale: 0.2,
-          rigidBodyOptions: {
-            type: RigidBodyType.KINEMATIC_POSITION,
-          }
-        });
-        
-        trailParticle.spawn(this.world, {
-          x: lastPosition.x + (Math.random() - 0.5) * 0.3,
-          y: lastPosition.y + 0.1,
-          z: lastPosition.z + (Math.random() - 0.5) * 0.3
-        });
-        
-        trailParticles.push(trailParticle);
-        
-        // Remove oldest trail particles if too many
-        if (trailParticles.length > maxTrailLength) {
-          const oldParticle = trailParticles.shift();
-          if (oldParticle && oldParticle.isSpawned) {
-            oldParticle.despawn();
-          }
-        }
-        
-        // Fade out this particle after 1 second
-        setTimeout(() => {
-          if (trailParticle.isSpawned) {
-            trailParticle.despawn();
-          }
-          // Remove from array
-          const index = trailParticles.indexOf(trailParticle);
-          if (index > -1) {
-            trailParticles.splice(index, 1);
-          }
-        }, 1000);
-        
-        lastPosition = { ...currentPos };
-      }
-    }, 100); // Check every 100ms
-    
-    // Store interval reference for cleanup
-    (player as any)._speedTrailInterval = trailInterval;
-    
-    // Stop trail after 15 seconds (duration of speed boost)
-    setTimeout(() => {
-      if ((player as any)._speedTrailInterval) {
-        clearInterval((player as any)._speedTrailInterval);
-        delete (player as any)._speedTrailInterval;
-      }
-      
-      // Clean up remaining trail particles
-      trailParticles.forEach(particle => {
-        if (particle.isSpawned) {
-          particle.despawn();
-        }
-      });
-    }, 15000);
+        trailParticles = [];
+      }, 15000),
+      'timeout',
+      player.player.username
+    );
   }
 
   // Execute shield power-up
@@ -1768,42 +1838,50 @@ export class ArcadeEnhancementManager {
   private createShurikenTrail(shuriken: Entity): void {
     let trailCount = 0;
     const maxTrails = 15; // Limit trail particles
-    
-    const trailInterval = setInterval(() => {
-      if (!shuriken.isSpawned || trailCount >= maxTrails) {
-        clearInterval(trailInterval);
-        return;
-      }
 
-      // Create metallic trail particle
-      const trailParticle = new Entity({
-        name: 'shuriken-trail',
-        modelUri: 'models/misc/selection-indicator.gltf',
-        modelScale: 0.2, // Small metallic glint
-        rigidBodyOptions: {
-          type: RigidBodyType.KINEMATIC_POSITION,
+    const trailInterval = this.registerTimer(
+      setInterval(() => {
+        // SAFETY: Check if destroyed or shuriken despawned
+        if (this.isDestroyed || !shuriken.isSpawned || trailCount >= maxTrails) {
+          clearInterval(trailInterval);
+          return;
         }
-      });
 
-      // Spawn at shuriken position
-      trailParticle.spawn(this.world, {
-        x: shuriken.position.x,
-        y: shuriken.position.y,
-        z: shuriken.position.z
-      });
+        // Create metallic trail particle
+        const trailParticle = new Entity({
+          name: 'shuriken-trail',
+          modelUri: 'models/misc/selection-indicator.gltf',
+          modelScale: 0.2, // Small metallic glint
+          rigidBodyOptions: {
+            type: RigidBodyType.KINEMATIC_POSITION,
+          }
+        });
 
-      // Quick fade and remove
-      setTimeout(() => {
-        if (trailParticle.isSpawned) {
-          trailParticle.despawn();
-        }
-      }, 400);
+        // Spawn at shuriken position
+        trailParticle.spawn(this.world, {
+          x: shuriken.position.x,
+          y: shuriken.position.y,
+          z: shuriken.position.z
+        });
 
-      trailCount++;
-    }, 80); // Create trail particle every 80ms
+        // Track entity for cleanup
+        this.trackEntity(trailParticle);
 
-    // Store interval reference for cleanup
-    (shuriken as any)._trailInterval = trailInterval;
+        // Quick fade and remove
+        this.registerTimer(
+          setTimeout(() => {
+            if (trailParticle.isSpawned) {
+              trailParticle.despawn();
+              this.untrackEntity(trailParticle);
+            }
+          }, 400),
+          'timeout'
+        );
+
+        trailCount++;
+      }, 80), // Create trail particle every 80ms
+      'interval'
+    );
   }
 
   // Create shuriken projectile with stunning effect
@@ -1921,81 +1999,104 @@ export class ArcadeEnhancementManager {
       return;
     }
 
+    // SAFETY: Check if destroyed
+    if (this.isDestroyed) {
+      return;
+    }
+
     let trailParticles: Entity[] = [];
     const maxTrailLength = 15;
     let lastBallPosition = { ...ballEntity.position };
-    
-    const trailInterval = setInterval(() => {
-      if (!ballEntity.isSpawned) {
+
+    const trailInterval = this.registerTimer(
+      setInterval(() => {
+        // SAFETY: Check if destroyed or ball despawned
+        if (this.isDestroyed || !ballEntity.isSpawned) {
+          clearInterval(trailInterval);
+          // Clean up trail particles
+          trailParticles.forEach(particle => {
+            if (particle.isSpawned) {
+              particle.despawn();
+              this.untrackEntity(particle);
+            }
+          });
+          trailParticles = [];
+          return;
+        }
+
+        // Check if ball is moving fast enough to create trail
+        const currentPos = ballEntity.position;
+        const velocity = ballEntity.linearVelocity;
+        const speed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+
+        if (speed > 3.0) { // Only create trail for fast-moving balls
+          // Create trail particle at current position
+          const trailParticle = new Entity({
+            name: 'ball-trail',
+            modelUri: 'models/misc/firework.gltf',
+            modelScale: 0.4 + Math.random() * 0.2,
+            rigidBodyOptions: {
+              type: RigidBodyType.KINEMATIC_POSITION,
+            }
+          });
+
+          trailParticle.spawn(this.world, {
+            x: currentPos.x + (Math.random() - 0.5) * 0.4,
+            y: currentPos.y + (Math.random() - 0.5) * 0.2,
+            z: currentPos.z + (Math.random() - 0.5) * 0.4
+          });
+
+          // Track entity for cleanup
+          this.trackEntity(trailParticle);
+          trailParticles.push(trailParticle);
+
+          // Remove oldest trail particles if too many
+          if (trailParticles.length > maxTrailLength) {
+            const oldParticle = trailParticles.shift();
+            if (oldParticle && oldParticle.isSpawned) {
+              oldParticle.despawn();
+              this.untrackEntity(oldParticle);
+            }
+          }
+
+          // Fade out this particle after a short time
+          this.registerTimer(
+            setTimeout(() => {
+              if (trailParticle.isSpawned) {
+                trailParticle.despawn();
+                this.untrackEntity(trailParticle);
+              }
+              // Remove from array
+              const index = trailParticles.indexOf(trailParticle);
+              if (index > -1) {
+                trailParticles.splice(index, 1);
+              }
+            }, 600),
+            'timeout'
+          );
+
+          lastBallPosition = { ...currentPos };
+        }
+      }, 50), // Check every 50ms
+      'interval'
+    );
+
+    // Stop trail after 3 seconds (typical ball flight time)
+    this.registerTimer(
+      setTimeout(() => {
         clearInterval(trailInterval);
-        // Clean up trail particles
+
+        // Clean up remaining trail particles
         trailParticles.forEach(particle => {
           if (particle.isSpawned) {
             particle.despawn();
+            this.untrackEntity(particle);
           }
         });
-        return;
-      }
-      
-      // Check if ball is moving fast enough to create trail
-      const currentPos = ballEntity.position;
-      const velocity = ballEntity.linearVelocity;
-      const speed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-      
-      if (speed > 3.0) { // Only create trail for fast-moving balls
-        // Create trail particle at current position
-        const trailParticle = new Entity({
-          name: 'ball-trail',
-          modelUri: 'models/misc/firework.gltf',
-          modelScale: 0.4 + Math.random() * 0.2,
-          rigidBodyOptions: {
-            type: RigidBodyType.KINEMATIC_POSITION,
-          }
-        });
-        
-        trailParticle.spawn(this.world, {
-          x: currentPos.x + (Math.random() - 0.5) * 0.4,
-          y: currentPos.y + (Math.random() - 0.5) * 0.2,
-          z: currentPos.z + (Math.random() - 0.5) * 0.4
-        });
-        
-        trailParticles.push(trailParticle);
-        
-        // Remove oldest trail particles if too many
-        if (trailParticles.length > maxTrailLength) {
-          const oldParticle = trailParticles.shift();
-          if (oldParticle && oldParticle.isSpawned) {
-            oldParticle.despawn();
-          }
-        }
-        
-        // Fade out this particle after a short time
-        setTimeout(() => {
-          if (trailParticle.isSpawned) {
-            trailParticle.despawn();
-          }
-          // Remove from array
-          const index = trailParticles.indexOf(trailParticle);
-          if (index > -1) {
-            trailParticles.splice(index, 1);
-          }
-        }, 600);
-        
-        lastBallPosition = { ...currentPos };
-      }
-    }, 50); // Check every 50ms
-    
-    // Stop trail after 3 seconds (typical ball flight time)
-    setTimeout(() => {
-      clearInterval(trailInterval);
-      
-      // Clean up remaining trail particles
-      trailParticles.forEach(particle => {
-        if (particle.isSpawned) {
-          particle.despawn();
-        }
-      });
-    }, 3000);
+        trailParticles = [];
+      }, 3000),
+      'timeout'
+    );
   }
 
   // Create environmental atmosphere effects for major power-ups
@@ -2347,8 +2448,27 @@ export class ArcadeEnhancementManager {
 
   // Clean up all enhancements (called when switching modes)
   public cleanup(): void {
+    console.log("🧹 ArcadeEnhancementManager cleanup starting...");
+
+    // Mark as destroyed to prevent new operations
+    this.isDestroyed = true;
+
+    // Clear freeze safety interval
+    if (this.freezeSafetyInterval) {
+      clearInterval(this.freezeSafetyInterval);
+      this.freezeSafetyInterval = null;
+    }
+
+    // Clear all active timers
+    this.clearAllTimers();
+
+    // Cleanup all spawned entities
+    this.cleanupAllEntities();
+
+    // Clear player enhancements
     this.playerEnhancements.clear();
-    console.log("ArcadeEnhancementManager cleaned up - pickup-based system only");
+
+    console.log("✅ ArcadeEnhancementManager cleaned up successfully");
   }
 
   /**

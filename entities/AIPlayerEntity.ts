@@ -48,6 +48,7 @@ import { AIStaminaManager } from './ai/AIStaminaManager';
 import { AIGoalkeeperBehavior, type GoalkeeperContext } from './ai/AIGoalkeeperBehavior';
 import { AIBallHandler, type BallHandlerContext } from './ai/AIBallHandler';
 import { AIMovementController, type MovementContext } from './ai/AIMovementController';
+import { AdaptiveAIController } from '../ai/AdaptiveAIController';
 import { AIDecisionMaker, type DecisionContext } from './ai/AIDecisionMaker';
 
 // Constants still used locally (not extracted to modules yet)
@@ -64,7 +65,8 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
   public targetPosition: Vector3Like = { x: 0, y: 0, z: 0 }; // Changed to public for behavior tree
   private updateInterval: Timer | null = null;
   public aiRole: SoccerAIRole; // Changed to public for behavior tree access
-  private decisionInterval: number = 500; // milliseconds between AI decisions (reduced for goalkeepers in constructor)
+  private decisionInterval: number = 500; // DEPRECATED: Use adaptiveController.getCurrentInterval() instead
+  public adaptiveController: AdaptiveAIController; // Dynamic decision interval controller
   public isKickoffActive: boolean = true; // Changed to public for out-of-bounds reset
   // Track last position for animation state detection
   private lastAIPosition: Vector3Like | null = null;
@@ -159,6 +161,10 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     this.movementController = new AIMovementController();
     this.decisionMaker = new AIDecisionMaker();
 
+    // Initialize adaptive decision interval controller
+    const isGoalkeeper = this.aiRole === 'goalkeeper';
+    this.adaptiveController = new AdaptiveAIController(this, isGoalkeeper);
+
     // Retrieve mass from parent or use default
     // Mass is used by SDK physics system for momentum calculations
     this._mass = this.mass || 1.0; 
@@ -211,26 +217,48 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     this.currentAnimState = 'idle';
     this.hasRotationBeenSetThisTick = false;
 
-    console.log(`AI ${this.player.username} (${this.aiRole}) activated with kickoff mode active`);
+    console.log(`AI ${this.player.username} (${this.aiRole}) activated with adaptive decision intervals`);
 
-    // Start the decision making interval
-    this.updateInterval = setInterval(() => {
+    // Start with idle animation
+    if (this.isSpawned) {
+      this.startModelLoopedAnimations(['idle_upper', 'idle_lower']);
+    }
+
+    // Schedule first decision with adaptive interval
+    this.scheduleNextDecision();
+  }
+
+  /**
+   * Schedule the next AI decision using adaptive interval
+   * This method enables dynamic decision-making frequency based on game context
+   */
+  private scheduleNextDecision() {
+    if (!this.isSpawned) {
+      this.deactivate(); // Clean up if entity is no longer spawned
+      return;
+    }
+
+    // Get optimal interval from adaptive controller
+    const optimalInterval = this.adaptiveController.getCurrentInterval();
+
+    // Schedule next decision
+    this.updateInterval = setTimeout(() => {
       if (this.isSpawned) {
         // If ball has moved significantly from center, disable kickoff mode
         if (this.isKickoffActive && sharedState.getBallHasMoved()) {
           console.log(`AI ${this.player.username} (${this.aiRole}) detected ball movement, ending kickoff mode`);
           this.isKickoffActive = false;
         }
+
+        // Make decision
         this.makeDecision();
+
+        // Schedule next decision (recursive call with new interval)
+        this.scheduleNextDecision();
       } else {
         this.deactivate(); // Clean up if entity is no longer spawned
       }
-    }, this.decisionInterval);
-
-    // Start with idle animation
-    if (this.isSpawned) {
-      this.startModelLoopedAnimations(['idle_upper', 'idle_lower']);
-    }
+    }, optimalInterval) as any;
   }
   
   /**
@@ -238,7 +266,7 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
    */
   public deactivate() {
     if (this.updateInterval) {
-      clearInterval(this.updateInterval);
+      clearTimeout(this.updateInterval); // Now using setTimeout, so clearTimeout
       this.updateInterval = null;
     }
     
