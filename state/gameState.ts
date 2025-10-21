@@ -31,6 +31,7 @@ import sharedState from "./sharedState";
 import SoccerPlayerEntity from "../entities/SoccerPlayerEntity";
 import AIPlayerEntity from "../entities/AIPlayerEntity";
 import { ArcadeEnhancementManager } from "./arcadeEnhancements";
+import { HalfTimeManager } from "./HalfTimeManager";
 import observerMode from "../utils/observerMode";
 
 // Custom events for the SoccerGame
@@ -134,6 +135,7 @@ export class SoccerGame {
   private aiPlayersList: AIPlayerEntity[] = [];
   private arcadeManager: ArcadeEnhancementManager | null = null;
   private fifaCrowdManager: any | null = null; // FIFA crowd manager for stadium atmosphere
+  private halfTimeManager!: HalfTimeManager; // Manages half-time logic and stoppage time
   
   // Momentum tracking for announcer commentary
   private teamMomentum: {
@@ -175,6 +177,9 @@ export class SoccerGame {
     this.world = world;
     this.soccerBall = entity;
     this.aiPlayersList = aiPlayers;
+
+    // Initialize half-time manager
+    this.halfTimeManager = new HalfTimeManager(this.state);
     this.world.on("goal" as any, ((team: "red" | "blue") => {
       this.handleGoalScored(team);
     }) as any);
@@ -530,71 +535,43 @@ export class SoccerGame {
       }
     } else {
       // Handle regular half time countdown with continuous timer and stoppage time
-      
+
       // Always update timers (continuous running clock)
-      this.state.halfTimeRemaining--;
-      this.state.timeRemaining--;
-      
+      this.halfTimeManager.decrementTime();
+
       // Check if we need to add stoppage time (when 60 seconds remaining)
-      if (this.state.halfTimeRemaining === 60 && !this.state.stoppageTimeNotified) {
-        const stoppageTime = Math.floor(Math.random() * 45) + 15; // Random 15-59 seconds
-        this.state.stoppageTimeAdded = stoppageTime;
-        this.state.stoppageTimeNotified = true;
-        
+      if (this.halfTimeManager.shouldAddStoppageTime()) {
+        const stoppageTime = this.halfTimeManager.addStoppageTime();
+
         console.log(`⏱️ STOPPAGE TIME: ${stoppageTime} seconds added to ${this.state.currentHalf === 1 ? 'first' : 'second'} half`);
         console.log(`⏱️ Game will end when timer reaches -${stoppageTime} seconds (after ${stoppageTime} seconds of stoppage time)`);
-        
+
         // Play stoppage time audio notification
         STOPPAGE_TIME_AUDIO.play(this.world);
-        
+
         // Send stoppage time notification to all players
         this.sendDataToAllPlayers({
           type: "stoppage-time-notification",
           stoppageTimeAdded: stoppageTime,
-          message: `${stoppageTime} seconds of stoppage time added`,
+          message: this.halfTimeManager.getStoppageTimeNotification(stoppageTime),
           half: this.state.currentHalf
         });
       }
-      
-      // IMPROVED STOPPAGE TIME LOGIC - Only end when full stoppage time has elapsed
-      // Calculate the exact endpoint: negative stoppage time value
-      const stoppageTimeEndpoint = 0 - this.state.stoppageTimeAdded;
-      
-      // Only end half if we've added stoppage time AND reached the endpoint
-      if (this.state.stoppageTimeNotified && this.state.halfTimeRemaining <= stoppageTimeEndpoint) {
-        console.log(`⏰ HALF ${this.state.currentHalf} ENDED! Timer: ${this.state.halfTimeRemaining}s, Required: ${stoppageTimeEndpoint}s`);
-        console.log(`⏰ Stoppage time fully elapsed: ${this.state.stoppageTimeAdded}s added, ${Math.abs(this.state.halfTimeRemaining)}s played`);
+
+      // Check if half should end (handles both regular time and stoppage time)
+      if (this.halfTimeManager.shouldEndHalf()) {
+        console.log(this.halfTimeManager.getHalfEndLogMessage());
         this.handleHalfEnd();
         return;
-      }
-      
-      // Alternative end condition: if no stoppage time and regular time is up
-      if (!this.state.stoppageTimeNotified && this.state.halfTimeRemaining <= 0) {
-        console.log(`⏰ HALF ${this.state.currentHalf} ENDED! Regular time finished, no stoppage time added`);
-        this.handleHalfEnd();
-        return;
-      }
-      
-      // Log every 30 seconds during regular time, and every 10 seconds during stoppage time
-      const isStoppageTime = this.state.halfTimeRemaining <= 0;
-      const logInterval = isStoppageTime ? 10 : 30;
-      
-      if (this.state.halfTimeRemaining % logInterval === 0) {
-        if (isStoppageTime) {
-          const stoppageSeconds = Math.abs(this.state.halfTimeRemaining);
-          console.log(`⏱️ STOPPAGE TIME: 5+${stoppageSeconds}s (${stoppageSeconds}s into stoppage, ${this.state.stoppageTimeAdded}s total), Status: ${this.state.status}, Score: ${this.state.score.red}-${this.state.score.blue}`);
-        } else {
-          console.log(`⏰ HALF ${this.state.currentHalf}: ${this.state.halfTimeRemaining}s remaining, Status: ${this.state.status}, Score: ${this.state.score.red}-${this.state.score.blue}`);
-        }
       }
 
-      // Play ticking sound in last 5 seconds of regulation OR last 5 seconds of stoppage time
-      if (this.state.halfTimeRemaining === 5) {
-        TICKING_AUDIO.play(this.world);
+      // Log game time at appropriate intervals
+      if (this.halfTimeManager.shouldLog()) {
+        console.log(this.halfTimeManager.getTimeLogMessage());
       }
-      
-      // Also play ticking sound 5 seconds before stoppage time ends
-      if (this.state.stoppageTimeNotified && this.state.halfTimeRemaining === (stoppageTimeEndpoint + 5)) {
+
+      // Play ticking sound in last 5 seconds (regulation or stoppage time)
+      if (this.halfTimeManager.shouldPlayTickingSound()) {
         TICKING_AUDIO.play(this.world);
       }
     }
