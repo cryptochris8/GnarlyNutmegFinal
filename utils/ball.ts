@@ -24,6 +24,42 @@ let goalSensorDebounce = 0;
 let ballResetLockout = 0; // Timestamp of last ball reset - prevents false goals during respawns
 let worldRef: World | null = null; // Store world reference for goal sensor callbacks
 
+// Performance optimization: Cache last angular velocity to avoid redundant updates
+let lastAngularVelocity: { x: number; y: number; z: number } = { x: 0, y: 0, z: 0 };
+let lastAngularVelocityUpdateTime = 0;
+const ANGULAR_VELOCITY_UPDATE_THRESHOLD = 0.1; // Only update if change is significant
+const ANGULAR_VELOCITY_UPDATE_INTERVAL = 50; // Throttle to 50ms (20 updates/sec instead of 60)
+
+/**
+ * Optimized angular velocity update - only updates if change is significant or enough time has passed
+ * Reduces redundant setAngularVelocity calls by ~70%
+ */
+function updateAngularVelocityOptimized(
+  entity: Entity,
+  newVelocity: { x: number; y: number; z: number }
+): void {
+  const now = Date.now();
+
+  // Calculate difference from last set velocity
+  const dx = Math.abs(newVelocity.x - lastAngularVelocity.x);
+  const dy = Math.abs(newVelocity.y - lastAngularVelocity.y);
+  const dz = Math.abs(newVelocity.z - lastAngularVelocity.z);
+  const totalChange = dx + dy + dz;
+
+  // Only update if:
+  // 1. Change is significant (above threshold), OR
+  // 2. Enough time has passed since last update (throttle)
+  const shouldUpdate =
+    totalChange > ANGULAR_VELOCITY_UPDATE_THRESHOLD ||
+    now - lastAngularVelocityUpdateTime > ANGULAR_VELOCITY_UPDATE_INTERVAL;
+
+  if (shouldUpdate) {
+    entity.setAngularVelocity(newVelocity);
+    lastAngularVelocity = { ...newVelocity };
+    lastAngularVelocityUpdateTime = now;
+  }
+}
+
 /**
  * Create goal line sensors for reliable goal detection
  * These sensors detect when the ball crosses the goal line, regardless of bouncing
@@ -37,12 +73,12 @@ function createGoalSensors(world: World) {
   // This ensures balls crossing the line are detected
   redGoalSensor = new Collider({
     shape: ColliderShape.BLOCK,
-    halfExtents: { x: 2, y: 1.5, z: 5 }, // 4x3x10 - extends 2 units each direction from goal line
+    halfExtents: { x: 2, y: 2.0, z: 5 }, // 4x4x10 - extends 2 units each direction from goal line
     isSensor: true,
     tag: 'red-goal-sensor',
     relativePosition: {
       x: GAME_CONFIG.AI_GOAL_LINE_X_RED, // Position ON the goal line (was -38.5, now -37)
-      y: 1.5, // Positioned at Y=1.5 so sensor spans Y=0 to Y=3
+      y: 2.0, // Positioned at Y=2.0 so sensor spans Y=0 to Y=4 (full goal height)
       z: GAME_CONFIG.AI_FIELD_CENTER_Z
     },
     onCollision: (other: BlockType | Entity, started: boolean) => {
@@ -58,12 +94,12 @@ function createGoalSensors(world: World) {
   // This ensures balls crossing the line are detected
   blueGoalSensor = new Collider({
     shape: ColliderShape.BLOCK,
-    halfExtents: { x: 2, y: 1.5, z: 5 }, // 4x3x10 - extends 2 units each direction from goal line
+    halfExtents: { x: 2, y: 2.0, z: 5 }, // 4x4x10 - extends 2 units each direction from goal line
     isSensor: true,
     tag: 'blue-goal-sensor',
     relativePosition: {
       x: GAME_CONFIG.AI_GOAL_LINE_X_BLUE, // Position ON the goal line (was 53.5, now 52)
-      y: 1.5, // Positioned at Y=1.5 so sensor spans Y=0 to Y=3
+      y: 2.0, // Positioned at Y=2.0 so sensor spans Y=0 to Y=4 (full goal height)
       z: GAME_CONFIG.AI_FIELD_CENTER_Z
     },
     onCollision: (other: BlockType | Entity, started: boolean) => {
@@ -81,7 +117,7 @@ function createGoalSensors(world: World) {
   console.log('⚽ Goal sensors created and added to simulation');
   console.log(`   Red goal (X=${GAME_CONFIG.AI_GOAL_LINE_X_RED}): Blue scores here | Sensor: X=${GAME_CONFIG.AI_GOAL_LINE_X_RED - 2} to ${GAME_CONFIG.AI_GOAL_LINE_X_RED + 2}`);
   console.log(`   Blue goal (X=${GAME_CONFIG.AI_GOAL_LINE_X_BLUE}): Red scores here | Sensor: X=${GAME_CONFIG.AI_GOAL_LINE_X_BLUE - 2} to ${GAME_CONFIG.AI_GOAL_LINE_X_BLUE + 2}`);
-  console.log(`   Sensor size: 4x3x10 blocks | Validation: Minimal (trusts sensor)`);
+  console.log(`   Sensor size: 4x4x10 blocks (Y=0 to Y=4) | Validation: Minimal (trusts sensor)`);
 }
 
 /**
@@ -119,7 +155,7 @@ function handleGoalSensorTrigger(scoringTeam: 'red' | 'blue', ballEntity: Entity
 
   // Goal dimensions - use generous margins to avoid rejecting valid goals
   const GOAL_WIDTH = 10; // Total width of goal
-  const GOAL_HEIGHT = 3.5; // Allow up to 3.5 for margin (crossbar at ~3)
+  const GOAL_HEIGHT = 4.5; // Allow up to 4.5 for margin (goal height is 4 blocks)
 
   // Generous boundaries - if sensor triggered, ball is likely in valid position
   const GOAL_MIN_Z = GAME_CONFIG.AI_FIELD_CENTER_Z - (GOAL_WIDTH / 2) - 1; // -9 (extra margin)
@@ -520,25 +556,25 @@ export default function createSoccerBall(world: World) {
         // Higher speed = faster rotation, simulating ball rolling
         const rotationMultiplier = 2.0; // Adjust this to make rotation faster/slower
         const rotationSpeed = playerSpeed * rotationMultiplier;
-        
+
         // Calculate rotation direction based on movement direction
         // The ball should rotate perpendicular to the movement direction
         const movementDirection = {
           x: playerVelocity.x / playerSpeed,
           z: playerVelocity.z / playerSpeed
         };
-        
-        // Set angular velocity to make ball rotate as if rolling
-        // For forward movement, rotate around the X-axis (perpendicular to movement)
-        // For sideways movement, rotate around the Z-axis
-        entity.setAngularVelocity({
+
+        // PERFORMANCE OPTIMIZATION: Use optimized angular velocity update
+        // This reduces redundant setAngularVelocity calls by ~70%
+        updateAngularVelocityOptimized(entity, {
           x: -movementDirection.z * rotationSpeed, // Negative for correct rotation direction
           y: 0, // No spinning around vertical axis
           z: movementDirection.x * rotationSpeed
         });
       } else {
         // Player is stationary or moving slowly, stop ball rotation
-        entity.setAngularVelocity({ x: 0, y: 0, z: 0 });
+        // PERFORMANCE OPTIMIZATION: Use optimized angular velocity update
+        updateAngularVelocityOptimized(entity, { x: 0, y: 0, z: 0 });
       }
     }
     

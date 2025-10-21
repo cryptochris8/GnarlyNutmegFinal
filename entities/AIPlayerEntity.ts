@@ -13,7 +13,7 @@ import {
   AI_GOAL_LINE_X_BLUE,
   AI_DEFENSIVE_OFFSET_X, // Depths/Offsets are now X
   AI_MIDFIELD_OFFSET_X,
-  AI_FORWARD_OFFSET_X, 
+  AI_FORWARD_OFFSET_X,
   AI_WIDE_Z_BOUNDARY_MAX, // Boundaries are now Z
   AI_WIDE_Z_BOUNDARY_MIN,
   AI_MIDFIELD_Z_BOUNDARY_MAX,
@@ -30,225 +30,31 @@ import {
 // Import the behavior tree components and creation function
 import { BehaviorNode, createBehaviorTree } from './BehaviorTree';
 
-// Define the specific roles for the 6v6 setup
-export type SoccerAIRole = 
-  | 'goalkeeper' 
-  | 'left-back' 
-  | 'right-back' 
-  | 'central-midfielder-1' 
-  | 'central-midfielder-2' 
-  | 'striker';
+// Import AI modules
+import {
+  SoccerAIRole,
+  ROLE_DEFINITIONS,
+  SHOT_ARC_FACTOR,
+  PASS_ARC_FACTOR,
+  PASS_FORCE,
+  SHOT_FORCE,
+  TEAMMATE_REPULSION_DISTANCE,
+  TEAMMATE_REPULSION_STRENGTH,
+  POSITION_DISCIPLINE_FACTOR,
+  ROLE_PURSUIT_PROBABILITY,
+  getPursuitDistanceForRole
+} from './ai/AIRoleDefinitions';
+import { AIStaminaManager } from './ai/AIStaminaManager';
+import { AIGoalkeeperBehavior, type GoalkeeperContext } from './ai/AIGoalkeeperBehavior';
+import { AIBallHandler, type BallHandlerContext } from './ai/AIBallHandler';
+import { AIMovementController, type MovementContext } from './ai/AIMovementController';
+import { AIDecisionMaker, type DecisionContext } from './ai/AIDecisionMaker';
 
-/**
- * Enhanced role definitions based on detailed soccer position descriptions
- * These will help guide AI behavior to better match real soccer positions
- */
-export interface RoleDefinition {
-  name: string;               // Human-readable name
-  description: string;        // Brief description of the role
-  primaryDuties: string[];    // Main responsibilities
-  defensiveContribution: number;  // 0-10 scale, how much they focus on defense
-  offensiveContribution: number;  // 0-10 scale, how much they focus on offense
-  preferredArea: {            // Areas of the field they prefer to operate in
-    minX: number;             // Minimum X value (closest to own goal)
-    maxX: number;             // Maximum X value (furthest from own goal) 
-    minZ: number;             // Minimum Z value (left side of field)
-    maxZ: number;             // Maximum Z value (right side of field)
-  };
-  pursuitTendency: number;    // 0-1 probability scale for pursuing the ball
-  positionRecoverySpeed: number; // 0-1 scale, how quickly they return to position
-  supportDistance: number;     // How close they stay to teammates with the ball
-  interceptDistance: number;   // How far they'll move to intercept passes
-}
-
-// Define role characteristics for each position to guide AI behavior
-export const ROLE_DEFINITIONS: Record<SoccerAIRole, RoleDefinition> = {
-  'goalkeeper': {
-    name: 'Goalkeeper',
-    description: 'Defends the goal, organizes defense, initiates counterattacks',
-    primaryDuties: [
-      'Block shots on goal',
-      'Command defensive line',
-      'Distribute ball after saves'
-    ],
-    defensiveContribution: 10,
-    offensiveContribution: 1,
-    preferredArea: {
-      minX: -12,  // Increased from -8 to -12 for better coverage
-      maxX: 12,   // Increased from 8 to 12 for better coverage
-      minZ: -15,  // Increased goal width coverage
-      maxZ: 9     // Increased goal width coverage
-    },
-    pursuitTendency: 0.7,       // Increased from 0.4 for more aggressive ball pursuit
-    positionRecoverySpeed: 1.2, // Increased from 0.95 for faster return to position
-    supportDistance: 0.5,        // Stays close to goal
-    interceptDistance: 18        // Increased from 10 to 18 for better reach
-  },
-  'left-back': {
-    name: 'Left Back',
-    description: 'Defends left flank, supports attacks down left side',
-    primaryDuties: [
-      'Defend against opposition right winger',
-      'Support midfield in build-up play',
-      'Provide width in attack occasionally'
-    ],
-    defensiveContribution: 8,
-    offensiveContribution: 5,
-    preferredArea: {
-      minX: -25, // Stay within defensive third
-      maxX: 30,  // Can support attacks to midfield
-      minZ: -30, // Left side coverage (within field bounds Z: -33 to 26)
-      maxZ: -8   // Stay on left side of field
-    },
-    pursuitTendency: 0.6,       // Increased for more aggressive ball recovery
-    positionRecoverySpeed: 0.7,  // Keep current
-    supportDistance: 18,         // INCREASED from 10 to 18 for better build-up support
-    interceptDistance: 15        // Increased for corner coverage
-  },
-  'right-back': {
-    name: 'Right Back',
-    description: 'Defends right flank, supports attacks down right side',
-    primaryDuties: [
-      'Defend against opposition left winger',
-      'Support midfield in build-up play',
-      'Provide width in attack occasionally'
-    ],
-    defensiveContribution: 8,
-    offensiveContribution: 5,
-    preferredArea: {
-      minX: -25, // Stay within defensive third
-      maxX: 30,  // Can support attacks to midfield
-      minZ: 2,   // Stay on right side of field
-      maxZ: 23   // Right side coverage (within field bounds Z: -33 to 26)
-    },
-    pursuitTendency: 0.6,       // Increased for more aggressive ball recovery
-    positionRecoverySpeed: 0.7,  // Keep current
-    supportDistance: 18,         // INCREASED from 10 to 18 for better build-up support
-    interceptDistance: 15        // Increased for corner coverage
-  },
-  'central-midfielder-1': {
-    name: 'Left Central Midfielder',
-    description: 'Controls central areas, links defense to attack on left side',
-    primaryDuties: [
-      'Link defense to attack',
-      'Control central area of pitch',
-      'Support both defensive and offensive phases'
-    ],
-    defensiveContribution: 6,
-    offensiveContribution: 7,
-    preferredArea: {
-      minX: -20, // Can drop back to help defense
-      maxX: 35,  // Can push forward for attacks
-      minZ: -20, // Left-center coverage
-      maxZ: 5    // Overlap slightly with right midfielder
-    },
-    pursuitTendency: 0.75,      // Increased to be more active in transitions
-    positionRecoverySpeed: 0.6,  // Keep current
-    supportDistance: 22,         // INCREASED from 15 to 22 for better team link-up
-    interceptDistance: 18        // Increased for wider coverage
-  },
-  'central-midfielder-2': {
-    name: 'Right Central Midfielder',
-    description: 'Controls central areas, links defense to attack on right side',
-    primaryDuties: [
-      'Link defense to attack',
-      'Control central area of pitch',
-      'Support both defensive and offensive phases'
-    ],
-    defensiveContribution: 6,
-    offensiveContribution: 7,
-    preferredArea: {
-      minX: -20, // Can drop back to help defense
-      maxX: 35,  // Can push forward for attacks
-      minZ: -11, // Overlap slightly with left midfielder
-      maxZ: 20   // Right-center coverage
-    },
-    pursuitTendency: 0.75,      // Increased to be more active in transitions
-    positionRecoverySpeed: 0.6,  // Keep current
-    supportDistance: 22,         // INCREASED from 15 to 22 for better team link-up
-    interceptDistance: 18        // Increased for wider coverage
-  },
-  'striker': {
-    name: 'Striker',
-    description: 'Main goal threat, leads pressing, creates space for others',
-    primaryDuties: [
-      'Score goals',
-      'Hold up play',
-      'Press opposition defenders',
-      'Create space for midfielders'
-    ],
-    defensiveContribution: 3,
-    offensiveContribution: 10,
-    preferredArea: {
-      minX: -10, // Can drop back to midfield
-      maxX: 45,  // Can push to attacking third
-      minZ: -18, // Wide attacking coverage
-      maxZ: 12   // Wide attacking coverage
-    },
-    pursuitTendency: 0.85,      // Very aggressive pursuit for pressing
-    positionRecoverySpeed: 0.5,  // Keep current
-    supportDistance: 20,         // INCREASED from 15 to 20 for better hold-up options
-    interceptDistance: 15        // Increased for wider coverage
-  }
-};
-
-// Constants for AI behavior (can be refined later)
-const TEAMMATE_REPULSION_DISTANCE = 9.0;  // Increased from 7.5 for better spacing
-const TEAMMATE_REPULSION_STRENGTH = 0.8; // Increased from 0.65 for stronger spacing
-const BALL_ANTICIPATION_FACTOR = 1.5;     // Keep current
-
-// Enhanced position discipline - these control how strongly players stick to their positions
-const POSITION_DISCIPLINE_FACTOR = {
-  'goalkeeper': 0.95,     // Goalkeepers stay very close to their position
-  'left-back': 0.8,       // Defenders maintain formation
-  'right-back': 0.8,      // Defenders maintain formation
-  'central-midfielder-1': 0.6,  // Midfielders have more flexibility
-  'central-midfielder-2': 0.6,  // Midfielders have more flexibility
-  'striker': 0.5          // Strikers have most freedom to roam
-};
-
-// FIXED: Increased pursuit distances to allow better ball retrieval near boundaries (except goalkeeper)
-const GOALKEEPER_PURSUIT_DISTANCE = 8.0;   // Kept same to keep goalkeepers near goal
-const DEFENDER_PURSUIT_DISTANCE = 20.0;    // Increased from 12.0 to reach sideline balls
-const MIDFIELDER_PURSUIT_DISTANCE = 25.0;  // Increased from 16.0 for better field coverage
-const STRIKER_PURSUIT_DISTANCE = 30.0;     // Increased from 20.0 for aggressive ball pursuit
-
-// Reduced pursuit probabilities to maintain spacing
-const ROLE_PURSUIT_PROBABILITY = {
-  'goalkeeper': 0.15,  // Reduced from 0.25
-  'left-back': 0.3,    // Reduced from 0.45
-  'right-back': 0.3,   // Reduced from 0.45
-  'central-midfielder-1': 0.4, // Reduced from 0.55
-  'central-midfielder-2': 0.4, // Reduced from 0.55
-  'striker': 0.5       // Reduced from 0.6
-};
-
-// Enhanced position recovery speeds to make players return to position faster
-const POSITION_RECOVERY_MULTIPLIER = {
-  'goalkeeper': 1.5,  // Increased for faster return
-  'left-back': 1.4,   // Increased for faster return
-  'right-back': 1.4,  // Increased for faster return
-  'central-midfielder-1': 1.3, // Increased for faster return
-  'central-midfielder-2': 1.3, // Increased for faster return
-  'striker': 1.2      // Increased for faster return
-};
-
-// Constants for formation spacing during kickoffs and restarts
-const KICKOFF_SPACING_MULTIPLIER = 2.0;    // Extra spacing during kickoffs
-const RESTART_FORMATION_DISCIPLINE = 0.9;  // High discipline during restarts
-const CENTER_AVOIDANCE_RADIUS = 12.0;      // Radius around center to avoid crowding
-
-// Constants for arcing shots and passes
-// REALISTIC SOCCER SHOT PHYSICS - Option 3: Variable by Distance
-const SHOT_ARC_FACTOR = 0.30; // Increased for more realistic parabolic arcs (was 0.18)
-const PASS_ARC_FACTOR = 0.05; // Reduced from 0.08 to keep passes lower and more controlled
-const PASS_FORCE = 2.8; // Reduced from 3.5 to 2.8 to fix out-of-bounds passes
-const SHOT_FORCE = 2.2; // Base force - will be scaled by distance for realism (was 2.5)
-
-/**
- * Behavioral Tree Implementation
- * This provides a more structured and maintainable way to organize AI decision making
- */
+// Constants still used locally (not extracted to modules yet)
+const BALL_ANTICIPATION_FACTOR = 1.5;
+const KICKOFF_SPACING_MULTIPLIER = 2.0;
+const RESTART_FORMATION_DISCIPLINE = 0.9;
+const CENTER_AVOIDANCE_RADIUS = 12.0;
 
 /**
  * AI-controlled soccer player entity
@@ -282,6 +88,13 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
 
   // Restart behavior type to determine how AI behaves after ball resets
   private restartBehavior: 'pass-to-teammates' | 'normal' | null = null;
+
+  // AI module instances
+  private staminaManager: AIStaminaManager;
+  private goalkeeperBehavior: AIGoalkeeperBehavior;
+  private ballHandler: AIBallHandler;
+  private movementController: AIMovementController;
+  private decisionMaker: AIDecisionMaker;
 
   /**
    * Create a new AI player entity
@@ -337,8 +150,15 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     
     // Initialize AI systems
     this.agent = new SoccerAgent(this);
-    this.behaviorTree = createBehaviorTree(this); 
-    
+    this.behaviorTree = createBehaviorTree(this);
+
+    // Initialize AI modules
+    this.staminaManager = new AIStaminaManager();
+    this.goalkeeperBehavior = new AIGoalkeeperBehavior();
+    this.ballHandler = new AIBallHandler();
+    this.movementController = new AIMovementController();
+    this.decisionMaker = new AIDecisionMaker();
+
     // Retrieve mass from parent or use default
     // Mass is used by SDK physics system for momentum calculations
     this._mass = this.mass || 1.0; 
@@ -3062,15 +2882,14 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
    * Get the maximum possession time for this AI player's role
    */
   private getMaxPossessionTime(): number {
-    switch (this.aiRole) {
-      case 'goalkeeper': return this.GOALKEEPER_MAX_POSSESSION_TIME;
-      case 'left-back':
-      case 'right-back': return this.DEFENDER_MAX_POSSESSION_TIME;
-      case 'central-midfielder-1':
-      case 'central-midfielder-2': return this.MIDFIELDER_MAX_POSSESSION_TIME;
-      case 'striker': return this.STRIKER_MAX_POSSESSION_TIME;
-      default: return 5000; // Default fallback
-    }
+    const context = {
+      GOALKEEPER_MAX_POSSESSION_TIME: this.GOALKEEPER_MAX_POSSESSION_TIME,
+      DEFENDER_MAX_POSSESSION_TIME: this.DEFENDER_MAX_POSSESSION_TIME,
+      MIDFIELDER_MAX_POSSESSION_TIME: this.MIDFIELDER_MAX_POSSESSION_TIME,
+      STRIKER_MAX_POSSESSION_TIME: this.STRIKER_MAX_POSSESSION_TIME
+    } as any;
+
+    return this.ballHandler.getMaxPossessionTime(this.aiRole, context);
   }
 
   /**
@@ -3946,31 +3765,7 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
    * @returns True if stamina should be conserved
    */
   private shouldConserveStamina(staminaPercentage: number): boolean {
-    // Different stamina thresholds based on role
-    let conservationThreshold = 30; // Default threshold
-    
-    switch (this.aiRole) {
-      case 'goalkeeper':
-        conservationThreshold = 20; // Goalkeepers conserve less aggressively
-        break;
-      case 'striker':
-        conservationThreshold = 40; // Strikers need to conserve more to be effective
-        break;
-      case 'central-midfielder-1':
-      case 'central-midfielder-2':
-        conservationThreshold = 35; // Midfielders balance defense and attack
-        break;
-      case 'left-back':
-      case 'right-back':
-        conservationThreshold = 25; // Defenders can be more aggressive with stamina
-        break;
-    }
-    
-    // More aggressive conservation as the game progresses
-    // In the second half, players should be more conservative with their stamina
-    // For now, we'll use a consistent threshold regardless of game phase
-    
-    return staminaPercentage < conservationThreshold;
+    return this.staminaManager.shouldConserveStamina(staminaPercentage, this.aiRole);
   }
   
   /**
@@ -3981,78 +3776,22 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
    * @param staminaPercentage Current stamina percentage
    */
   private handleStaminaConservation(ballPosition: Vector3Like, hasBall: boolean, staminaPercentage: number): void {
-    // Log conservation behavior occasionally
-    if (Math.random() < 0.02) { // 2% chance to log
-      console.log(`💨 STAMINA CONSERVATION: ${this.player.username} (${this.aiRole}) conserving stamina (${staminaPercentage.toFixed(0)}%)`);
-    }
-    
-    if (hasBall) {
-      // If we have the ball and low stamina, prioritize quick pass over dribbling
-      const passSuccess = this.passBall();
-      if (passSuccess) {
-        console.log(`⚡ STAMINA CONSERVATION: ${this.player.username} made quick pass to preserve stamina`);
-        return;
-      }
-      
-      // If passing failed, hold position and slow down
-      this.targetPosition = {
-        x: this.position.x,
-        y: this.position.y,
-        z: this.position.z
-      };
-      return;
-    }
-    
-    // When we don't have the ball, prioritize positioning over aggressive pursuit
-    const roleDef = ROLE_DEFINITIONS[this.aiRole];
-    const distanceToBall = this.distanceBetween(this.position, ballPosition);
-    
-    // Reduce effective pursuit based on stamina levels
-    const staminaFactor = Math.max(0.3, staminaPercentage / 100); // Never go below 30% pursuit
-    const adjustedPursuitTendency = roleDef.pursuitTendency * staminaFactor;
-    
-    // Only pursue if we're very close to the ball or if we're the designated role
-    const shouldPursue = distanceToBall < 8 && Math.random() < adjustedPursuitTendency;
-    
-    if (shouldPursue && this.isClosestTeammateToPosition(ballPosition)) {
-      // Pursue the ball but with reduced intensity
-      this.targetPosition = {
-        x: ballPosition.x,
-        y: ballPosition.y,
-        z: ballPosition.z
-      };
-    } else {
-      // Move to a conservative position that allows stamina recovery
-      const formationPosition = this.getRoleBasedPosition();
-      
-      // Move towards formation position but prioritize standing still for stamina recovery
-      const distanceToFormation = this.distanceBetween(this.position, formationPosition);
-      
-      if (distanceToFormation < 3) {
-        // If close to formation position, hold position for stamina recovery
-        this.targetPosition = {
-          x: this.position.x,
-          y: this.position.y,
-          z: this.position.z
-        };
-      } else {
-        // Move slowly towards formation position
-        const direction = {
-          x: formationPosition.x - this.position.x,
-          z: formationPosition.z - this.position.z
-        };
-        const distance = Math.sqrt(direction.x * direction.x + direction.z * direction.z);
-        
-        if (distance > 0.1) {
-          const moveDistance = Math.min(2, distance); // Move only 2 units at a time
-          this.targetPosition = {
-            x: this.position.x + (direction.x / distance) * moveDistance,
-            y: this.position.y,
-            z: this.position.z + (direction.z / distance) * moveDistance
-          };
-        }
-      }
-    }
+    const context = {
+      aiRole: this.aiRole,
+      position: this.position,
+      username: this.player.username,
+      passBall: () => this.passBall(),
+      distanceBetween: (pos1: Vector3Like, pos2: Vector3Like) => this.distanceBetween(pos1, pos2),
+      isClosestTeammateToPosition: (position: Vector3Like) => this.isClosestTeammateToPosition(position),
+      getRoleBasedPosition: () => this.getRoleBasedPosition()
+    };
+
+    this.targetPosition = this.staminaManager.handleStaminaConservation(
+      context,
+      ballPosition,
+      hasBall,
+      staminaPercentage
+    );
   }
 
   /**

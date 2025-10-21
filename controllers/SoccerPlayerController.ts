@@ -1148,13 +1148,15 @@ export default class CustomSoccerPlayer extends BaseEntityController {
 
   public detach(entity: Entity) {
     try {
-      // **SHOT METER FIX**: Clear any charging state when detaching
+      console.log(`🧹 DETACH CLEANUP: Starting comprehensive cleanup for ${entity instanceof PlayerEntity ? entity.player?.username : entity.id}`);
+
+      // 1. **SHOT METER FIX**: Clear any charging state when detaching
       if (this._holdingQ !== null && entity instanceof PlayerEntity) {
         console.log(`🔧 SHOT METER FIX: Clearing charging state during detach for ${entity.player?.username || 'unknown'}`);
         this._clearPowerChargeIfNeeded(entity);
       }
 
-      // Clear any pending animations or intervals
+      // 2. Clear any pending animations
       if (entity instanceof SoccerPlayerEntity) {
         try {
           entity.stopModelAnimations(Array.from(entity.modelLoopedAnimations));
@@ -1163,16 +1165,58 @@ export default class CustomSoccerPlayer extends BaseEntityController {
         }
       }
 
-      // Clear intervals
+      // 3. Clear all intervals and timers
       this.clearChargeInterval();
+
       if (CustomSoccerPlayer._ballStuckCheckInterval) {
         clearInterval(CustomSoccerPlayer._ballStuckCheckInterval);
         CustomSoccerPlayer._ballStuckCheckInterval = null;
       }
 
+      if (this._stunTimeout) {
+        clearTimeout(this._stunTimeout);
+        this._stunTimeout = undefined;
+      }
+
+      // 4. Clear audio
+      if (this._stepAudio) {
+        try {
+          this._stepAudio.stop();
+          this._stepAudio = undefined;
+        } catch (error) {
+          console.log("Step audio cleanup error:", error);
+        }
+      }
+
+      // 5. Reset all state variables
+      this._holdingQ = null;
+      this._chargeStartTime = null;
+      this._lastMoveDirection = { x: 0, z: 0 };
+      this._lastRotationUpdateTime = null;
+      this._lastCameraRotationTime = null;
+      this._lastBounceTime = null;
+      this._lastHeaderTime = 0;
+      this._lastPowerUpTime = 0;
+
+      // 6. Reset ground contact and platform tracking
+      this._groundContactCount = 0;
+      this._platform = undefined;
+
+      // 7. Clear power bar UI if it exists
+      if (this._powerBarUI) {
+        try {
+          this._powerBarUI.unload();
+          this._powerBarUI = undefined;
+        } catch (error) {
+          console.log("Power bar UI cleanup error:", error);
+        }
+      }
+
+      console.log(`✅ DETACH CLEANUP: Completed cleanup for ${entity instanceof PlayerEntity ? entity.player?.username : entity.id}`);
+
       super.detach(entity);
     } catch (error) {
-      console.log("Detach error:", error);
+      console.error("❌ DETACH ERROR: Critical error during detach:", error);
     }
   }
 

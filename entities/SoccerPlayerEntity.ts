@@ -455,17 +455,27 @@ export default class SoccerPlayerEntity extends PlayerEntity {
   
   public updateStamina() {
     const now = Date.now();
-    const deltaTime = (now - this.lastStaminaUpdate) / 1000; // Convert to seconds
+
+    // PERFORMANCE OPTIMIZATION: Throttle stamina updates to every 200ms
+    // This reduces unnecessary calculations and UI updates
+    const STAMINA_UPDATE_INTERVAL = 200; // milliseconds
+    const timeSinceLastUpdate = now - this.lastStaminaUpdate;
+
+    if (timeSinceLastUpdate < STAMINA_UPDATE_INTERVAL) {
+      return; // Skip update - too soon
+    }
+
+    const deltaTime = timeSinceLastUpdate / 1000; // Convert to seconds
     this.lastStaminaUpdate = now;
 
     // Check player's movement state
     const velocity = this.linearVelocity;
     const speed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-    
+
     // Determine movement state and corresponding stamina change rate
     let staminaChangeRate: number;
     let movementState: string;
-    
+
     if (speed < 0.5) {
       // Standing still - fastest recovery
       staminaChangeRate = this.staminaRegenRates.standing;
@@ -479,7 +489,7 @@ export default class SoccerPlayerEntity extends PlayerEntity {
       staminaChangeRate = this.staminaRegenRates.running;
       movementState = "running";
     }
-    
+
     // Apply stamina change only if player is not stunned or frozen
     if (!this.isStunned && !this.isPlayerFrozen) {
       if (staminaChangeRate > 0) {
@@ -490,7 +500,7 @@ export default class SoccerPlayerEntity extends PlayerEntity {
         this.stamina = Math.max(0, this.stamina - (Math.abs(staminaChangeRate) * deltaTime));
       }
     }
-    
+
     // Apply speed penalty based on current stamina level
     this.applyStaminaSpeedPenalty();
 
