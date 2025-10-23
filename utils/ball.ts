@@ -16,6 +16,7 @@ import { soccerMap } from "../state/map";
 import type { BoundaryInfo } from "../state/map";
 import SoccerPlayerEntity from "../entities/SoccerPlayerEntity";
 import { EventThrottler } from "./EventThrottler";
+import { isPenaltyShootoutMode } from "../state/gameModes";
 
 // Goal sensor tracking
 let redGoalSensor: Collider | null = null;
@@ -24,6 +25,7 @@ let ballHasEnteredGoal = false;
 let goalSensorDebounce = 0;
 let ballResetLockout = 0; // Timestamp of last ball reset - prevents false goals during respawns
 let worldRef: World | null = null; // Store world reference for goal sensor callbacks
+let penaltyShootoutManagerRef: any | null = null; // Store penalty shootout manager reference for goal detection during shootouts
 
 // Performance optimization: Cache last angular velocity to avoid redundant updates
 let lastAngularVelocity: { x: number; y: number; z: number } = { x: 0, y: 0, z: 0 };
@@ -190,12 +192,20 @@ function handleGoalSensorTrigger(scoringTeam: 'red' | 'blue', ballEntity: Entity
 
   console.log(`\n🎉🎉🎉 GOAL! ${scoringTeam.toUpperCase()} TEAM SCORES! 🎉🎉🎉`);
   console.log(`   Final position: X=${ballPos.x.toFixed(2)}, Y=${ballPos.y.toFixed(2)}, Z=${ballPos.z.toFixed(2)}\n`);
-  
+
+  // Check if we're in penalty shootout mode
+  if (isPenaltyShootoutMode() && penaltyShootoutManagerRef) {
+    console.log('⚽ PENALTY SHOOTOUT GOAL!');
+    penaltyShootoutManagerRef.handleShotResult('goal');
+    ballHasEnteredGoal = false; // Reset immediately for next penalty
+    return;
+  }
+
   // Emit goal event immediately - no confirmation delay needed
   if (worldRef) {
     worldRef.emit("goal" as any, scoringTeam as any);
   }
-  
+
   // Reset ball after short celebration delay
   setTimeout(() => {
     if (worldRef) {
@@ -220,6 +230,15 @@ function handleGoalSensorTrigger(scoringTeam: 'red' | 'blue', ballEntity: Entity
 export function setBallResetLockout() {
   ballResetLockout = Date.now();
   console.log('⚽ Ball reset lockout activated (1.5s)');
+}
+
+/**
+ * Set penalty shootout manager reference for goal detection during penalties
+ * Call this from gameState.ts when initializing the penalty shootout manager
+ */
+export function setPenaltyShootoutManager(manager: any) {
+  penaltyShootoutManagerRef = manager;
+  console.log('⚽ Penalty shootout manager registered with ball system');
 }
 
 /**

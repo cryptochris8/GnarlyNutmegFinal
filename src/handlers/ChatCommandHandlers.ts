@@ -76,6 +76,7 @@ export class ChatCommandHandlers {
     this.registerFIFACommand();
     this.registerArcadeCommand();
     this.registerModeCommand();
+    this.registerPenaltyShootoutCommand();
 
     // Tournament Commands
     this.registerTournamentCommand();
@@ -474,6 +475,31 @@ export class ChatCommandHandlers {
         player,
         `Mode: ${mode} - implementation needed`
       );
+    });
+  }
+
+  private registerPenaltyShootoutCommand(): void {
+    this.deps.world.chatManager.registerCommand("/penaltyshootout", (player, args) => {
+      if (!this.deps.game) {
+        this.deps.world.chatManager.sendPlayerMessage(player, "No active game");
+        return;
+      }
+
+      const penaltyShootoutManager = this.deps.game.getPenaltyShootoutManager();
+      if (!penaltyShootoutManager) {
+        this.deps.world.chatManager.sendPlayerMessage(player, "❌ Penalty shootout manager not available");
+        return;
+      }
+
+      // Check if already active
+      if (penaltyShootoutManager.isShootoutActive()) {
+        this.deps.world.chatManager.sendPlayerMessage(player, "⚽ Penalty shootout already in progress!");
+        return;
+      }
+
+      // Start penalty shootout
+      this.deps.world.chatManager.sendBroadcastMessage("⚽ Penalty shootout manually started by admin!");
+      penaltyShootoutManager.start();
     });
   }
 

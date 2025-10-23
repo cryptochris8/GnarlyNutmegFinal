@@ -7,7 +7,8 @@ import { HALF_DURATION, TOTAL_HALVES, HALFTIME_DURATION } from './gameConfig';
 export enum GameMode {
   FIFA = "fifa",
   ARCADE = "arcade",
-  TOURNAMENT = "tournament"
+  TOURNAMENT = "tournament",
+  PENALTY_SHOOTOUT = "penalty_shootout"
 }
 
 // FIFA Mode Configuration - Realistic Soccer
@@ -131,6 +132,50 @@ export const TOURNAMENT_MODE_CONFIG = {
   persistMatchHistory: true
 };
 
+// Penalty Shootout Mode Configuration - Dramatic 1v1 Penalties
+export const PENALTY_SHOOTOUT_CONFIG = {
+  name: 'Penalty Shootout',
+  description: 'Sudden death penalty kicks to determine the winner',
+
+  // Shootout rules
+  standardRounds: 5, // Best of 5 rounds before sudden death
+  suddenDeathAfterTie: true,
+
+  // Timing
+  shotTimeLimit: 30, // 30 seconds per shot
+  celebrationDelay: 3000, // 3 seconds to show result
+  roundTransitionDelay: 2000, // 2 seconds between rounds
+
+  // Positioning (in units from goal line)
+  penaltySpotDistance: 11, // Standard penalty kick distance (12 yards ≈ 11 units)
+
+  // Physics - use realistic FIFA physics
+  ballPhysics: {
+    damping: 0.95,
+    friction: 0.8,
+    bounciness: 0.6
+  },
+
+  // Shooter mechanics
+  allowPowerCharge: true, // Q key to charge shot
+  allowAiming: true, // Mouse aim for direction
+  allowChipShot: true, // Space + click for lob
+
+  // Goalkeeper mechanics
+  allowDiving: true, // WASD/Arrows to dive
+  allowEarlyDive: true, // Can dive before shot
+
+  // Audio and atmosphere
+  crowdAudio: true,
+  tensionMusic: true,
+  celebrationSounds: true,
+
+  // Camera
+  cinematicCamera: true,
+  followBall: true,
+  slowMotionReplays: false // Start simple, can add later
+};
+
 // Current game mode (defaults to FIFA for safety)
 let currentGameMode: GameMode = GameMode.FIFA;
 
@@ -146,6 +191,8 @@ export const getCurrentModeConfig = () => {
       return ARCADE_MODE_CONFIG;
     case GameMode.TOURNAMENT:
       return TOURNAMENT_MODE_CONFIG;
+    case GameMode.PENALTY_SHOOTOUT:
+      return PENALTY_SHOOTOUT_CONFIG;
     default:
       return FIFA_MODE_CONFIG; // Default fallback
   }
@@ -161,6 +208,7 @@ export const setGameMode = (mode: GameMode): void => {
 export const isFIFAMode = (): boolean => currentGameMode === GameMode.FIFA;
 export const isArcadeMode = (): boolean => currentGameMode === GameMode.ARCADE;
 export const isTournamentMode = (): boolean => currentGameMode === GameMode.TOURNAMENT;
+export const isPenaltyShootoutMode = (): boolean => currentGameMode === GameMode.PENALTY_SHOOTOUT;
 
 // Enhanced ball physics for arcade mode only (FIFA uses existing BALL_CONFIG)
 export const ARCADE_BALL_CONFIG = {

@@ -32,6 +32,7 @@ import SoccerPlayerEntity from "../entities/SoccerPlayerEntity";
 import AIPlayerEntity from "../entities/AIPlayerEntity";
 import { ArcadeEnhancementManager } from "./arcadeEnhancements";
 import { HalfTimeManager } from "./HalfTimeManager";
+import { PenaltyShootoutManager } from "./PenaltyShootoutManager";
 import observerMode from "../utils/observerMode";
 
 // Custom events for the SoccerGame
@@ -136,6 +137,13 @@ export class SoccerGame {
   private arcadeManager: ArcadeEnhancementManager | null = null;
   private fifaCrowdManager: any | null = null; // FIFA crowd manager for stadium atmosphere
   private halfTimeManager!: HalfTimeManager; // Manages half-time logic and stoppage time
+  private penaltyShootoutManager: PenaltyShootoutManager | null = null; // Manages penalty shootout mode
+
+  // Automatic AI restart system - ensures ball doesn't sit idle after out-of-bounds
+  private restartTimer: Timer | null = null;
+  private restartTeam: "red" | "blue" | null = null;
+  private restartPosition: { x: number; y: number; z: number } | null = null;
+  private readonly RESTART_TIMEOUT = 5000; // 5 seconds before AI automatically takes restart
   
   // Momentum tracking for announcer commentary
   private teamMomentum: {
@@ -180,6 +188,13 @@ export class SoccerGame {
 
     // Initialize half-time manager
     this.halfTimeManager = new HalfTimeManager(this.state);
+
+    // Initialize penalty shootout manager
+    this.penaltyShootoutManager = new PenaltyShootoutManager(world, entity);
+
+    // Register penalty shootout manager with ball system for goal detection
+    const { setPenaltyShootoutManager } = require('../utils/ball');
+    setPenaltyShootoutManager(this.penaltyShootoutManager);
     this.world.on("goal" as any, ((team: "red" | "blue") => {
       this.handleGoalScored(team);
     }) as any);
@@ -497,7 +512,9 @@ export class SoccerGame {
 
   private gameLoop() {
 
-    
+    // Check if ball was picked up for restart (clears timer if ball is possessed)
+    this.checkBallPickupForRestart();
+
     // Update arcade enhancements (only active in arcade mode)
     if (this.arcadeManager) {
       this.arcadeManager.update();
@@ -869,7 +886,7 @@ export class SoccerGame {
   private handleTimeUp() {
     console.log("⏰ OVERTIME TIME UP! Handling end of overtime");
     console.log(`⏰ Score at overtime end: Red ${this.state.score.red} - Blue ${this.state.score.blue}`);
-    
+
     // Clear the game loop interval to stop the timer
     if (this.gameLoopInterval) {
       clearInterval(this.gameLoopInterval);
@@ -880,11 +897,24 @@ export class SoccerGame {
     TICKING_AUDIO.pause();
 
     if (this.state.score.red === this.state.score.blue) {
-      // Overtime ended and still tied, finish the game
+      // Still tied after overtime - GO TO PENALTY SHOOTOUT!
+      console.log("⚽ Game still tied after overtime - starting penalty shootout!");
       this.world.chatManager.sendBroadcastMessage(
-        "Overtime ended! Match ends in a tie!"
+        "⚽ Still tied after overtime! Penalty shootout will decide the winner!"
       );
-      this.endGame();
+
+      // Brief delay before starting penalty shootout
+      setTimeout(() => {
+        if (this.penaltyShootoutManager) {
+          this.penaltyShootoutManager.start();
+        } else {
+          console.error("❌ Penalty shootout manager not initialized");
+          this.world.chatManager.sendBroadcastMessage(
+            "Error starting penalty shootout. Match ends in a draw."
+          );
+          this.endGame();
+        }
+      }, 3000);
     } else {
       // Game has a winner after overtime
       this.endGame();
@@ -913,6 +943,109 @@ export class SoccerGame {
 
   public isTeamFull(team: "red" | "blue"): boolean {
     return this.getPlayerCountOnTeam(team) >= this.state.maxPlayersPerTeam;
+  }
+
+  /**
+   * Start automatic AI restart timer - ensures ball doesn't sit idle for more than 5 seconds
+   * @param team - The team that should take the restart
+   * @param position - The position where the ball was placed
+   */
+  private startRestartTimer(team: "red" | "blue", position: { x: number; y: number; z: number }): void {
+    // Clear any existing timer
+    this.clearRestartTimer();
+
+    this.restartTeam = team;
+    this.restartPosition = position;
+
+    console.log(`⏱️ Starting ${this.RESTART_TIMEOUT/1000}s restart timer for ${team} team at (${position.x.toFixed(1)}, ${position.z.toFixed(1)})`);
+
+    this.restartTimer = setTimeout(() => {
+      console.log(`⏰ Restart timer expired - assigning AI to take restart for ${team} team`);
+      this.assignAIForRestart();
+    }, this.RESTART_TIMEOUT);
+  }
+
+  /**
+   * Clear the restart timer (called when a player picks up the ball)
+   */
+  private clearRestartTimer(): void {
+    if (this.restartTimer) {
+      clearTimeout(this.restartTimer);
+      this.restartTimer = null;
+      this.restartTeam = null;
+      this.restartPosition = null;
+      console.log('✅ Restart timer cleared - player retrieved ball');
+    }
+  }
+
+  /**
+   * Assign closest AI player to automatically pick up the ball for restart
+   */
+  private assignAIForRestart(): void {
+    if (!this.restartTeam || !this.restartPosition) {
+      console.log('⚠️ Cannot assign AI for restart - no restart team or position set');
+      return;
+    }
+
+    // Find all AI players on the restart team
+    const teamAIPlayers = this.world.entityManager
+      .getAllPlayerEntities()
+      .filter(entity =>
+        entity instanceof AIPlayerEntity &&
+        entity.team === this.restartTeam &&
+        entity.isSpawned
+      ) as AIPlayerEntity[];
+
+    if (teamAIPlayers.length === 0) {
+      console.log(`⚠️ No AI players found on ${this.restartTeam} team for automatic restart`);
+      return;
+    }
+
+    // Find closest AI player to restart position
+    let closestAI: AIPlayerEntity | null = null;
+    let closestDistance = Infinity;
+
+    for (const ai of teamAIPlayers) {
+      const distance = Math.sqrt(
+        Math.pow(ai.position.x - this.restartPosition.x, 2) +
+        Math.pow(ai.position.z - this.restartPosition.z, 2)
+      );
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestAI = ai;
+      }
+    }
+
+    if (closestAI) {
+      console.log(`🤖 Assigning ${closestAI.player.username} to automatically take restart (distance: ${closestDistance.toFixed(1)} units)`);
+
+      // Attach ball to the AI player
+      sharedState.setAttachedPlayer(closestAI);
+
+      // Play sound to indicate AI picked up ball
+      new Audio({
+        uri: "audio/sfx/soccer/kick.mp3",
+        volume: 0.1,
+        loop: false,
+      }).play(this.world);
+
+      // Clear restart tracking
+      this.restartTeam = null;
+      this.restartPosition = null;
+      this.restartTimer = null;
+    }
+  }
+
+  /**
+   * Check if ball was picked up and clear restart timer if so
+   * Call this whenever ball possession changes
+   */
+  public checkBallPickupForRestart(): void {
+    if (this.restartTimer && sharedState.getAttachedPlayer() !== null) {
+      console.log('👤 Player picked up ball - clearing restart timer');
+      this.clearRestartTimer();
+    }
   }
 
   private handleGoalScored(team: "red" | "blue") {
@@ -1084,6 +1217,9 @@ export class SoccerGame {
       this.gameLoopInterval = null;
     }
 
+    // Clear restart timer if active
+    this.clearRestartTimer();
+
     // Set game status to finished
     this.state.status = "finished";
     
@@ -1209,12 +1345,15 @@ export class SoccerGame {
 
   public resetGame() {
     console.log("🔄 RESETTING GAME - Starting cleanup process...");
-    
-    // Clear all intervals
+
+    // Clear all intervals and timers
     if (this.gameLoopInterval) {
       clearInterval(this.gameLoopInterval);
       this.gameLoopInterval = null;
     }
+
+    // Clear restart timer if active
+    this.clearRestartTimer();
     
     // Reset momentum tracking
     this.teamMomentum = {
@@ -1421,7 +1560,13 @@ export class SoccerGame {
     console.log("🏆 Tournament manager set for SoccerGame");
   }
 
-
+  /**
+   * Get the penalty shootout manager
+   * Used by chat commands and external systems
+   */
+  public getPenaltyShootoutManager(): PenaltyShootoutManager | null {
+    return this.penaltyShootoutManager;
+  }
 
   // Perform coin toss and determine which team kicks off
   public performCoinToss(playerChoice?: { playerId: string, choice: "heads" | "tails" }): void {
@@ -1489,10 +1634,10 @@ export class SoccerGame {
    */
   private handleThrowIn(data: { side: string; position: any; lastPlayer: PlayerEntity | null }) {
     console.log("Handling throw-in:", data);
-    
+
     // Determine which team gets the throw-in (opposite of team that last touched)
     let throwInTeam: "red" | "blue";
-    
+
     if (data.lastPlayer && data.lastPlayer instanceof SoccerPlayerEntity) {
       // Give throw-in to opposing team
       throwInTeam = data.lastPlayer.team === "red" ? "blue" : "red";
@@ -1502,17 +1647,17 @@ export class SoccerGame {
       throwInTeam = Math.random() < 0.5 ? "red" : "blue";
       console.log(`Unknown last touch, randomly assigning throw-in to ${throwInTeam} team`);
     }
-    
+
     // Calculate throw-in position
     const throwInPosition = this.calculateThrowInPosition(data.side, data.position);
-    
+
     // Notify players
     this.world.chatManager.sendBroadcastMessage(
       `Throw-in to ${throwInTeam.toUpperCase()} team.`
     );
-    
-    // Simple ball reset for throw-in
-    this.resetBallAtPosition(throwInPosition);
+
+    // Reset ball and start automatic AI timer
+    this.resetBallAtPosition(throwInPosition, throwInTeam);
   }
 
   /**
@@ -1521,27 +1666,27 @@ export class SoccerGame {
    */
   private handleGoalLineOut(data: { side: string; position: any; lastPlayer: PlayerEntity | null }) {
     console.log("Handling goal line out:", data);
-    
+
     // Determine which goal line was crossed and restart type
     const crossedRedGoalLine = data.side === "min-x"; // Red defends min-x side
     const crossedBlueGoalLine = data.side === "max-x"; // Blue defends max-x side
-    
+
     if (data.lastPlayer && data.lastPlayer instanceof SoccerPlayerEntity) {
       const lastTouchTeam = data.lastPlayer.team;
-      
+
       if (crossedRedGoalLine) {
         if (lastTouchTeam === "red") {
           // Red team last touched, ball went over their own goal line = Corner kick for blue
           console.log("Corner kick for blue team (red last touched over red goal line)");
           const cornerPosition = this.calculateCornerPosition(data.side, data.position);
           this.world.chatManager.sendBroadcastMessage("Corner kick to BLUE team!");
-          this.resetBallAtPosition(cornerPosition);
+          this.resetBallAtPosition(cornerPosition, "blue");
         } else {
           // Blue team last touched, ball went over red goal line = Goal kick for red
           console.log("Goal kick for red team (blue last touched over red goal line)");
           const goalKickPosition = this.calculateGoalKickPosition("red");
           this.world.chatManager.sendBroadcastMessage("Goal kick to RED team!");
-          this.resetBallAtPosition(goalKickPosition);
+          this.resetBallAtPosition(goalKickPosition, "red");
         }
       } else if (crossedBlueGoalLine) {
         if (lastTouchTeam === "blue") {
@@ -1549,13 +1694,13 @@ export class SoccerGame {
           console.log("Corner kick for red team (blue last touched over blue goal line)");
           const cornerPosition = this.calculateCornerPosition(data.side, data.position);
           this.world.chatManager.sendBroadcastMessage("Corner kick to RED team!");
-          this.resetBallAtPosition(cornerPosition);
+          this.resetBallAtPosition(cornerPosition, "red");
         } else {
           // Red team last touched, ball went over blue goal line = Goal kick for blue
           console.log("Goal kick for blue team (red last touched over blue goal line)");
           const goalKickPosition = this.calculateGoalKickPosition("blue");
           this.world.chatManager.sendBroadcastMessage("Goal kick to BLUE team!");
-          this.resetBallAtPosition(goalKickPosition);
+          this.resetBallAtPosition(goalKickPosition, "blue");
         }
       } else {
         // Fallback to center reset for unexpected cases
@@ -1568,14 +1713,16 @@ export class SoccerGame {
       console.log(`No clear last touch, goal kick for defending team: ${defendingTeam}`);
       const goalKickPosition = this.calculateGoalKickPosition(defendingTeam);
       this.world.chatManager.sendBroadcastMessage(`Goal kick to ${defendingTeam.toUpperCase()} team!`);
-      this.resetBallAtPosition(goalKickPosition);
+      this.resetBallAtPosition(goalKickPosition, defendingTeam);
     }
   }
 
   /**
    * Simple ball reset at a specific position
+   * @param position - The position to reset the ball to
+   * @param restartTeam - Optional: The team that should take the restart (starts 5s timer for AI)
    */
-  private resetBallAtPosition(position: Vector3Like) {
+  private resetBallAtPosition(position: Vector3Like, restartTeam?: "red" | "blue") {
     // Despawn and respawn ball at position
     if (this.soccerBall.isSpawned) {
       this.soccerBall.despawn();
@@ -1599,6 +1746,11 @@ export class SoccerGame {
       loop: false,
       volume: 0.1,
     }).play(this.world);
+
+    // Start automatic AI restart timer if a team is specified
+    if (restartTeam) {
+      this.startRestartTimer(restartTeam, position);
+    }
   }
 
   /**
