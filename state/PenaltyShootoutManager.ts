@@ -76,6 +76,11 @@ export class PenaltyShootoutManager {
   // Timers
   private shotTimer: ReturnType<typeof setTimeout> | null = null;
   private transitionTimer: ReturnType<typeof setTimeout> | null = null;
+  private ballMonitorInterval: ReturnType<typeof setInterval> | null = null;
+
+  // Shot tracking
+  private shotHasBeenTaken: boolean = false;
+  private ballInitialPosition: Vector3Like | null = null;
 
   // Audio
   private tensionAudio: Audio;
@@ -361,11 +366,21 @@ export class PenaltyShootoutManager {
    */
   private startShotTimer(): void {
     this.phase = 'shooting';
+    this.shotHasBeenTaken = false;
+    this.ballInitialPosition = this.soccerBall.position;
 
-    // Clear any existing timer
+    // Clear any existing timers
     if (this.shotTimer) {
       clearTimeout(this.shotTimer);
     }
+    if (this.ballMonitorInterval) {
+      clearInterval(this.ballMonitorInterval);
+    }
+
+    // Start monitoring the ball every 100ms for out-of-bounds and saves
+    this.ballMonitorInterval = setInterval(() => {
+      this.monitorBallDuringShot();
+    }, 100);
 
     // Start countdown
     this.shotTimer = setTimeout(() => {
@@ -375,16 +390,122 @@ export class PenaltyShootoutManager {
   }
 
   /**
+   * Monitor the ball during a shot for misses and saves
+   * Called every 100ms during shooting phase
+   */
+  private monitorBallDuringShot(): void {
+    if (!this.soccerBall.isSpawned || this.phase !== 'shooting') {
+      return;
+    }
+
+    const ballPos = this.soccerBall.position;
+    const ballVel = this.soccerBall.linearVelocity;
+
+    // Check if ball has moved significantly (shot has been taken)
+    if (!this.shotHasBeenTaken && this.ballInitialPosition) {
+      const distanceMoved = Math.sqrt(
+        Math.pow(ballPos.x - this.ballInitialPosition.x, 2) +
+        Math.pow(ballPos.z - this.ballInitialPosition.z, 2)
+      );
+
+      // If ball moved more than 2 units, shot has been taken
+      if (distanceMoved > 2) {
+        this.shotHasBeenTaken = true;
+        console.log('⚽ Shot detected - ball is moving!');
+      }
+    }
+
+    // Only check for misses/saves if shot has been taken
+    if (!this.shotHasBeenTaken) {
+      return;
+    }
+
+    // Get field boundaries from game config
+    const FIELD_MIN_X = -37;
+    const FIELD_MAX_X = 52;
+    const FIELD_MIN_Z = -33;
+    const FIELD_MAX_Z = 26;
+    const FIELD_MAX_Y = 15;
+    const CROSSBAR_HEIGHT = 4.5;
+
+    // Check for MISS - Ball out of bounds
+    const isOutOfBounds =
+      ballPos.x < FIELD_MIN_X ||
+      ballPos.x > FIELD_MAX_X ||
+      ballPos.z < FIELD_MIN_Z ||
+      ballPos.z > FIELD_MAX_Z ||
+      ballPos.y > CROSSBAR_HEIGHT || // Over crossbar
+      ballPos.y < -1; // Underground
+
+    if (isOutOfBounds) {
+      console.log(`❌ MISS! Ball out of bounds at (${ballPos.x.toFixed(1)}, ${ballPos.y.toFixed(1)}, ${ballPos.z.toFixed(1)})`);
+      this.handleShotResult('missed');
+      return;
+    }
+
+    // Check for SAVE - Goalkeeper collision with ball
+    if (this.currentGoalkeeper && this.currentGoalkeeper.isSpawned) {
+      const keeperPos = this.currentGoalkeeper.position;
+
+      // Calculate distance between ball and goalkeeper
+      const distanceToKeeper = Math.sqrt(
+        Math.pow(ballPos.x - keeperPos.x, 2) +
+        Math.pow(ballPos.y - keeperPos.y, 2) +
+        Math.pow(ballPos.z - keeperPos.z, 2)
+      );
+
+      // If ball is very close to keeper (within 1.5 units), it's a save
+      // AND ball velocity has changed direction (keeper touched it)
+      if (distanceToKeeper < 1.5) {
+        // Check if ball is moving away from goal (keeper deflected it)
+        const shootingTeam = this.currentShootingTeam!;
+        const targetGoalX = shootingTeam === 'red' ? AI_GOAL_LINE_X_BLUE : AI_GOAL_LINE_X_RED;
+
+        // If ball is moving away from goal or velocity is low, keeper saved it
+        const movingTowardGoal = shootingTeam === 'red' ? ballVel.x > 0 : ballVel.x < 0;
+        const ballSpeed = Math.sqrt(ballVel.x * ballVel.x + ballVel.y * ballVel.y + ballVel.z * ballVel.z);
+
+        if (!movingTowardGoal || ballSpeed < 2) {
+          console.log(`🧤 SAVE! Goalkeeper ${this.currentGoalkeeper.player.username} stops the ball!`);
+          this.handleShotResult('saved');
+          return;
+        }
+      }
+    }
+
+    // Check if ball has stopped moving (no goal, no save = miss)
+    const ballSpeed = Math.sqrt(ballVel.x * ballVel.x + ballVel.y * ballVel.y + ballVel.z * ballVel.z);
+    if (ballSpeed < 0.5 && this.shotHasBeenTaken) {
+      // Ball has stopped before reaching goal - miss
+      const shootingTeam = this.currentShootingTeam!;
+      const targetGoalX = shootingTeam === 'red' ? AI_GOAL_LINE_X_BLUE : AI_GOAL_LINE_X_RED;
+
+      // Check if ball is far from goal (stopped before reaching)
+      const distanceToGoal = Math.abs(ballPos.x - targetGoalX);
+
+      if (distanceToGoal > 5) {
+        console.log(`❌ MISS! Ball stopped ${distanceToGoal.toFixed(1)} units from goal`);
+        this.handleShotResult('missed');
+        return;
+      }
+    }
+  }
+
+  /**
    * Handle the result of a penalty shot
-   * This will be called by goal detection system or timeout
+   * This will be called by goal detection system, miss detection, or timeout
    */
   public handleShotResult(result: ShotResult): void {
     if (!this.isActive || this.phase !== 'shooting') return;
 
-    // Clear shot timer
+    // Clear shot timer and ball monitor
     if (this.shotTimer) {
       clearTimeout(this.shotTimer);
       this.shotTimer = null;
+    }
+    if (this.ballMonitorInterval) {
+      clearInterval(this.ballMonitorInterval);
+      this.ballMonitorInterval = null;
     }
 
     this.phase = 'result';
@@ -553,6 +674,10 @@ export class PenaltyShootoutManager {
     if (this.transitionTimer) {
       clearTimeout(this.transitionTimer);
       this.transitionTimer = null;
+    }
+    if (this.ballMonitorInterval) {
+      clearInterval(this.ballMonitorInterval);
+      this.ballMonitorInterval = null;
     }
 
     // Stop tension music
