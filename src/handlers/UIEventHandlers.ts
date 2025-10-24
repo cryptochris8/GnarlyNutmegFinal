@@ -130,9 +130,12 @@ export class UIEventHandlers {
           break;
 
         // ===== MOBILE INPUT =====
+        // NOTE: Disabled custom mobile handlers - Hytopia SDK handles movement/camera automatically
+        // Only keeping mobile-mode-enabled for tracking mobile players
         case "mobile-mode-enabled":
           this.handleMobileModeEnabled(player, data);
           break;
+        /* DISABLED - Conflicts with Hytopia SDK automatic mobile controls
         case "mobile-movement-input":
           this.handleMobileMovementInput(player, data);
           break;
@@ -150,6 +153,7 @@ export class UIEventHandlers {
         case "mobile-zoom-gesture":
           this.handleMobileZoomGesture(player, data);
           break;
+        */
 
         default:
           logger.warn(`Unknown UI event type: ${data.type}`);
@@ -1065,25 +1069,15 @@ export class UIEventHandlers {
     // Store mobile mode preference for this player
     (player as any)._isMobilePlayer = true;
 
-    // Send mobile-optimized game state if game is active
+    // Send game state if active (no special mobile processing - SDK handles it)
     if (this.deps.game && this.deps.game.inProgress()) {
       player.ui.sendData({
-        type: "mobile-game-state",
+        type: "game-state-update",
         gameState: this.deps.game.getState(),
-        optimizedForMobile: true,
       });
     }
 
-    // Notify all other players about mobile player
-    PlayerManager.instance.getConnectedPlayers().forEach((p) => {
-      if (p.username !== player.username) {
-        p.ui.sendData({
-          type: "mobile-player-joined",
-          playerName: player.username,
-          deviceInfo: data.deviceInfo,
-        });
-      }
-    });
+    // No need to notify other players - Hytopia SDK handles mobile detection automatically
 
     logger.info(` Mobile mode enabled for ${player.username}`);
   }
