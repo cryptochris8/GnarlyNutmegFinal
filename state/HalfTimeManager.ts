@@ -8,6 +8,8 @@
  * - Logging intervals for time updates
  */
 
+import { HALF_DURATION } from './gameConfig';
+
 export interface GameState {
   currentHalf: number;
   halfTimeRemaining: number;
@@ -105,7 +107,8 @@ export class HalfTimeManager {
   public getTimeLogMessage(): string {
     if (this.isInStoppageTime()) {
       const stoppageSeconds = Math.abs(this.state.halfTimeRemaining);
-      return `⏱️ STOPPAGE TIME: 5+${stoppageSeconds}s (${stoppageSeconds}s into stoppage, ${this.state.stoppageTimeAdded}s total), Status: ${this.state.status}, Score: ${this.state.score.red}-${this.state.score.blue}`;
+      const halfMinutes = Math.floor(HALF_DURATION / 60);
+      return `⏱️ STOPPAGE TIME: ${halfMinutes}+${stoppageSeconds}s (${stoppageSeconds}s into stoppage, ${this.state.stoppageTimeAdded}s total), Status: ${this.state.status}, Score: ${this.state.score.red}-${this.state.score.blue}`;
     } else {
       return `⏰ HALF ${this.state.currentHalf}: ${this.state.halfTimeRemaining}s remaining, Status: ${this.state.status}, Score: ${this.state.score.red}-${this.state.score.blue}`;
     }
