@@ -4791,6 +4791,115 @@
     }
   }
 
+  /* Mobile layout when Hytopia SDK adds body.mobile class */
+  body.mobile .how-to-play-container {
+    display: none !important;
+  }
+
+  body.mobile .instructions-panel {
+    padding: 15px 10px !important;
+    max-height: 100vh !important;
+    overflow-y: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  body.mobile .title-container {
+    margin-bottom: 10px !important;
+  }
+
+  body.mobile .title-logo {
+    width: 120px !important;
+    height: 120px !important;
+    margin-bottom: 5px !important;
+  }
+
+  body.mobile .game-mode-selection {
+    margin: 10px 0 !important;
+    padding: 0 10px !important;
+  }
+
+  body.mobile .game-mode-title {
+    font-size: 18px !important;
+    margin-bottom: 10px !important;
+    letter-spacing: 1px !important;
+  }
+
+  body.mobile .game-mode-buttons {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+  }
+
+  body.mobile .game-mode-btn {
+    padding: 12px 15px !important;
+    font-size: 14px !important;
+    min-height: 50px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    text-align: left !important;
+  }
+
+  body.mobile .mode-description {
+    font-size: 11px !important;
+    margin-top: 2px !important;
+  }
+
+  body.mobile .mode-features {
+    font-size: 10px !important;
+    margin-top: 2px !important;
+  }
+
+  body.mobile .player-count-selection {
+    padding: 10px !important;
+    margin: 10px 0 !important;
+  }
+
+  body.mobile .player-count-title {
+    font-size: 18px !important;
+    margin-bottom: 10px !important;
+  }
+
+  body.mobile .player-count-buttons {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  body.mobile .team-selection {
+    padding: 10px !important;
+    margin: 10px 0 !important;
+  }
+
+  body.mobile .team-selection-title {
+    font-size: 18px !important;
+    margin-bottom: 10px !important;
+  }
+
+  body.mobile .team-buttons-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  body.mobile .team-btn {
+    min-height: 50px !important;
+    font-size: 16px !important;
+    padding: 12px 15px !important;
+  }
+
+  body.mobile .opening-ui-overlay {
+    overflow: hidden !important;
+    height: 100vh !important;
+  }
+
   /* ===== PHASE 2 ENHANCED MOBILE UI (HYTOPIA SDK COMPLIANT) ===== */
   
   /* Enhanced Mobile Scoreboard - Larger and More Prominent */
@@ -8317,6 +8426,22 @@
     if (mobileBtn) {
       mobileBtn.setAttribute('ontouchstart', 'event.preventDefault(); if (typeof hytopia !== "undefined") hytopia.pressInput("f", true);');
       mobileBtn.setAttribute('ontouchend', 'event.preventDefault(); if (typeof hytopia !== "undefined") hytopia.pressInput("f", false); console.log("📱 Mobile power-up activated!");');
+    }
+
+    // Log mobile detection for debugging
+    console.log('📱 MOBILE DETECTION DEBUG:');
+    console.log('  - Window width:', window.innerWidth);
+    console.log('  - Window height:', window.innerHeight);
+    console.log('  - body.mobile class:', document.body.classList.contains('mobile'));
+    console.log('  - User agent:', navigator.userAgent);
+    console.log('  - Media query (max-width: 768px):', window.matchMedia('(max-width: 768px)').matches);
+    console.log('  - Touch capable:', 'ontouchstart' in window || navigator.maxTouchPoints > 0);
+
+    // If media query matches or window width is small, log it
+    if (window.innerWidth <= 768 || window.matchMedia('(max-width: 768px)').matches) {
+      console.log('✅ MOBILE LAYOUT SHOULD BE ACTIVE');
+    } else {
+      console.log('❌ DESKTOP LAYOUT ACTIVE (width > 768px)');
     }
   });
 
