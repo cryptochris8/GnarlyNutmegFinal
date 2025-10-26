@@ -742,7 +742,7 @@ export class ArcadeEnhancementManager {
       playerId
     );
 
-    // Unfreeze all players after 4 seconds
+    // Unfreeze all players after 3 seconds (balanced for fair gameplay)
     this.registerTimer(
       setTimeout(() => {
         if (!this.isDestroyed) {
@@ -753,7 +753,7 @@ export class ArcadeEnhancementManager {
             }
           });
         }
-      }, 4000),
+      }, 3000),
       'timeout',
       playerId
     );

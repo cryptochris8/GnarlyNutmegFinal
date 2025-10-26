@@ -1288,6 +1288,66 @@
     white-space: nowrap;
   }
 
+  /* ===== MOBILE POWER-UP ACTIVATION BUTTON ===== */
+  .mobile-powerup-use-btn {
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.95), rgba(255, 165, 0, 0.95));
+    border: 3px solid #FFD700;
+    border-radius: 50px;
+    padding: 15px 40px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+    animation: mobile-powerup-pulse 1.5s ease-in-out infinite;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  body.mobile .mobile-powerup-use-btn {
+    display: flex;
+  }
+
+  .mobile-powerup-icon {
+    font-size: 40px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  }
+
+  .mobile-powerup-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    letter-spacing: 1px;
+  }
+
+  @keyframes mobile-powerup-pulse {
+    0%, 100% {
+      transform: translateX(-50%) scale(1);
+      box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+    }
+    50% {
+      transform: translateX(-50%) scale(1.1);
+      box-shadow: 0 12px 40px rgba(255, 215, 0, 0.9);
+    }
+  }
+
+  .mobile-powerup-use-btn:active {
+    transform: translateX(-50%) scale(0.95);
+    transition: transform 0.1s ease;
+  }
+
+  @media (max-width: 768px) {
+    .mobile-powerup-use-btn {
+      display: flex;
+    }
+  }
+
   /* Legacy ability icon styles (hidden) */
   #ability-icon {
     display: none;
@@ -2095,6 +2155,12 @@
     <div class="empty-slot-icon">⚡</div>
     <div class="empty-slot-text">Collect Powerups!</div>
   </div>
+</div>
+
+<!-- MOBILE POWER-UP ACTIVATION BUTTON -->
+<div id="mobile-powerup-use-btn" class="mobile-powerup-use-btn" style="display: none;">
+  <div class="mobile-powerup-icon" id="mobile-powerup-icon">⚡</div>
+  <div class="mobile-powerup-label">TAP TO USE!</div>
 </div>
 
 <!-- LEGACY ABILITY ICON (for compatibility) -->
@@ -6054,10 +6120,10 @@
       // Map power-up types to display names and descriptions
       const powerUpInfo = {
         // Core Power-Ups
-        'freeze_blast': { name: '🧊 Freeze Blast', desc: 'Freezes nearby opponents for 4 seconds' },
+        'freeze_blast': { name: '🧊 Freeze Blast', desc: 'Freezes nearby opponents for 3 seconds' },
         'stamina': { name: '⚡ Stamina Restore', desc: 'Restores stamina and boosts regeneration' },
         'fireball': { name: '🔥 Fireball', desc: 'Launches an explosive fireball that stuns and burns' },
-        'mega_kick': { name: '⚽ Mega Kick', desc: 'Next ball kick has 3x power and speed' },
+        'mega_kick': { name: '⚽ Mega Kick', desc: 'Next ball kick has 2x power and speed' },
         'shield': { name: '🛡️ Shield', desc: 'Blocks one attack for 15 seconds' },
         'speed': { name: '⚡ Speed Boost', desc: 'Increased movement speed for 8 seconds' },
         'speed_boost': { name: '⚡ Speed Boost', desc: 'Increased movement speed for 8 seconds' }, // Alias for consistency
@@ -7970,30 +8036,33 @@
     const powerupIndicator = document.getElementById("powerup-indicator");
     const powerupIcon = document.getElementById("powerup-indicator-icon");
     const powerupName = document.getElementById("powerup-name-display");
-    
+
     if (powerupIndicator && powerupIcon && powerupName) {
       // Construct proper icon URL if needed
       let finalIconUrl = iconUrl;
       if (iconUrl && !iconUrl.startsWith('http') && !iconUrl.includes('{{CDN_ASSETS_URL}}')) {
         finalIconUrl = `{{CDN_ASSETS_URL}}/ui/icons/${iconUrl}.png`;
       }
-      
+
       // Set the powerup details
       powerupIcon.src = finalIconUrl || "{{CDN_ASSETS_URL}}/ui/icons/default-ability.png";
       powerupName.textContent = formatPowerupName(abilityName);
-      
+
       // Hide empty slot indicator first
       hideEmptyPowerupSlot();
-      
+
       // Show the indicator with smooth animation
       powerupIndicator.style.display = "block";
       setTimeout(() => {
         powerupIndicator.classList.add("visible");
       }, 50);
-      
+
+      // Show mobile activation button
+      showMobilePowerupButton(abilityName);
+
       console.log(`✨ Enhanced powerup indicator shown: ${abilityName} with icon: ${finalIconUrl}`);
     }
-    
+
     // Legacy support (hidden but functional)
     const legacyIcon = document.getElementById("ability-icon");
     if (legacyIcon) {
@@ -8010,18 +8079,63 @@
         powerupIndicator.style.display = "none";
       }, 400);
     }
-    
+
     // Legacy support
     const legacyIcon = document.getElementById("ability-icon");
     if (legacyIcon) {
       legacyIcon.classList.remove("visible");
     }
-    
+
+    // Hide mobile power-up button
+    hideMobilePowerupButton();
+
     // Show empty slot indicator in arcade mode
     showEmptyPowerupSlot();
-    
+
     console.log("🚫 Powerup indicator hidden - ready for new pickup");
   }
+
+  // Mobile power-up button functions
+  function showMobilePowerupButton(abilityName) {
+    const mobileBtn = document.getElementById("mobile-powerup-use-btn");
+    const mobileIcon = document.getElementById("mobile-powerup-icon");
+
+    if (mobileBtn && mobileIcon) {
+      // Set icon based on ability name
+      const iconMap = {
+        'Freeze Blast': '🧊',
+        'Fireball': '🔥',
+        'Mega Kick': '⚽',
+        'Shield': '🛡️',
+        'Speed Boost': '⚡',
+        'Stamina': '💊',
+        'Power Boost': '💪',
+        'Precision': '🎯',
+        'Shuriken': '🌀'
+      };
+
+      mobileIcon.textContent = iconMap[abilityName] || '⚡';
+      mobileBtn.style.display = 'flex';
+
+      console.log("📱 Mobile power-up button shown");
+    }
+  }
+
+  function hideMobilePowerupButton() {
+    const mobileBtn = document.getElementById("mobile-powerup-use-btn");
+    if (mobileBtn) {
+      mobileBtn.style.display = 'none';
+    }
+  }
+
+  // Handle mobile power-up button click
+  document.addEventListener('DOMContentLoaded', function() {
+    const mobileBtn = document.getElementById("mobile-powerup-use-btn");
+    if (mobileBtn) {
+      mobileBtn.setAttribute('ontouchstart', 'event.preventDefault(); if (typeof hytopia !== "undefined") hytopia.pressInput("f", true);');
+      mobileBtn.setAttribute('ontouchend', 'event.preventDefault(); if (typeof hytopia !== "undefined") hytopia.pressInput("f", false); console.log("📱 Mobile power-up activated!");');
+    }
+  });
 
   function showEmptyPowerupSlot() {
     // Only show in arcade mode

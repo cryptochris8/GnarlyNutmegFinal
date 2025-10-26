@@ -271,8 +271,9 @@ export const honeyTrapOptions: ItemAbilityOptions = {
 };
 
 // Array of all available power-up options for easy access
+// NOTE: Enhanced power-ups removed from spawn pool until fully implemented
 export const ALL_POWERUP_OPTIONS: ItemAbilityOptions[] = [
-    // Original power-ups (keeping for compatibility)
+    // Core power-ups (fully implemented and balanced)
     speedBoostOptions,
     shurikenThrowOptions,
     freezeBlastOptions,
@@ -282,16 +283,15 @@ export const ALL_POWERUP_OPTIONS: ItemAbilityOptions[] = [
     precisionOptions,
     staminaOptions,
     shieldOptions,
-    staminaBoostOptions,
-    
-    // Enhanced power-ups
-    timeSlowOptions,
-    ballMagnetOptions,
-    crystalBarrierOptions,
-    elementalMasteryOptions,
-    tidalWaveOptions,
-    realityWarpOptions,
-    honeyTrapOptions
+
+    // Enhanced power-ups commented out until implementation is complete
+    // timeSlowOptions,
+    // ballMagnetOptions,
+    // crystalBarrierOptions,
+    // elementalMasteryOptions,
+    // tidalWaveOptions,
+    // realityWarpOptions,
+    // honeyTrapOptions
 ];
 
 // Enhanced power-ups only (for premium arcade mode)
