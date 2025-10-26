@@ -31,9 +31,9 @@ export const GAME_CONFIG = {
   // Team setup
   MAX_PLAYERS_PER_TEAM: 6,
   MIN_PLAYERS_PER_TEAM: 1,
-  
+
   // Map file
-  MAP_FILE: "soccer.json"
+  MAP_FILE: "soccer-field-urban.json"
 };
 
 // Simple getter for the single configuration
