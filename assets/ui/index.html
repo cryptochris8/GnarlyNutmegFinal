@@ -4411,11 +4411,20 @@
   .mobile-controls {
     display: none; /* Hidden by default - only shown on mobile */
     position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 9999;
-    pointer-events: auto;
+    pointer-events: none; /* Let touches pass through container to children */
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
+  }
+
+  /* Enable pointer events on child elements */
+  .mobile-controls > * {
+    pointer-events: auto;
   }
 
   /* Force mobile controls to show when mobile is detected by JavaScript */
@@ -4430,17 +4439,20 @@
   
   /* Virtual Joystick for Movement */
   .virtual-joystick {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    width: 120px;
-    height: 120px;
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 30px !important;
+    width: 120px !important;
+    height: 120px !important;
     background: rgba(0, 0, 0, 0.3);
     border: 3px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 10000 !important;
   }
   
   .joystick-knob {
@@ -4454,14 +4466,17 @@
   
   /* Action Buttons */
   .mobile-actions {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    display: grid;
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    display: grid !important;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr auto;
     gap: 8px;
     max-width: 140px;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 10000 !important;
   }
   
   .mobile-action-btn {
@@ -10451,7 +10466,31 @@
         mobileControlsContainer.classList.add('mobile-gameplay');
         mobileControlsContainer.style.display = 'block';
         mobileControlsContainer.style.visibility = 'visible';
+        mobileControlsContainer.style.opacity = '1';
+
+        // Force children to be visible
+        const joystick = mobileControlsContainer.querySelector('.virtual-joystick');
+        const actions = mobileControlsContainer.querySelector('.mobile-actions');
+
+        if (joystick) {
+          joystick.style.display = 'flex';
+          joystick.style.visibility = 'visible';
+          joystick.style.opacity = '1';
+          console.log('✅ Joystick visibility forced');
+        }
+
+        if (actions) {
+          actions.style.display = 'grid';
+          actions.style.visibility = 'visible';
+          actions.style.opacity = '1';
+          console.log('✅ Action buttons visibility forced');
+        }
+
         console.log('✅ Mobile controls now visible');
+        console.log('  - Container display:', mobileControlsContainer.style.display);
+        console.log('  - Container visibility:', mobileControlsContainer.style.visibility);
+        console.log('  - Joystick element:', !!joystick);
+        console.log('  - Actions element:', !!actions);
       } else {
         console.warn('📱 Mobile controls container not found');
       }
