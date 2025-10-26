@@ -67,7 +67,7 @@ const TICKING_AUDIO = new Audio({
 const STOPPAGE_TIME_AUDIO = new Audio({
   uri: "audio/sfx/crowd/stoppage-time.mp3",
   loop: false,
-  volume: 0.7,
+  volume: 1.0,
   duration: 3,
 });
 

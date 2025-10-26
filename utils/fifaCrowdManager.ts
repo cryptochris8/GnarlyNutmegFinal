@@ -147,7 +147,7 @@ export class FIFACrowdManager {
     this.ambientAudio = new Audio({
       uri: randomAmbient,
       loop: true,
-      volume: 0.35, // Increased ambient crowd volume for better atmosphere
+      volume: 0.55, // Increased ambient crowd volume for better atmosphere
     });
     
     this.ambientAudio.play(this.world);
@@ -166,7 +166,7 @@ export class FIFACrowdManager {
       const chantAudio = new Audio({
         uri: randomChant,
         loop: false,
-        volume: 0.45,
+        volume: 0.65,
       });
       
       chantAudio.play(this.world);
@@ -200,7 +200,7 @@ export class FIFACrowdManager {
     const goalCheer = new Audio({
       uri: this.crowdSounds.reactions.goalCheer,
       loop: false,
-      volume: 0.7,
+      volume: 0.9,
     });
     goalCheer.play(this.world);
 
@@ -221,7 +221,7 @@ export class FIFACrowdManager {
     const reactionAudio = new Audio({
       uri: this.crowdSounds.reactions.mixedReaction,
       loop: false,
-      volume: 0.45,
+      volume: 0.65,
     });
     reactionAudio.play(this.world);
 
@@ -244,7 +244,7 @@ export class FIFACrowdManager {
     const applauseAudio = new Audio({
       uri: this.crowdSounds.reactions.applause,
       loop: false,
-      volume: 0.45,
+      volume: 0.65,
     });
     applauseAudio.play(this.world);
 
@@ -278,7 +278,7 @@ export class FIFACrowdManager {
     const foulAudio = new Audio({
       uri: this.crowdSounds.reactions.foulReaction,
       loop: false,
-      volume: 0.55,
+      volume: 0.75,
     });
     foulAudio.play(this.world);
 
@@ -311,7 +311,7 @@ export class FIFACrowdManager {
     const foulAudio = new Audio({
       uri: this.crowdSounds.reactions.foulReaction,
       loop: false,
-      volume: 0.5,
+      volume: 0.7,
     });
     foulAudio.play(this.world);
   }
@@ -338,7 +338,7 @@ export class FIFACrowdManager {
     const applauseAudio = new Audio({
       uri: this.crowdSounds.reactions.applause,
       loop: false,
-      volume: 0.4,
+      volume: 0.6,
     });
     applauseAudio.play(this.world);
   }
@@ -430,7 +430,7 @@ export class FIFACrowdManager {
   /**
    * Add an announcement to the queue
    */
-  private queueAnnouncement(type: string, audioUri: string, priority: number, volume: number = 0.85): void {
+  private queueAnnouncement(type: string, audioUri: string, priority: number, volume: number = 1.0): void {
     if (!this.isActive || !isFIFAMode()) return;
 
     // Remove any duplicate announcements of the same type to prevent spam
