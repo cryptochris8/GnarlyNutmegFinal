@@ -62,9 +62,9 @@ export const AI_MIDFIELD_Z_BOUNDARY_MIN = GAME_CONFIG.AI_MIDFIELD_Z_BOUNDARY_MIN
 export const MAX_PLAYERS_PER_TEAM = GAME_CONFIG.MAX_PLAYERS_PER_TEAM;
 
 // Game timing configuration - Updated to 2 halves system
-export const HALF_DURATION = 5 * 60; // 5 minutes per half in seconds
+export const HALF_DURATION = 3 * 60; // 3 minutes per half in seconds
 export const TOTAL_HALVES = 2; // First half and second half
-export const MATCH_DURATION = TOTAL_HALVES * HALF_DURATION; // 10 minutes total
+export const MATCH_DURATION = TOTAL_HALVES * HALF_DURATION; // 6 minutes total
 export const HALFTIME_DURATION = 2 * 60; // 2 minutes halftime break
 
 export const PASS_FORCE = 3.5;

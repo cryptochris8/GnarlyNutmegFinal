@@ -16,8 +16,8 @@ export const FIFA_MODE_CONFIG = {
   name: 'FIFA Mode',
   description: 'Realistic soccer with professional rules and timing',
   
-  // Timing system - 2 halves of 5 minutes each
-  halfDuration: HALF_DURATION, // 5 minutes per half
+  // Timing system - 2 halves of 3 minutes each
+  halfDuration: HALF_DURATION, // 3 minutes per half
   totalHalves: TOTAL_HALVES, // 2 halves
   halftimeDuration: HALFTIME_DURATION, // 2 minutes halftime break
   
@@ -48,7 +48,7 @@ export const ARCADE_MODE_CONFIG = {
   description: 'Fast-paced enhanced soccer with collectible ability pickups scattered on the field',
   
   // Timing system - Same 2 halves but faster pace
-  halfDuration: HALF_DURATION, // 5 minutes per half (consistent with FIFA)
+  halfDuration: HALF_DURATION, // 3 minutes per half (consistent with FIFA)
   totalHalves: TOTAL_HALVES, // 2 halves
   halftimeDuration: HALFTIME_DURATION, // 2 minutes halftime break
   
@@ -86,7 +86,7 @@ export const TOURNAMENT_MODE_CONFIG = {
   description: 'Competitive bracket-based soccer with professional rules and player coordination',
   
   // Tournament timing system - Professional match timing
-  halfDuration: HALF_DURATION, // 5 minutes per half
+  halfDuration: HALF_DURATION, // 3 minutes per half
   totalHalves: TOTAL_HALVES, // 2 halves
   halftimeDuration: HALFTIME_DURATION, // 2 minutes halftime break
   

@@ -13,7 +13,7 @@
  */
 
 import { World, Audio } from "hytopia";
-import worldMap from "../../assets/maps/soccer.json";
+import worldMap from "../../assets/maps/soccer-field-urban.json";
 import { SoccerGame } from "../../state/gameState";
 import { AudioManager } from "./AudioManager";
 import createSoccerBall from "../../utils/ball";

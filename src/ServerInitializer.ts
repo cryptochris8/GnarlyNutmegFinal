@@ -6,7 +6,7 @@
  */
 
 import { startServer, Audio } from "hytopia";
-import worldMap from "../assets/maps/soccer.json";
+import worldMap from "../assets/maps/soccer-field-urban.json";
 import { SoccerGame } from "../state/gameState";
 import createSoccerBall from "../utils/ball";
 import { BALL_SPAWN_POSITION } from "../state/gameConfig";
