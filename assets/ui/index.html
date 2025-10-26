@@ -4397,6 +4397,11 @@
   .mobile-controls.mobile-active {
     display: block !important;
   }
+
+  /* Hide mobile controls during opening/team selection screens */
+  .mobile-controls.mobile-gameplay {
+    display: block !important;
+  }
   
   /* Virtual Joystick for Movement */
   .virtual-joystick {
@@ -6303,6 +6308,15 @@
           playerCount: selectedPlayerCount,
           gameMode: selectedGameMode
         });
+
+        // Show mobile controls after team selection on mobile devices
+        // Delay to allow server to spawn player first
+        setTimeout(() => {
+          if (document.body.classList.contains('mobile') && typeof showMobileControls === 'function') {
+            console.log('📱 Showing mobile controls after team selection');
+            showMobileControls();
+          }
+        }, 500);
       }
     }, 200);
   }
@@ -9821,11 +9835,11 @@
     // Create mobile controls container
     const mobileControlsContainer = document.createElement('div');
     mobileControlsContainer.id = 'mobile-controls-container';
-    mobileControlsContainer.className = 'mobile-controls mobile-active';
-    
-    // Show mobile controls only on mobile devices
-    mobileControlsContainer.style.display = 'block';
-    mobileControlsContainer.style.visibility = 'visible';
+    mobileControlsContainer.className = 'mobile-controls'; // Start hidden - will be shown after team selection
+
+    // Mobile controls will be hidden until player spawns into game
+    mobileControlsContainer.style.display = 'none';
+    mobileControlsContainer.style.visibility = 'hidden';
     
     // Create virtual joystick
     const virtualJoystick = document.createElement('div');
@@ -10139,7 +10153,29 @@
       console.error('📱 Error handling quick action:', error);
     }
   }
-  
+
+  // Show mobile controls after player spawns into game
+  function showMobileControls() {
+    try {
+      console.log('📱 Showing mobile controls after player spawn...');
+
+      const mobileControlsContainer = document.getElementById('mobile-controls-container');
+      if (mobileControlsContainer) {
+        mobileControlsContainer.classList.add('mobile-gameplay');
+        mobileControlsContainer.style.display = 'block';
+        mobileControlsContainer.style.visibility = 'visible';
+        console.log('✅ Mobile controls now visible');
+      } else {
+        console.warn('📱 Mobile controls container not found');
+      }
+    } catch (error) {
+      console.error('📱 Error showing mobile controls:', error);
+    }
+  }
+
+  // Make showMobileControls available globally for server-side calls
+  window.showMobileControls = showMobileControls;
+
   // LEGACY FUNCTION - REPLACED BY SDK-COMPLIANT VERSION IN initializeJoystickEvents()
   // This function is kept for compatibility but is no longer used
   function updateJoystickPosition(touch) {

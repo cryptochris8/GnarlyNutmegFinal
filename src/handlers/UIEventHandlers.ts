@@ -273,6 +273,15 @@ export class UIEventHandlers {
     playerEntity.spawn(this.deps.world, spawnPosition);
     logger.info(`Player entity ${playerEntity.id} spawn command issued as ${humanPlayerRole}.`);
 
+    // Show mobile controls after spawn if player is on mobile
+    if ((player as any)._isMobilePlayer) {
+      logger.info(`📱 Showing mobile controls for ${player.username} after spawn`);
+      player.ui.sendData({
+        type: "show-mobile-controls",
+        message: "Player spawned - showing mobile controls",
+      });
+    }
+
     // Freeze the human player initially
     playerEntity.freeze();
 
