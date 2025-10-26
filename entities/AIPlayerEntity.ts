@@ -3763,11 +3763,11 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
   }
 
   /**
-   * Helper method to check if a pass direction is safe and won't go out of bounds
+   * Helper method to check if a pass direction is safe and won't go out of bounds or be intercepted
    * @param fromPosition Starting position of the pass
    * @param direction Direction vector of the pass
    * @param distance Distance of the pass
-   * @returns True if the pass is safe, false if it might go out of bounds
+   * @returns True if the pass is safe, false if it might go out of bounds or be intercepted
    */
   private isPassDirectionSafe(fromPosition: Vector3Like, direction: Vector3Like, distance: number): boolean {
     const targetPosition = {
@@ -3775,15 +3775,55 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
       y: fromPosition.y,
       z: fromPosition.z + direction.z * distance
     };
-    
+
     // Check if target would be within safe boundaries
     const safeMinX = FIELD_MIN_X + 10; // Conservative margin
     const safeMaxX = FIELD_MAX_X - 10;
     const safeMinZ = FIELD_MIN_Z + 10;
     const safeMaxZ = FIELD_MAX_Z - 10;
-    
-    return targetPosition.x >= safeMinX && targetPosition.x <= safeMaxX &&
-           targetPosition.z >= safeMinZ && targetPosition.z <= safeMaxZ;
+
+    const inBounds = targetPosition.x >= safeMinX && targetPosition.x <= safeMaxX &&
+                     targetPosition.z >= safeMinZ && targetPosition.z <= safeMaxZ;
+
+    if (!inBounds) return false;
+
+    // Check for opponent interception along the pass path
+    const opponents = this.team === 'red' ? sharedState.getBlueAITeam() : sharedState.getRedAITeam();
+    const INTERCEPTION_THRESHOLD = 4; // Distance from pass path where opponent could intercept
+
+    for (const opponent of opponents) {
+      if (!opponent.isSpawned) continue;
+
+      // Calculate perpendicular distance from opponent to pass line
+      const toOpponent = {
+        x: opponent.position.x - fromPosition.x,
+        z: opponent.position.z - fromPosition.z
+      };
+
+      // Project opponent position onto pass direction
+      const projectionLength = (toOpponent.x * direction.x + toOpponent.z * direction.z);
+
+      // Only check opponents that are along the pass path (not behind or beyond)
+      if (projectionLength >= 0 && projectionLength <= distance) {
+        // Calculate perpendicular distance to pass line
+        const projectedPoint = {
+          x: fromPosition.x + direction.x * projectionLength,
+          z: fromPosition.z + direction.z * projectionLength
+        };
+
+        const perpDistance = Math.sqrt(
+          Math.pow(opponent.position.x - projectedPoint.x, 2) +
+          Math.pow(opponent.position.z - projectedPoint.z, 2)
+        );
+
+        // If opponent is too close to the pass path, it's not safe
+        if (perpDistance < INTERCEPTION_THRESHOLD) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   /**

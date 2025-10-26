@@ -97,17 +97,32 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
         // Pass (Teammate Better Positioned?) - CHECK PASSING FIRST for strategic play
         new Sequence([
           new Condition((agent: AIPlayerEntity) => {
-            // Teammate Better Positioned check - IMPROVED for strategic play
+            // Teammate Better Positioned check - More conservative strategic passing
             const teammates = sharedState.getAITeammates(agent).filter(t => t.isSpawned && t !== agent);
             if (teammates.length === 0) return false;
 
             const opponentGoalLineX = agent.team === 'red' ? AI_GOAL_LINE_X_BLUE : AI_GOAL_LINE_X_RED;
             const goalPosition = { x: opponentGoalLineX, y: 1, z: AI_FIELD_CENTER_Z };
 
+            // Get opponents for pass safety checking
+            const opponents = agent.team === 'red' ? sharedState.getBlueAITeam() : sharedState.getRedAITeam();
+
             for (const teammate of teammates) {
               const distanceToTeammate = agent.distanceBetween(agent.position, teammate.position);
               if (distanceToTeammate < 3) continue; // Too close
               if (distanceToTeammate > 30) continue; // Too far
+
+              // Check if teammate has space around them (not heavily marked)
+              let teammateSpace = true;
+              for (const opponent of opponents) {
+                if (!opponent.isSpawned) continue;
+                const distToOpponent = agent.distanceBetween(teammate.position, opponent.position);
+                if (distToOpponent < 3) { // Opponent too close to teammate
+                  teammateSpace = false;
+                  break;
+                }
+              }
+              if (!teammateSpace) continue; // Skip heavily marked teammates
 
               // ALLOW BACKWARDS/SIDEWAYS PASSES for build-up play
               const forwardProgress = (agent.team === 'red' ? teammate.position.x - agent.position.x : agent.position.x - teammate.position.x);
@@ -117,13 +132,14 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
               const teammateDistanceToGoal = agent.distanceBetween(teammate.position, goalPosition);
               const myDistanceToGoal = agent.distanceBetween(agent.position, goalPosition);
 
-              // RELAXED: Pass if teammate is even slightly better positioned (95% of my distance)
-              if (teammateDistanceToGoal < myDistanceToGoal * 0.95) {
+              // More conservative: Pass only if teammate is CLEARLY better positioned (85% of my distance)
+              // This ensures we only pass when there's a real advantage
+              if (teammateDistanceToGoal < myDistanceToGoal * 0.85) {
                 return true;
               }
 
-              // Also pass if teammate is well-positioned for a forward move
-              if (forwardProgress > 5 && distanceToTeammate < 25) {
+              // Also pass if teammate is well-positioned for a forward move AND has space
+              if (forwardProgress > 8 && distanceToTeammate < 25 && teammateSpace) {
                 return true;
               }
             }
@@ -431,15 +447,17 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
         // Intercept Ball (In Reach?)
         new Sequence([
           new Condition((agent: AIPlayerEntity) => {
-            // Ball In Reach check
+            // Ball In Reach check - Enhanced for better pass reception
             const ball = sharedState.getSoccerBall();
             if (!ball) return false;
-            
+
             const distanceToBall = agent.distanceBetween(agent.position, ball.position);
-            
+            const ballVelocity = ball.linearVelocity;
+            const ballSpeed = Math.sqrt(ballVelocity.x * ballVelocity.x + ballVelocity.z * ballVelocity.z);
+
             // Different roles have different interception distances
             let interceptDistance = 5; // Default
-            
+
             switch (agent.aiRole) {
               case 'goalkeeper':
                 interceptDistance = 4;
@@ -456,7 +474,38 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
                 interceptDistance = 10;
                 break;
             }
-            
+
+            // ENHANCED: Detect if ball is a pass coming toward me from a teammate
+            if (ballSpeed > 1.5) { // Ball is moving with pass-like speed
+              // Calculate if ball is moving toward me
+              const toBallVector = {
+                x: ball.position.x - agent.position.x,
+                z: ball.position.z - agent.position.z
+              };
+              const toBallDistance = Math.sqrt(toBallVector.x * toBallVector.x + toBallVector.z * toBallVector.z);
+
+              if (toBallDistance > 0) {
+                toBallVector.x /= toBallDistance;
+                toBallVector.z /= toBallDistance;
+
+                // Normalize ball velocity
+                const ballDir = {
+                  x: ballVelocity.x / ballSpeed,
+                  z: ballVelocity.z / ballSpeed
+                };
+
+                // Dot product to see if ball is moving toward me
+                const dotProduct = ballDir.x * toBallVector.x + ballDir.z * toBallVector.z;
+
+                // If ball is moving toward me (dotProduct > 0.5 means moving in my direction)
+                if (dotProduct > 0.5) {
+                  // Extend interception distance for incoming passes
+                  interceptDistance *= 2.5; // Much more aggressive for incoming passes
+                  console.log(`${agent.player.username} detecting incoming pass, extending intercept distance to ${interceptDistance.toFixed(1)}`);
+                }
+              }
+            }
+
             return distanceToBall < interceptDistance;
           }),
           new Action((agent: AIPlayerEntity) => {
@@ -497,10 +546,37 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
             // Adjust anticipation based on ball speed
             // For faster balls, increase anticipation to get to where the ball will be
             // For slower balls, reduce anticipation to avoid overshooting
-            const speedAdjustedFactor = 
+            let speedAdjustedFactor =
               ballSpeed > 10 ? BALL_ANTICIPATION_FACTOR * 1.2 :  // Fast ball
               ballSpeed > 5 ? BALL_ANTICIPATION_FACTOR :         // Medium ball
               BALL_ANTICIPATION_FACTOR * 0.8;                    // Slow ball
+
+            // ENHANCED: Check if ball is coming toward me (pass reception)
+            if (ballSpeed > 1.5) {
+              const toBallVector = {
+                x: ball.position.x - agent.position.x,
+                z: ball.position.z - agent.position.z
+              };
+              const toBallDistance = Math.sqrt(toBallVector.x * toBallVector.x + toBallVector.z * toBallVector.z);
+
+              if (toBallDistance > 0) {
+                toBallVector.x /= toBallDistance;
+                toBallVector.z /= toBallDistance;
+
+                const ballDir = {
+                  x: ballVelocity.x / ballSpeed,
+                  z: ballVelocity.z / ballSpeed
+                };
+
+                const dotProduct = ballDir.x * toBallVector.x + ballDir.z * toBallVector.z;
+
+                // If ball is moving toward me, increase anticipation for better pass reception
+                if (dotProduct > 0.5) {
+                  speedAdjustedFactor *= 1.5; // 50% more anticipation for incoming passes
+                  console.log(`${agent.player.username} increasing anticipation for incoming pass`);
+                }
+              }
+            }
             
             // Determine if the ball is in the air
             const ballInAir = ball.position.y > 1.0;
