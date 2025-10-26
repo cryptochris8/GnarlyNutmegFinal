@@ -4490,18 +4490,36 @@
   body.mobile .desktop-only {
     display: none !important;
   }
-  
+
+  body.mobile .team-formation-display {
+    display: none !important;
+  }
+
+  body.mobile .player-status-hud {
+    display: none !important;
+  }
+
   /* Improved mobile detection - more reliable than pointer: coarse */
   @media (max-width: 768px) {
     .mobile-controls {
       display: block;
     }
-    
+
     /* Hide desktop-only elements on mobile */
     .desktop-only {
       display: none !important;
     }
-    
+
+    /* Hide team formation display on mobile */
+    .team-formation-display {
+      display: none !important;
+    }
+
+    /* Hide player status HUD on mobile */
+    .player-status-hud {
+      display: none !important;
+    }
+
     /* Optimize UI spacing for mobile */
     .team-selection {
       padding: 10px;
@@ -6975,6 +6993,42 @@
     window.forceUpdateScores(0, 0); // Reset to 0-0 but ensure visibility
   }, 2000);
 
+  // Hide desktop-only UI elements on mobile devices (initial check)
+  setTimeout(() => {
+    const isMobile = document.body.classList.contains('mobile') || window.innerWidth <= 768;
+    if (isMobile) {
+      const formationDisplay = document.getElementById("team-formation-display");
+      const playerHUD = document.getElementById("player-status-hud");
+
+      if (formationDisplay) {
+        formationDisplay.style.display = "none";
+        console.log("📱 Team formation display hidden on mobile");
+      }
+      if (playerHUD) {
+        playerHUD.style.display = "none";
+        console.log("📱 Player status HUD hidden on mobile");
+      }
+    }
+  }, 500);
+
+  // Periodic check to ensure desktop UI stays hidden on mobile
+  setInterval(() => {
+    const isMobile = document.body.classList.contains('mobile') || window.innerWidth <= 768;
+    if (isMobile) {
+      const formationDisplay = document.getElementById("team-formation-display");
+      const playerHUD = document.getElementById("player-status-hud");
+
+      if (formationDisplay && formationDisplay.style.display !== "none") {
+        formationDisplay.style.display = "none";
+        console.log("📱 Team formation display re-hidden on mobile (periodic check)");
+      }
+      if (playerHUD && playerHUD.style.display !== "none") {
+        playerHUD.style.display = "none";
+        console.log("📱 Player status HUD re-hidden on mobile (periodic check)");
+      }
+    }
+  }, 1000); // Check every second
+
   // ===== ENHANCED PLAYER STATUS & FEEDBACK SYSTEM =====
   
   // Player status tracking
@@ -7033,19 +7087,21 @@
   // Initialize enhanced UI systems
   function initializeEnhancedUI() {
     console.log("🎮 Initializing enhanced UI systems...");
-    
-    // Show player status HUD
+
+    // Show player status HUD (desktop only)
+    const isMobile = document.body.classList.contains('mobile') || window.innerWidth <= 768;
     const playerHUD = document.getElementById("player-status-hud");
-    if (playerHUD) {
+    if (playerHUD && !isMobile) {
       playerHUD.style.display = "block";
       updatePlayerRole("player");
+    } else if (playerHUD && isMobile) {
+      playerHUD.style.display = "none";
+      console.log("📱 Player status HUD hidden on mobile");
     }
-
-
 
     // Initialize stamina
     updateStamina(100);
-    
+
     console.log("✅ Enhanced UI systems initialized");
   }
 
@@ -7168,6 +7224,9 @@
 
   // Toggle formation display
   function toggleFormationDisplay() {
+    const isMobile = document.body.classList.contains('mobile') || window.innerWidth <= 768;
+    if (isMobile) return; // Don't allow toggle on mobile
+
     const formationDisplay = document.getElementById("team-formation-display");
     if (formationDisplay) {
       const isVisible = formationDisplay.style.display !== "none";
@@ -7227,11 +7286,35 @@
       showActionFeedback(type, title, message);
     }
 
-    // Show formation display during game
+    // Show formation display during game (but not on mobile)
     if (data.status === "playing" || data.status === "starting") {
+      const isMobile = document.body.classList.contains('mobile') || window.innerWidth <= 768;
       const formationDisplay = document.getElementById("team-formation-display");
-      if (formationDisplay && formationDisplay.style.display === "none") {
-        formationDisplay.style.display = "block";
+
+      if (isMobile) {
+        // Force hide on mobile - always
+        if (formationDisplay) {
+          formationDisplay.style.display = "none";
+        }
+      } else {
+        // Show on desktop only
+        if (formationDisplay && formationDisplay.style.display === "none") {
+          formationDisplay.style.display = "block";
+        }
+      }
+    }
+
+    // Additional safety check: Always keep desktop UI elements hidden on mobile
+    const isMobile = document.body.classList.contains('mobile') || window.innerWidth <= 768;
+    if (isMobile) {
+      const formationDisplay = document.getElementById("team-formation-display");
+      const playerHUD = document.getElementById("player-status-hud");
+
+      if (formationDisplay && formationDisplay.style.display !== "none") {
+        formationDisplay.style.display = "none";
+      }
+      if (playerHUD && playerHUD.style.display !== "none") {
+        playerHUD.style.display = "none";
       }
     }
   }
@@ -11487,11 +11570,12 @@
   window.selectMobileTeam = selectMobileTeam;
   window.showMobileGameMenu = showMobileGameMenu;
 
-  // Initialize mobile controls when page loads
-  setTimeout(function() {
-    console.log('📱 Starting mobile controls initialization...');
-    initializeMobileControls();
-  }, 1000);
+  // DISABLED: Old mobile controls initialization (replaced with static HTML implementation below)
+  // setTimeout(function() {
+  //   console.log('📱 Starting mobile controls initialization...');
+  //   initializeMobileControls();
+  // }, 1000);
+</script>
 
 <!-- ========================================
   HYTOPIA SDK-COMPLIANT MOBILE CONTROLS
@@ -11702,7 +11786,8 @@
   if (document.body.classList.contains('mobile') || hytopia.isMobile) {
     console.log('📱 Initializing mobile controls (SDK-compliant)');
 
-    // Helper function to handle button press/release
+    // HYTOPIA SDK-COMPLIANT: Using setAttribute instead of addEventListener
+    // Helper function to handle button press/release using attributes (not addEventListener)
     function setupMobileButton(buttonId, inputKey) {
       const button = document.getElementById(buttonId);
       if (!button) {
@@ -11710,28 +11795,15 @@
         return;
       }
 
-      // Touch start - press the input
-      button.addEventListener('touchstart', (e) => {
-        e.preventDefault(); // Prevent mobile browser behaviors
-        button.classList.add('active');
-        hytopia.pressInput(inputKey, true); // SDK method to press input
-        console.log(`📱 Mobile: ${buttonId} pressed (${inputKey})`);
-      });
+      // Create handler functions in global scope
+      const touchStartHandler = `event.preventDefault(); this.classList.add('active'); hytopia.pressInput('${inputKey}', true); console.log('📱 Mobile: ${buttonId} pressed (${inputKey})');`;
+      const touchEndHandler = `event.preventDefault(); this.classList.remove('active'); hytopia.pressInput('${inputKey}', false); console.log('📱 Mobile: ${buttonId} released (${inputKey})');`;
+      const touchCancelHandler = `event.preventDefault(); this.classList.remove('active'); hytopia.pressInput('${inputKey}', false);`;
 
-      // Touch end - release the input
-      button.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        button.classList.remove('active');
-        hytopia.pressInput(inputKey, false); // SDK method to release input
-        console.log(`📱 Mobile: ${buttonId} released (${inputKey})`);
-      });
-
-      // Touch cancel (finger leaves button) - also release
-      button.addEventListener('touchcancel', (e) => {
-        e.preventDefault();
-        button.classList.remove('active');
-        hytopia.pressInput(inputKey, false);
-      });
+      // HYTOPIA-COMPLIANT: Use setAttribute instead of addEventListener
+      button.setAttribute('ontouchstart', touchStartHandler);
+      button.setAttribute('ontouchend', touchEndHandler);
+      button.setAttribute('ontouchcancel', touchCancelHandler);
     }
 
     // Setup all mobile buttons
@@ -11741,6 +11813,6 @@
     setupMobileButton('mobile-sprint-btn', 'sh'); // Shift key = Sprint
     setupMobileButton('mobile-tackle-btn', 'e');  // E key = Tackle
 
-    console.log('✅ Mobile controls initialized successfully');
+    console.log('✅ Mobile controls initialized successfully (SDK-compliant)');
   }
 </script>
