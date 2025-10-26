@@ -78,7 +78,7 @@ export class UIEventHandlers {
           this.handleJoinMultiplayerLobby(player, data);
           break;
         case "mobile-team-selection":
-          this.handleMobileTeamSelection(player, data);
+          await this.handleMobileTeamSelection(player, data);
           break;
 
         // ===== GAME CONTROLS =====
@@ -496,30 +496,22 @@ export class UIEventHandlers {
     });
   }
 
-  private handleMobileTeamSelection(player: Player, data: any): void {
+  private async handleMobileTeamSelection(player: Player, data: any): Promise<void> {
     const selectedTeam = data.team;
     logger.info(`=� Mobile team selection: ${player.username} chose ${selectedTeam}`);
 
-    // Use existing team selection logic - same as regular team-selected handler
-    // NOTE: This is a simplified version - full implementation would mirror handleTeamSelection
-    if (this.deps.game) {
-      // Check if player is already on a team
-      if (this.deps.game.getTeamOfPlayer(player.username) !== null) {
-        logger.info("=� Player already on a team");
-        player.ui.sendData({
-          type: "mobile-team-selection-failed",
-          message: "Already on a team",
-        });
-        return;
-      }
+    // Send immediate mobile confirmation
+    player.ui.sendData({
+      type: "mobile-team-selection-confirmed",
+      team: selectedTeam,
+      message: `Joining ${selectedTeam} team...`,
+    });
 
-      // Mobile team selection success
-      player.ui.sendData({
-        type: "mobile-team-selection-confirmed",
-        team: selectedTeam,
-        message: `Joined ${selectedTeam} team`,
-      });
-    }
+    // Use the FULL team selection logic to actually spawn the player
+    // This ensures mobile players get properly spawned into the game
+    await this.handleTeamSelection(player, data);
+
+    logger.info(`=� Mobile team selection complete for ${player.username} on ${selectedTeam} team`);
   }
 
   // ============================================================================
