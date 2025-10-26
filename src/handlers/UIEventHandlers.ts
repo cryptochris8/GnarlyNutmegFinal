@@ -651,15 +651,36 @@ export class UIEventHandlers {
         logger.info(
           ` GUARANTEED PASS: Successfully passed ball to human player ${requestingPlayerEntity.player.username}`
         );
+
+        player.ui.sendData({
+          type: "action-feedback",
+          feedbackType: "success",
+          title: "Pass Incoming!",
+          message: `${playerWithBall.player.username} is passing`,
+        });
       } else {
         logger.warn(
           `L PASS FAILED: Could not pass to human player ${requestingPlayerEntity.player.username}`
         );
+
+        player.ui.sendData({
+          type: "action-feedback",
+          feedbackType: "error",
+          title: "Pass Failed",
+          message: "Teammate couldn't pass",
+        });
       }
     } else {
       logger.info(
         `L PASS REQUEST DENIED: No AI teammate has the ball or wrong team`
       );
+
+      player.ui.sendData({
+        type: "action-feedback",
+        feedbackType: "warning",
+        title: "No Pass Available",
+        message: "No AI teammate has the ball",
+      });
     }
   }
 
