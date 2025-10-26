@@ -7806,11 +7806,18 @@
     // Handle specific power-up activation responses
     if (data.type === "powerup-activated") {
       console.log("Powerup activated response:", data);
-      showPowerupFeedback({
-        success: true,
-        powerUpType: data.powerUpType,
-        message: data.message || `${getPowerupName(data.powerUpType)} activated!`
-      });
+      const powerupName = getPowerupName(data.powerUpType);
+
+      // Only show feedback if we can identify the power-up
+      if (powerupName) {
+        showPowerupFeedback({
+          success: true,
+          powerUpType: data.powerUpType,
+          message: data.message || `${powerupName} activated!`
+        });
+      } else {
+        console.log("⚠️ Unrecognized power-up type:", data.powerUpType, "- skipping notification");
+      }
     }
 
     // Handle action feedback from server
@@ -9555,31 +9562,70 @@
 
   // Get human-readable power-up name
   function getPowerupName(powerUpType) {
+    if (!powerUpType) return null;
+
     const nameMap = {
-      // Core Power-Ups
+      // Core Power-Ups with variations
       'freeze_blast': 'Freeze Blast',
+      'freezeBlast': 'Freeze Blast',
+      'freeze-blast': 'Freeze Blast',
       'fireball': 'Fireball',
       'mega_kick': 'Mega Kick',
+      'megaKick': 'Mega Kick',
+      'mega-kick': 'Mega Kick',
       'random_powerup': 'Random Power-up',
       'shield': 'Shield',
       'stamina': 'Stamina Potion',
       'speed': 'Speed Boost',
-      'speed_boost': 'Speed Boost', // Alias for consistency
+      'speed_boost': 'Speed Boost',
+      'speedBoost': 'Speed Boost',
+      'speed-boost': 'Speed Boost',
       'power': 'Power Enhancement',
+      'power_boost': 'Power Enhancement',
+      'powerBoost': 'Power Enhancement',
       'precision': 'Precision Boost',
       'shuriken': 'Shuriken Throw',
 
       // Enhanced Power-Ups
       'time_slow': 'Time Slow',
+      'timeSlow': 'Time Slow',
       'ball_magnet': 'Ball Magnet',
+      'ballMagnet': 'Ball Magnet',
       'crystal_barrier': 'Crystal Barrier',
+      'crystalBarrier': 'Crystal Barrier',
       'elemental_mastery': 'Elemental Mastery',
+      'elementalMastery': 'Elemental Mastery',
       'tidal_wave': 'Tidal Wave',
+      'tidalWave': 'Tidal Wave',
       'reality_warp': 'Reality Warp',
+      'realityWarp': 'Reality Warp',
       'honey_trap': 'Honey Trap',
-      'star_rain': 'Star Rain'
+      'honeyTrap': 'Honey Trap',
+      'star_rain': 'Star Rain',
+      'starRain': 'Star Rain'
     };
-    return nameMap[powerUpType] || 'Unknown Power-up';
+
+    // Try direct lookup
+    if (nameMap[powerUpType]) {
+      return nameMap[powerUpType];
+    }
+
+    // Try lowercase lookup
+    const lowerType = powerUpType.toLowerCase();
+    if (nameMap[lowerType]) {
+      return nameMap[lowerType];
+    }
+
+    // Format the type name as fallback (convert snake_case or camelCase to Title Case)
+    const formatted = powerUpType
+      .replace(/[_-]/g, ' ')
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+
+    return formatted || null;
   }
 
   // Start cooldown animation
@@ -9625,13 +9671,16 @@
     if (effectDisplay) {
       const powerupName = getPowerupName(powerUpType);
       const powerupIcon = getPowerupIcon(powerUpType);
-      
-      effectDisplay.textContent = `${powerupIcon} ${powerupName.toUpperCase()} ACTIVATED!`;
-      effectDisplay.style.display = 'block';
-      
-      setTimeout(() => {
-        effectDisplay.style.display = 'none';
-      }, 2000);
+
+      // Only show if we can identify the power-up
+      if (powerupName) {
+        effectDisplay.textContent = `${powerupIcon} ${powerupName.toUpperCase()} ACTIVATED!`;
+        effectDisplay.style.display = 'block';
+
+        setTimeout(() => {
+          effectDisplay.style.display = 'none';
+        }, 2000);
+      }
     }
   }
 
