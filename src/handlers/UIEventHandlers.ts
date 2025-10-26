@@ -615,8 +615,14 @@ export class UIEventHandlers {
         `<� HUMAN PLAYER REQUESTING PASS: AI ${playerWithBall.player.username} passing to ${requestingPlayerEntity.player.username}`
       );
 
+      // Calculate distance between AI and requesting player for power scaling
+      const distanceToPlayer = Math.sqrt(
+        Math.pow(playerWithBall.position.x - requestingPlayerEntity.position.x, 2) +
+        Math.pow(playerWithBall.position.z - requestingPlayerEntity.position.z, 2)
+      );
+
       // Calculate a target point slightly in front of the requesting player
-      const leadDistance = 3.0; // Increased lead distance for better reception
+      const leadDistance = 2.5; // Lead distance for better reception
       // Use the direction the player is facing for better ball placement
       const targetDirection = getDirectionFromRotation(requestingPlayerEntity.rotation);
 
@@ -626,8 +632,13 @@ export class UIEventHandlers {
         z: requestingPlayerEntity.position.z + targetDirection.z * leadDistance,
       };
 
-      // Use higher power for more reliable pass delivery
-      const passPower = 1.2; // Increased power to ensure ball reaches human player
+      // Scale power based on distance - closer passes use less power for better control
+      let passPower = 0.7; // Base power for close passes
+      if (distanceToPlayer > 20) {
+        passPower = 0.95; // Long passes need more power
+      } else if (distanceToPlayer > 10) {
+        passPower = 0.8; // Medium passes
+      }
 
       // GUARANTEED PASS: Use forcePass which bypasses all AI decision making
       const passSuccess = playerWithBall.forcePass(
