@@ -361,19 +361,19 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
             const ballPosition = ball.position;
             const ballVelocity = ball.linearVelocity;
             
-            // Check if ball is near boundaries
-            const BOUNDARY_THRESHOLD = 12; // Distance from field edge to consider "near boundary"
+            // Check if ball is near boundaries - increased threshold for better detection
+            const BOUNDARY_THRESHOLD = 18; // Distance from field edge to consider "near boundary"
             const nearMinX = Math.abs(ballPosition.x - FIELD_MIN_X) < BOUNDARY_THRESHOLD;
             const nearMaxX = Math.abs(ballPosition.x - FIELD_MAX_X) < BOUNDARY_THRESHOLD;
             const nearMinZ = Math.abs(ballPosition.z - FIELD_MIN_Z) < BOUNDARY_THRESHOLD;
             const nearMaxZ = Math.abs(ballPosition.z - FIELD_MAX_Z) < BOUNDARY_THRESHOLD;
-            
+
             const isNearBoundary = nearMinX || nearMaxX || nearMinZ || nearMaxZ;
             const isInCorner = (nearMinX || nearMaxX) && (nearMinZ || nearMaxZ);
-            
-            // Check if ball is stationary or nearly stationary
+
+            // Check if ball is stationary or nearly stationary - increased threshold to catch slow-moving balls
             const ballSpeed = Math.sqrt(ballVelocity.x * ballVelocity.x + ballVelocity.z * ballVelocity.z);
-            const isStuck = ballSpeed < 0.5; // Very slow movement indicates stuck ball
+            const isStuck = ballSpeed < 2.0; // Increased from 0.5 - catch slow-moving balls earlier
             
             // Check if no one has the ball (it's loose)
             const ballIsLoose = !sharedState.getAttachedPlayer();
@@ -382,16 +382,16 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
             if (isNearBoundary && isStuck && ballIsLoose) {
               const distanceToBall = agent.distanceBetween(agent.position, ballPosition);
               
-              // Allow much more aggressive pursuit for stuck balls
-              let maxRetrievalDistance = 35; // Base distance for boundary balls
+              // Allow much more aggressive pursuit for stuck balls - increased distances
+              let maxRetrievalDistance = 55; // Increased from 35 - base distance for boundary balls
               if (isInCorner) {
-                maxRetrievalDistance = 45; // Even more aggressive for corner balls
+                maxRetrievalDistance = 70; // Increased from 45 - even more aggressive for corner balls
               }
-              
+
               // Be one of the closest players to the stuck ball
               const teammates = agent.getVisibleTeammates();
               let playersCloser = 0;
-              
+
               for (const teammate of teammates) {
                 if (teammate instanceof AIPlayerEntity && teammate.isSpawned) {
                   const teammateDistance = agent.distanceBetween(teammate.position, ballPosition);
@@ -400,9 +400,9 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
                   }
                 }
               }
-              
-              // Allow up to 2 players to go after stuck balls (closest 2)
-              const shouldPursue = playersCloser < 2 && distanceToBall < maxRetrievalDistance;
+
+              // Allow up to 3 players to go after stuck balls (increased from 2)
+              const shouldPursue = playersCloser < 3 && distanceToBall < maxRetrievalDistance;
               
               if (shouldPursue) {
                 console.log(`${agent.player.username} (${agent.aiRole}) pursuing stuck ball in ${isInCorner ? 'corner' : 'boundary'} area (distance: ${distanceToBall.toFixed(1)})`);
