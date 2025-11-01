@@ -54,7 +54,7 @@ export class PlayerEventHandlers {
    * Handles initial setup when player connects to the server
    */
   private registerPlayerJoinedHandler(): void {
-    this.deps.world.on(PlayerEvent.JOINED_WORLD, ({ player }) => {
+    this.deps.world.on(PlayerEvent.JOINED_WORLD, async ({ player }) => {
       logger.info(`Player ${player.username} joined world`);
 
       // Welcome message for new players
@@ -63,7 +63,7 @@ export class PlayerEventHandlers {
         "<� Welcome to Hytopia Soccer! Use /spectate to watch games when teams are full."
       );
 
-      // Load UI first before any game state checks
+      // Load UI first - it will detect mobile client-side
       player.ui.load("ui/index.html");
 
       // CRITICAL: Unlock pointer for UI interactions (Hytopia-compliant approach)
@@ -96,6 +96,7 @@ export class PlayerEventHandlers {
 
       // Register UI event handlers for this player
       // The UIEventHandlers class will handle all UI interactions
+      // Mobile detection will happen in the UI and trigger auto-start via event
       this.deps.uiEventHandlers.registerPlayerUIHandler(player);
     });
   }

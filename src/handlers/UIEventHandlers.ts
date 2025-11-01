@@ -30,6 +30,7 @@ import { TournamentManager } from "../../state/tournamentManager";
 import { GameMode, setGameMode, getCurrentModeConfig, isFIFAMode, isArcadeMode } from "../../state/gameModes";
 import { getStartPosition } from "../../utils/positions";
 import { getDirectionFromRotation } from "../../utils/direction";
+import { setMobilePlayer } from "../../utils/mobileDetection";
 
 export interface UIEventDependencies {
   world: World;
@@ -62,6 +63,11 @@ export class UIEventHandlers {
 
       // Route to appropriate handler based on data.type
       switch (data.type) {
+        // ===== MOBILE AUTO-START =====
+        case "mobile-auto-start-fifa":
+          this.handleMobileAutoStartFIFA(player, data);
+          break;
+
         // ===== GAME MODE SELECTION =====
         case "select-game-mode":
           this.handleGameModeSelection(player, data);
@@ -160,6 +166,113 @@ export class UIEventHandlers {
           break;
       }
     });
+  }
+
+  // ============================================================================
+  // MOBILE AUTO-START HANDLER
+  // ============================================================================
+
+  private async handleMobileAutoStartFIFA(player: Player, data: any): Promise<void> {
+    logger.info(`Mobile auto-start FIFA requested by: ${player.username}`);
+
+    // Mark player as mobile
+    setMobilePlayer(player, true);
+
+    // Set game mode to FIFA
+    setGameMode(GameMode.FIFA);
+    logger.info("Game mode set to FIFA Mode (mobile auto-start)");
+
+    // Check if player already on a team
+    if (this.deps.game && this.deps.game.getTeamOfPlayer(player.username) !== null) {
+      logger.warn("Mobile player already on a team");
+      return;
+    }
+
+    // Clean up any existing entities
+    const existingEntities = this.deps.world.entityManager.getPlayerEntitiesByPlayer(player);
+    if (existingEntities.length > 0) {
+      logger.warn(`Mobile player ${player.username} has existing entities - cleaning up...`);
+      existingEntities.forEach((entity) => {
+        if (entity.isSpawned) {
+          entity.despawn();
+        }
+      });
+    }
+
+    // Join game and team (auto-select red team)
+    const autoTeam = "red";
+    if (this.deps.game) {
+      this.deps.game.joinGame(player.username, player.username);
+      this.deps.game.joinTeam(player.username, autoTeam);
+      logger.info(`Mobile player auto-joined team: ${autoTeam}`);
+    }
+
+    // Create player entity
+    const humanPlayerRole = "central-midfielder-1";
+    const playerEntity = new SoccerPlayerEntity(player, autoTeam, humanPlayerRole);
+    logger.info(`Creating mobile player entity for team ${autoTeam} as ${humanPlayerRole}`);
+
+    // Add spawn event listener
+    playerEntity.on(EntityEvent.SPAWN, () => {
+      logger.info(`Mobile player entity ${playerEntity.id} successfully spawned`);
+    });
+
+    // Get spawn position
+    const spawnPosition = getStartPosition(autoTeam, humanPlayerRole);
+    logger.info(`Mobile spawn position: X=${spawnPosition.x.toFixed(2)}, Y=${spawnPosition.y.toFixed(2)}, Z=${spawnPosition.z.toFixed(2)}`);
+
+    // Spawn player entity
+    playerEntity.spawn(this.deps.world, spawnPosition);
+    logger.info(`Mobile player entity spawned as ${humanPlayerRole}`);
+
+    // Freeze player initially
+    playerEntity.freeze();
+
+    // Start FIFA crowd atmosphere
+    this.deps.fifaCrowdManager.start();
+    this.deps.fifaCrowdManager.playGameStart();
+
+    // Start gameplay music (FIFA mode)
+    const gameMode = getCurrentModeConfig();
+    this.deps.audioManager.playGameplayMusic(gameMode.mode);
+    logger.info(`Music started for FIFA mode (mobile)`);
+
+    // Spawn AI players
+    logger.info("Spawning AI players for mobile single-player mode...");
+    await this.deps.spawnAIPlayers(autoTeam);
+
+    // Start the game
+    logger.info("Starting game with AI for mobile player...");
+    const gameStarted = this.deps.game && this.deps.game.startGame();
+
+    if (gameStarted) {
+      logger.info("Mobile FIFA game started successfully!");
+
+      // Send chat message to player
+      this.deps.world.chatManager.sendPlayerMessage(
+        player,
+        "FIFA mode started! Good luck!"
+      );
+
+      // Unfreeze player after short delay
+      setTimeout(() => {
+        if (playerEntity && typeof playerEntity.unfreeze === "function") {
+          playerEntity.unfreeze();
+          logger.info("Mobile player unfrozen - game active!");
+        }
+
+        // Lock pointer for gameplay
+        player.ui.lockPointer(true);
+        logger.info(`Pointer locked for mobile player ${player.username} - Game controls enabled`);
+      }, 500);
+
+    } else {
+      logger.error("Failed to start mobile FIFA game");
+      this.deps.world.chatManager.sendPlayerMessage(
+        player,
+        "Failed to start game. Please reconnect."
+      );
+    }
   }
 
   // ============================================================================

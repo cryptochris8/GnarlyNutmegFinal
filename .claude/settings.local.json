@@ -22,7 +22,17 @@
       "mcp__hytopia-mcp__askQuestion",
       "Bash(git init:*)",
       "WebSearch",
-      "WebFetch(domain:docs.hytopia.com)"
+      "WebFetch(domain:docs.hytopia.com)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(git push)",
+      "Bash(npm run type-check:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash drop:*)"
     ],
     "deny": []
   },

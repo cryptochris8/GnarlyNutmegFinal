@@ -16,8 +16,8 @@ export const GAME_CONFIG = {
   FIELD_MAX_Z: 26,
   
   // AI Positioning Constants
-  AI_GOAL_LINE_X_RED: -37, // Red Goal line
-  AI_GOAL_LINE_X_BLUE: 52,  // Blue Goal line
+  AI_GOAL_LINE_X_RED: 52,  // Red team spawns near Blue goal (attacks toward Red goal at -37)
+  AI_GOAL_LINE_X_BLUE: -37, // Blue team spawns near Red goal (attacks toward Blue goal at 52)
   AI_FIELD_CENTER_X: 7,    // Center point X coordinate
   AI_FIELD_CENTER_Z: -3,   // Center point Z coordinate
   AI_DEFENSIVE_OFFSET_X: 12, // X-offset from own goal line for defenders

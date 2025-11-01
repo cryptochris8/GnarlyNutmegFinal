@@ -5796,6 +5796,63 @@
 
 <!-- Phase 1: Enhanced Scripts with Modern Features -->
 <script>
+  // ===== MOBILE AUTO-START DETECTION =====
+  // Hytopia-compliant mobile detection using client-side API
+  // Waits for both DOM and hytopia object to be ready before checking
+  function initMobileAutoStart() {
+    let retryCount = 0;
+    const maxRetries = 20; // Max 10 seconds of retries
+
+    function checkAndStartMobile() {
+      // Check if hytopia object exists and is properly initialized
+      if (typeof hytopia !== 'undefined' && hytopia.sendData && typeof hytopia.isMobile !== 'undefined') {
+        // Check if device is mobile using built-in detection
+        if (hytopia.isMobile === true) {
+          console.log('[Mobile] Device detected - triggering auto-start FIFA mode');
+
+          // Send mobile auto-start request to server
+          hytopia.sendData({
+            type: 'mobile-auto-start-fifa',
+            deviceInfo: {
+              userAgent: navigator.userAgent,
+              screenWidth: window.screen.width,
+              screenHeight: window.screen.height,
+              timestamp: Date.now()
+            }
+          });
+
+          // Hide the opening UI for mobile players
+          const openingScreen = document.getElementById('opening-screen');
+          if (openingScreen) {
+            openingScreen.style.display = 'none';
+          }
+
+          console.log('[Mobile] Auto-start request sent to server');
+        } else {
+          console.log('[Desktop] Browser player - showing full UI');
+        }
+      } else if (retryCount < maxRetries) {
+        // Hytopia object not ready yet, retry in 500ms
+        retryCount++;
+        console.log('[Mobile Detection] Waiting for hytopia object... (attempt ' + retryCount + ')');
+        setTimeout(checkAndStartMobile, 500);
+      } else {
+        console.warn('[Mobile Detection] Hytopia object not available after ' + maxRetries + ' attempts');
+      }
+    }
+
+    // Start the check after DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', checkAndStartMobile);
+    } else {
+      // DOM already loaded
+      checkAndStartMobile();
+    }
+  }
+
+  // Initialize mobile auto-start detection
+  initMobileAutoStart();
+
   // ===== GPU MEMORY MANAGEMENT =====
   // Client-side GPU memory management and WebGL context recovery
   function setupGPUMemoryManagement() {
