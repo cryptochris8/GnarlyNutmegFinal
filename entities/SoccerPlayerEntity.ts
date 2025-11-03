@@ -255,9 +255,10 @@ export default class SoccerPlayerEntity extends PlayerEntity {
     let z = 0; 
 
     const ownGoalLineX = isRed ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
-    // Red team players are positioned relative to Red's goal line and move towards positive X (Blue's goal).
-    // Blue team players are positioned relative to Blue's goal line and move towards negative X (Red's goal).
-    const forwardXMultiplier = isRed ? 1 : -1;
+    // COORDINATE FIX: Red goal at X=52, Blue goal at X=-37
+    // Red team defends X=52 goal, attacks toward X=-37 (NEGATIVE X direction, multiplier = -1)
+    // Blue team defends X=-37 goal, attacks toward X=52 (POSITIVE X direction, multiplier = +1)
+    const forwardXMultiplier = isRed ? -1 : 1;
 
     switch (this.role) {
       case 'goalkeeper':

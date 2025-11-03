@@ -1890,17 +1890,19 @@ export class SoccerGame {
       // Kickoff team positioning
       if (player instanceof AIPlayerEntity && player.aiRole === 'central-midfielder-1') {
         // This AI player will take the kickoff - position near the ball
+        // COORDINATE FIX: Kickoff taker should be slightly toward their own goal
+        // Red defends X=52 (right), so +2. Blue defends X=-37 (left), so -2
         targetPosition = {
-          x: AI_FIELD_CENTER_X + (kickoffTeam === 'red' ? -2 : 2), // Slightly behind ball
-          y: SAFE_SPAWN_Y, // Use safe spawn height
+          x: AI_FIELD_CENTER_X + (kickoffTeam === 'red' ? 2 : -2), // Slightly toward own goal
+          y: SAFE_SPAWN_Y,
           z: AI_FIELD_CENTER_Z
         };
         console.log(`Positioning AI kickoff taker ${player.player.username} at center`);
       } else if (isHumanPlayer && player.role === 'central-midfielder-1') {
         // Human player taking kickoff
         targetPosition = {
-          x: AI_FIELD_CENTER_X + (kickoffTeam === 'red' ? -2 : 2),
-          y: SAFE_SPAWN_Y, // Use safe spawn height
+          x: AI_FIELD_CENTER_X + (kickoffTeam === 'red' ? 2 : -2),
+          y: SAFE_SPAWN_Y,
           z: AI_FIELD_CENTER_Z
         };
         console.log(`Positioning human kickoff taker ${player.player.username} at center`);
@@ -1912,17 +1914,20 @@ export class SoccerGame {
       // Defending team positioning
       if (player instanceof AIPlayerEntity && player.aiRole === 'central-midfielder-1') {
         // One defending midfielder positions at center circle edge (10-yard rule)
+        // COORDINATE FIX: Defender must be in their own half, 10 yards from ball
+        // If Red kicks off, Blue defends from left side (X < 7), so -12
+        // If Blue kicks off, Red defends from right side (X > 7), so +12
         targetPosition = {
-          x: AI_FIELD_CENTER_X + (kickoffTeam === 'red' ? 12 : -12), // 12 units away (10-yard rule)
-          y: SAFE_SPAWN_Y, // Use safe spawn height
+          x: AI_FIELD_CENTER_X + (kickoffTeam === 'red' ? -12 : 12), // 12 units away in defending team's half
+          y: SAFE_SPAWN_Y,
           z: AI_FIELD_CENTER_Z
         };
         console.log(`Positioning defending AI ${player.player.username} at center circle edge`);
       } else if (isHumanPlayer && player.role === 'central-midfielder-1') {
         // Human defending midfielder
         targetPosition = {
-          x: AI_FIELD_CENTER_X + (kickoffTeam === 'red' ? 12 : -12),
-          y: SAFE_SPAWN_Y, // Use safe spawn height
+          x: AI_FIELD_CENTER_X + (kickoffTeam === 'red' ? -12 : 12),
+          y: SAFE_SPAWN_Y,
           z: AI_FIELD_CENTER_Z
         };
         console.log(`Positioning defending human ${player.player.username} at center circle edge`);
@@ -1950,43 +1955,46 @@ export class SoccerGame {
    */
   private getKickoffHalfPosition(player: SoccerPlayerEntity, kickoffTeam: "red" | "blue", isKickoffTeam: boolean): Vector3Like {
     const playerTeam = player.team;
-    
-    // Determine which half the player should be in
-    // Red team's half: x < AI_FIELD_CENTER_X
-    // Blue team's half: x > AI_FIELD_CENTER_X
-    const inOwnHalf = playerTeam === 'red' ? 
-      (AI_FIELD_CENTER_X - 5) : // Red players stay in negative X area
-      (AI_FIELD_CENTER_X + 5);  // Blue players stay in positive X area
-    
+
+    // COORDINATE FIX: Determine which half the player should be in (their defensive half)
+    // Red team defends X=52 (right side), defensive half: X > 7 (right of center)
+    // Blue team defends X=-37 (left side), defensive half: X < 7 (left of center)
+    const inOwnHalf = playerTeam === 'red' ?
+      (AI_FIELD_CENTER_X + 5) :  // Red players in right half (X > 7)
+      (AI_FIELD_CENTER_X - 5);   // Blue players in left half (X < 7)
+
     // Get base position for the player's role
     let basePosition: Vector3Like;
-    
+
     if (player instanceof AIPlayerEntity) {
       // For AI players, use their role-based positioning but constrain to appropriate half
       const rolePosition = this.getRoleBasedPositionForTeam(player.aiRole, playerTeam);
-      
-      // Adjust X to ensure player is in correct half
+
+      // COORDINATE FIX: Adjust X to ensure player is in correct half
       let adjustedX = rolePosition.x;
-      if (playerTeam === 'red' && adjustedX > AI_FIELD_CENTER_X - 5) {
-        adjustedX = AI_FIELD_CENTER_X - 8; // Keep red team in their half
-      } else if (playerTeam === 'blue' && adjustedX < AI_FIELD_CENTER_X + 5) {
-        adjustedX = AI_FIELD_CENTER_X + 8; // Keep blue team in their half
+      // Red team must stay in right half (X > AI_FIELD_CENTER_X)
+      if (playerTeam === 'red' && adjustedX < AI_FIELD_CENTER_X + 5) {
+        adjustedX = AI_FIELD_CENTER_X + 8; // Keep red team in their half (right side)
       }
-      
+      // Blue team must stay in left half (X < AI_FIELD_CENTER_X)
+      else if (playerTeam === 'blue' && adjustedX > AI_FIELD_CENTER_X - 5) {
+        adjustedX = AI_FIELD_CENTER_X - 8; // Keep blue team in their half (left side)
+      }
+
       basePosition = {
         x: adjustedX,
-        y: SAFE_SPAWN_Y, // Use safe spawn height
+        y: SAFE_SPAWN_Y,
         z: rolePosition.z
       };
     } else {
       // For human players, use a default midfielder position in their half
       basePosition = {
         x: inOwnHalf,
-        y: SAFE_SPAWN_Y, // Use safe spawn height
+        y: SAFE_SPAWN_Y,
         z: AI_FIELD_CENTER_Z
       };
     }
-    
+
     return basePosition;
   }
 
@@ -1996,36 +2004,38 @@ export class SoccerGame {
   private getRoleBasedPositionForTeam(role: string, team: "red" | "blue"): Vector3Like {
     const isRed = team === 'red';
     const ownGoalLineX = isRed ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
+    // COORDINATE FIX: Red defends X=52, attacks toward X=-37 (multiplier = -1)
+    //                 Blue defends X=-37, attacks toward X=52 (multiplier = +1)
     const forwardXMultiplier = isRed ? -1 : 1;
-    
-    // Simplified role positioning (based on original getStartPosition logic)
+
+    // Simplified role positioning (based on corrected getStartPosition logic)
     let x = 0, z = AI_FIELD_CENTER_Z;
-    
+
     switch (role) {
       case 'goalkeeper':
-        x = ownGoalLineX + (1 * forwardXMultiplier * -1);
+        x = ownGoalLineX + (1 * forwardXMultiplier);
         break;
       case 'left-back':
-        x = ownGoalLineX + (12 * forwardXMultiplier * -1); // AI_DEFENSIVE_OFFSET_X
+        x = ownGoalLineX + (12 * forwardXMultiplier); // AI_DEFENSIVE_OFFSET_X
         z = AI_FIELD_CENTER_Z - 15;
         break;
       case 'right-back':
-        x = ownGoalLineX + (12 * forwardXMultiplier * -1);
+        x = ownGoalLineX + (12 * forwardXMultiplier);
         z = AI_FIELD_CENTER_Z + 15;
         break;
       case 'central-midfielder-1':
-        x = ownGoalLineX + (34 * forwardXMultiplier * -1); // AI_MIDFIELD_OFFSET_X
+        x = ownGoalLineX + (34 * forwardXMultiplier); // AI_MIDFIELD_OFFSET_X
         z = AI_FIELD_CENTER_Z - 8;
         break;
       case 'central-midfielder-2':
-        x = ownGoalLineX + (34 * forwardXMultiplier * -1);
+        x = ownGoalLineX + (34 * forwardXMultiplier);
         z = AI_FIELD_CENTER_Z + 8;
         break;
       case 'striker':
-        x = ownGoalLineX + (43 * forwardXMultiplier * -1); // AI_FORWARD_OFFSET_X
+        x = ownGoalLineX + (43 * forwardXMultiplier); // AI_FORWARD_OFFSET_X
         break;
       default:
-        x = ownGoalLineX + (34 * forwardXMultiplier * -1);
+        x = ownGoalLineX + (34 * forwardXMultiplier);
         break;
     }
     

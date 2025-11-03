@@ -130,9 +130,11 @@ export class SoccerAgent {
       // Minimum passing distance to avoid too-close passes
       if (distanceToTeammate < 3) continue;
 
+      // COORDINATE FIX: Red attacks toward X=-37 (decreasing X), Blue toward X=52 (increasing X)
+      // Forward progress is POSITIVE when teammate is closer to opponent goal
       const forwardProgress = this.entity.team === 'red' ?
-        teammate.position.x - this.entity.position.x :
-        this.entity.position.x - teammate.position.x;
+        this.entity.position.x - teammate.position.x :  // Red: my X - teammate X = positive when teammate forward
+        teammate.position.x - this.entity.position.x;   // Blue: teammate X - my X = positive when teammate forward
 
       // ALLOW BACKWARDS PASSES: Remove strict forward-only requirement
       // Allow passes backwards if it helps build-up play (up to 12 units back)
@@ -231,12 +233,13 @@ export class SoccerAgent {
     if (!ball) return false;
     
     const fieldCenterX = (AI_GOAL_LINE_X_RED + AI_GOAL_LINE_X_BLUE) / 2;
-    
-    // Red team attacks towards negative X, Blue team towards positive X
+
+    // COORDINATE FIX: Red attacks toward X=-37 (left), Blue attacks toward X=52 (right)
+    // Attacking phase = ball is in opponent's half (closer to opponent goal than field center)
     if (this.entity.team === 'red') {
-      return ball.position.x < fieldCenterX; // Ball X is less than center (towards -X)
+      return ball.position.x < fieldCenterX; // Ball in left half (opponent's half) ✓ CORRECT
     } else {
-      return ball.position.x > fieldCenterX; // Ball X is greater than center (towards +X)
+      return ball.position.x > fieldCenterX; // Ball in right half (opponent's half) ✓ CORRECT
     }
   }
   
@@ -318,9 +321,11 @@ export class SoccerAgent {
         { x: opponentGoalLineX, y: 1, z: AI_FIELD_CENTER_Z }
       );
 
+      // COORDINATE FIX: Red attacks toward X=-37 (decreasing X), Blue toward X=52 (increasing X)
+      // Forward progress is POSITIVE when teammate is closer to opponent goal
       let forwardProgress = this.entity.team === 'red' ?
-        teammate.position.x - this.entity.position.x :
-        this.entity.position.x - teammate.position.x;
+        this.entity.position.x - teammate.position.x :  // Red: my X - teammate X = positive when teammate forward
+        teammate.position.x - this.entity.position.x;   // Blue: teammate X - my X = positive when teammate forward
 
       if (isCounterAttackingContext && forwardProgress < -2) continue;
       if (!isCounterAttackingContext && forwardProgress < -8 && allTeammates.length > 1) continue;
@@ -683,17 +688,23 @@ export class SoccerAgent {
       const opponentPlayer = attachedPlayerRaw as SoccerPlayerEntity; // Cast for type safety
       const ownGoalLineX = this.entity.team === 'red' ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
       
-      const goalSideFactor = 1 + (roleDef.defensiveContribution / 10); 
-      const goalSideOffset = (this.entity.team === 'red' ? -goalSideFactor : goalSideFactor) * 1.5; 
+      const goalSideFactor = 1 + (roleDef.defensiveContribution / 10);
+      // COORDINATE FIX: Position between opponent and own goal
+      // Red defends X=52 (needs POSITIVE offset to be at higher X than opponent)
+      // Blue defends X=-37 (needs NEGATIVE offset to be at lower X than opponent)
+      const goalSideOffset = (this.entity.team === 'red' ? goalSideFactor : -goalSideFactor) * 1.5; 
 
       let targetX = opponentPlayer.position.x + goalSideOffset;
-      
-      if (this.entity.team === 'red') { 
-        targetX = Math.max(targetX, ownGoalLineX + 2); 
-        targetX = Math.min(targetX, opponentPlayer.position.x - 1); 
-      } else { 
-        targetX = Math.min(targetX, ownGoalLineX - 2);
-        targetX = Math.max(targetX, opponentPlayer.position.x + 1); 
+
+      // COORDINATE FIX: Constrain position to stay between opponent and own goal
+      if (this.entity.team === 'red') {
+        // Red defends X=52: stay in front of goal (lower than 52) and behind opponent (higher than opponent X)
+        targetX = Math.min(targetX, ownGoalLineX - 2);  // Don't go past own goal line
+        targetX = Math.max(targetX, opponentPlayer.position.x + 1);  // Stay between opponent and goal
+      } else {
+        // Blue defends X=-37: stay in front of goal (higher than -37) and behind opponent (lower than opponent X)
+        targetX = Math.max(targetX, ownGoalLineX + 2);  // Don't go past own goal line
+        targetX = Math.min(targetX, opponentPlayer.position.x - 1);  // Stay between opponent and goal
       }
       
       const zShiftFactor = 0.3; 
@@ -862,9 +873,11 @@ export class SoccerAgent {
     
     // Field center for positioning references
     const fieldCenterX = (AI_GOAL_LINE_X_RED + AI_GOAL_LINE_X_BLUE) / 2;
-    
-    // Direction from own goal (1 for red team attacking toward positive X, -1 for blue)
-    const direction = this.entity.team === 'red' ? 1 : -1;
+
+    // COORDINATE FIX: Direction of attack
+    // Red team defends X=52, attacks toward X=-37 (NEGATIVE X direction = -1)
+    // Blue team defends X=-37, attacks toward X=52 (POSITIVE X direction = +1)
+    const direction = this.entity.team === 'red' ? -1 : 1;
     
     // Calculate defensive line depth based on ball position
     // When ball is closer to our goal, defensive line drops deeper
@@ -886,9 +899,10 @@ export class SoccerAgent {
       for (const opponent of opponents) {
         if (!opponent.isSpawned) continue;
         
-        // Check if opponent is in our defensive half
-        const opponentInOurHalf = (this.entity.team === 'red' && opponent.position.x < fieldCenterX) ||
-                                  (this.entity.team === 'blue' && opponent.position.x > fieldCenterX);
+        // COORDINATE FIX: Check if opponent is in our defensive half
+        // Red defends right half (X > 7), Blue defends left half (X < 7)
+        const opponentInOurHalf = (this.entity.team === 'red' && opponent.position.x > fieldCenterX) ||
+                                  (this.entity.team === 'blue' && opponent.position.x < fieldCenterX);
                                   
         if (!opponentInOurHalf) continue;
         
@@ -1189,8 +1203,11 @@ export class SoccerAgent {
       
       // For attackers, check if ball is in good position for making offensive runs
       const fieldCenterX = (AI_GOAL_LINE_X_RED + AI_GOAL_LINE_X_BLUE) / 2;
-      const ballInOpponentHalf = 
-          (this.entity.team === 'red' && ball.position.x < fieldCenterX) || 
+      // Check if ball is in opponent's half (good for attacking)
+      // Red attacks toward X=-37 (left), so opponent half = X < 7
+      // Blue attacks toward X=52 (right), so opponent half = X > 7
+      const ballInOpponentHalf =
+          (this.entity.team === 'red' && ball.position.x < fieldCenterX) ||
           (this.entity.team === 'blue' && ball.position.x > fieldCenterX); 
       
       const tendencyToAttack = (roleDef.offensiveContribution - roleDef.defensiveContribution + 10) / 20;

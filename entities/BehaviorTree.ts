@@ -125,7 +125,8 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
               if (!teammateSpace) continue; // Skip heavily marked teammates
 
               // ALLOW BACKWARDS/SIDEWAYS PASSES for build-up play
-              const forwardProgress = (agent.team === 'red' ? teammate.position.x - agent.position.x : agent.position.x - teammate.position.x);
+              // COORDINATE FIX: Red attacks toward X=-37 (decreasing X), Blue toward X=52 (increasing X)
+              const forwardProgress = (agent.team === 'red' ? agent.position.x - teammate.position.x : teammate.position.x - agent.position.x);
               // Only reject passes that go too far backwards (more than 12 units)
               if (forwardProgress < -12) continue;
 
@@ -180,7 +181,8 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
                 teammate.position,
                 { x: opponentGoalLineX, y: 1, z: AI_FIELD_CENTER_Z }
               );
-              const forwardProgress = (agent.team === 'red' ? teammate.position.x - agent.position.x : agent.position.x - teammate.position.x);
+              // COORDINATE FIX: Red attacks toward X=-37 (decreasing X), Blue toward X=52 (increasing X)
+              const forwardProgress = (agent.team === 'red' ? agent.position.x - teammate.position.x : teammate.position.x - agent.position.x);
 
               // Allow backwards passes for build-up play (up to 12 units back)
               if (forwardProgress < -12) continue;
@@ -689,6 +691,7 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
           
           // If red team and ball is past midfield toward blue goal, or
           // if blue team and ball is past midfield toward red goal
+          // COORDINATE FIX: Red defends right half (X > 7), Blue defends left half (X < 7)
           return (agent.team === 'red' && ball.position.x > fieldCenterX) ||
                 (agent.team === 'blue' && ball.position.x < fieldCenterX);
         }),
@@ -747,8 +750,11 @@ export function createBehaviorTree(agent: AIPlayerEntity): BehaviorNode {
               case 'left-back':
               case 'right-back':
                 // Backs position based on ball position - move forward if ball is advanced
-                const isAttackingHalf = (agent.team === 'red' && ball.position.x > fieldCenterX) || 
-                                       (agent.team === 'blue' && ball.position.x < fieldCenterX);
+                // COORDINATE FIX: Check if ball is in attacking half (opponent's territory)
+                // Red attacks toward X=-37 (left), so attacking half = X < 7
+                // Blue attacks toward X=52 (right), so attacking half = X > 7
+                const isAttackingHalf = (agent.team === 'red' && ball.position.x < fieldCenterX) ||
+                                       (agent.team === 'blue' && ball.position.x > fieldCenterX);
                 return isAttackingHalf ? 
                   basePos.x + (10 * attackDirection) : // More advanced when team has possession in attacking half
                   basePos.x; // Base position when defending

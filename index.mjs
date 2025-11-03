@@ -80556,7 +80556,7 @@ var init_SoccerPlayerEntity = __esm(() => {
       let x = 0;
       let z = 0;
       const ownGoalLineX = isRed ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
-      const forwardXMultiplier = isRed ? 1 : -1;
+      const forwardXMultiplier = isRed ? -1 : 1;
       switch (this.role) {
         case "goalkeeper":
           x = ownGoalLineX + 1 * forwardXMultiplier;
@@ -81559,28 +81559,28 @@ var soccer_field_urban_default = {
       isMultiTexture: false
     },
     {
-      id: 2,
+      id: 3,
       name: "glass-blue",
       textureUri: "blocks/glass-blue.png",
       isCustom: false,
       isMultiTexture: false
     },
     {
-      id: 3,
+      id: 2,
       name: "glass-red",
       textureUri: "blocks/glass-red.png",
       isCustom: false,
       isMultiTexture: false
     },
     {
-      id: 1,
+      id: 13,
       name: "blue-concrete",
       textureUri: "blocks/blue-concrete.png",
       isCustom: false,
       isMultiTexture: false
     },
     {
-      id: 13,
+      id: 1,
       name: "red-concrete",
       textureUri: "blocks/red-concrete.png",
       isCustom: false,
@@ -99546,262 +99546,262 @@ var soccer_field_urban_default = {
     "9,0,66": 5,
     "8,0,66": 5,
     "12,0,60": 5,
-    "54,4,3": 3,
-    "54,3,3": 3,
-    "54,2,3": 3,
-    "54,1,3": 3,
-    "55,1,3": 3,
-    "55,2,3": 3,
-    "55,3,3": 3,
-    "55,4,3": 3,
-    "56,1,3": 3,
-    "56,2,3": 3,
-    "56,3,3": 3,
-    "56,4,3": 3,
-    "57,1,3": 3,
-    "57,1,2": 3,
-    "57,1,1": 3,
-    "57,1,0": 3,
-    "57,1,-1": 3,
-    "57,1,-2": 3,
-    "57,1,-3": 3,
-    "57,1,-4": 3,
-    "57,1,-5": 3,
-    "57,1,-6": 3,
-    "57,2,3": 3,
-    "57,3,3": 3,
-    "57,4,3": 3,
-    "54,4,2": 3,
-    "54,4,1": 3,
-    "54,4,0": 3,
-    "54,4,-1": 3,
-    "54,4,-2": 3,
-    "54,4,-3": 3,
-    "54,4,-4": 3,
-    "54,4,-5": 3,
-    "54,4,-9": 3,
-    "54,4,-8": 3,
-    "54,4,-7": 3,
-    "54,4,-6": 3,
-    "54,3,-9": 3,
-    "54,2,-9": 3,
-    "54,1,-9": 3,
-    "55,1,-9": 3,
-    "56,1,-9": 3,
-    "57,1,-9": 3,
-    "57,1,-7": 3,
-    "57,1,-8": 3,
-    "55,2,-9": 3,
-    "56,2,-9": 3,
-    "57,2,-9": 3,
-    "55,3,-9": 3,
-    "56,3,-9": 3,
-    "55,4,-9": 3,
-    "57,3,-9": 3,
-    "56,4,-9": 3,
-    "57,4,-9": 3,
-    "55,4,-7": 3,
-    "55,4,-6": 3,
-    "55,4,-5": 3,
-    "55,4,-4": 3,
-    "55,4,-3": 3,
-    "55,4,-2": 3,
-    "55,4,-1": 3,
-    "55,4,0": 3,
-    "55,4,1": 3,
-    "57,2,2": 3,
-    "57,2,1": 3,
-    "57,2,0": 3,
-    "57,2,-1": 3,
-    "57,2,-2": 3,
-    "57,2,-3": 3,
-    "57,2,-4": 3,
-    "57,2,-8": 3,
-    "57,2,-7": 3,
-    "57,2,-6": 3,
-    "57,2,-5": 3,
-    "57,3,2": 3,
-    "55,4,2": 3,
-    "56,4,2": 3,
-    "57,4,2": 3,
-    "56,4,1": 3,
-    "57,4,1": 3,
-    "57,3,1": 3,
-    "56,4,0": 3,
-    "56,4,-1": 3,
-    "56,4,-2": 3,
-    "56,4,-3": 3,
-    "56,4,-4": 3,
-    "56,4,-5": 3,
-    "56,4,-7": 3,
-    "56,4,-6": 3,
-    "55,4,-8": 3,
-    "56,4,-8": 3,
-    "57,4,-8": 3,
-    "57,4,-7": 3,
-    "57,4,-6": 3,
-    "57,4,-5": 3,
-    "57,4,-4": 3,
-    "57,4,-3": 3,
-    "57,4,-2": 3,
-    "57,4,-1": 3,
-    "57,3,-8": 3,
-    "57,3,-7": 3,
-    "57,4,0": 3,
-    "57,3,0": 3,
-    "57,3,-1": 3,
-    "57,3,-2": 3,
-    "57,3,-3": 3,
-    "57,3,-4": 3,
-    "57,3,-6": 3,
-    "57,3,-5": 3,
-    "-39,1,3": 2,
-    "-39,2,3": 2,
-    "-39,3,3": 2,
-    "-39,4,3": 2,
-    "-40,1,3": 2,
-    "-40,2,3": 2,
-    "-40,3,3": 2,
-    "-40,4,3": 2,
-    "-41,1,3": 2,
-    "-41,2,3": 2,
-    "-41,3,3": 2,
-    "-41,4,3": 2,
-    "-42,1,3": 2,
-    "-42,2,3": 2,
-    "-42,3,3": 2,
-    "-42,4,3": 2,
-    "-39,1,-9": 2,
-    "-39,2,-9": 2,
-    "-39,3,-9": 2,
-    "-39,4,-9": 2,
-    "-39,4,-8": 2,
-    "-39,4,-7": 2,
-    "-39,4,-6": 2,
-    "-39,4,-5": 2,
-    "-39,4,-3": 2,
-    "-39,4,-4": 2,
-    "-39,4,-2": 2,
-    "-39,4,-1": 2,
-    "-40,4,-1": 2,
-    "-40,1,-9": 2,
-    "-40,2,-9": 2,
-    "-40,3,-9": 2,
-    "-40,4,-9": 2,
-    "-40,4,-8": 2,
-    "-40,4,-7": 2,
-    "-40,4,-6": 2,
-    "-40,4,-5": 2,
-    "-41,4,-5": 2,
-    "-39,4,0": 2,
-    "-39,4,1": 2,
-    "-39,4,2": 2,
-    "-40,4,0": 2,
-    "-40,4,1": 2,
-    "-40,4,2": 2,
-    "-40,4,-2": 2,
-    "-40,4,-3": 2,
-    "-40,4,-4": 2,
-    "-41,1,-9": 2,
-    "-41,2,-9": 2,
-    "-41,3,-9": 2,
-    "-41,4,-9": 2,
-    "-42,1,-9": 2,
-    "-42,2,-9": 2,
-    "-42,3,-9": 2,
-    "-42,4,-9": 2,
-    "-42,1,2": 2,
-    "-42,1,1": 2,
-    "-42,1,0": 2,
-    "-42,1,-1": 2,
-    "-42,1,-2": 2,
-    "-42,1,-3": 2,
-    "-42,1,-4": 2,
-    "-42,1,-5": 2,
-    "-42,1,-6": 2,
-    "-42,1,-7": 2,
-    "-42,1,-8": 2,
-    "-42,2,2": 2,
-    "-42,2,1": 2,
-    "-42,2,0": 2,
-    "-42,2,-1": 2,
-    "-42,2,-2": 2,
-    "-42,2,-3": 2,
-    "-42,2,-4": 2,
-    "-42,2,-5": 2,
-    "-42,2,-6": 2,
-    "-42,2,-7": 2,
-    "-42,2,-8": 2,
-    "-42,3,2": 2,
-    "-42,3,1": 2,
-    "-42,3,0": 2,
-    "-42,3,-1": 2,
-    "-42,3,-2": 2,
-    "-42,3,-3": 2,
-    "-42,3,-4": 2,
-    "-42,3,-5": 2,
-    "-42,3,-6": 2,
-    "-42,3,-7": 2,
-    "-42,3,-8": 2,
-    "-42,4,2": 2,
-    "-42,4,1": 2,
-    "-42,4,0": 2,
-    "-42,4,-1": 2,
-    "-42,4,-2": 2,
-    "-42,4,-3": 2,
-    "-42,4,-4": 2,
-    "-42,4,-5": 2,
-    "-42,4,-6": 2,
-    "-42,4,-7": 2,
-    "-42,4,-8": 2,
-    "-41,4,-8": 2,
-    "-41,4,-6": 2,
-    "-41,4,-7": 2,
-    "-41,4,-4": 2,
-    "-41,4,-3": 2,
-    "-41,4,-2": 2,
-    "-41,4,-1": 2,
-    "-41,4,0": 2,
-    "-41,4,1": 2,
-    "-41,4,2": 2,
-    "-38,1,3": 1,
-    "-38,2,3": 1,
-    "-38,3,3": 1,
-    "-38,4,3": 1,
-    "-38,1,-9": 1,
-    "-38,2,-9": 1,
-    "-38,3,-9": 1,
-    "-38,4,-9": 1,
-    "-38,4,-8": 1,
-    "-38,4,-7": 1,
-    "-38,4,-6": 1,
-    "-38,4,-5": 1,
-    "-38,4,-3": 1,
-    "-38,4,-4": 1,
-    "-38,4,-2": 1,
-    "-38,4,-1": 1,
-    "-38,4,0": 1,
-    "-38,4,1": 1,
-    "-38,4,2": 1,
-    "53,4,3": 13,
-    "53,3,3": 13,
-    "53,2,3": 13,
-    "53,1,3": 13,
-    "53,4,2": 13,
-    "53,4,1": 13,
-    "53,4,0": 13,
-    "53,4,-1": 13,
-    "53,4,-2": 13,
-    "53,4,-3": 13,
-    "53,4,-4": 13,
-    "53,4,-5": 13,
-    "53,4,-9": 13,
-    "53,4,-8": 13,
-    "53,4,-7": 13,
-    "53,4,-6": 13,
-    "53,3,-9": 13,
-    "53,2,-9": 13,
-    "53,1,-9": 13,
+    "54,4,3": 2,
+    "54,3,3": 2,
+    "54,2,3": 2,
+    "54,1,3": 2,
+    "55,1,3": 2,
+    "55,2,3": 2,
+    "55,3,3": 2,
+    "55,4,3": 2,
+    "56,1,3": 2,
+    "56,2,3": 2,
+    "56,3,3": 2,
+    "56,4,3": 2,
+    "57,1,3": 2,
+    "57,1,2": 2,
+    "57,1,1": 2,
+    "57,1,0": 2,
+    "57,1,-1": 2,
+    "57,1,-2": 2,
+    "57,1,-3": 2,
+    "57,1,-4": 2,
+    "57,1,-5": 2,
+    "57,1,-6": 2,
+    "57,2,3": 2,
+    "57,3,3": 2,
+    "57,4,3": 2,
+    "54,4,2": 2,
+    "54,4,1": 2,
+    "54,4,0": 2,
+    "54,4,-1": 2,
+    "54,4,-2": 2,
+    "54,4,-3": 2,
+    "54,4,-4": 2,
+    "54,4,-5": 2,
+    "54,4,-9": 2,
+    "54,4,-8": 2,
+    "54,4,-7": 2,
+    "54,4,-6": 2,
+    "54,3,-9": 2,
+    "54,2,-9": 2,
+    "54,1,-9": 2,
+    "55,1,-9": 2,
+    "56,1,-9": 2,
+    "57,1,-9": 2,
+    "57,1,-7": 2,
+    "57,1,-8": 2,
+    "55,2,-9": 2,
+    "56,2,-9": 2,
+    "57,2,-9": 2,
+    "55,3,-9": 2,
+    "56,3,-9": 2,
+    "55,4,-9": 2,
+    "57,3,-9": 2,
+    "56,4,-9": 2,
+    "57,4,-9": 2,
+    "55,4,-7": 2,
+    "55,4,-6": 2,
+    "55,4,-5": 2,
+    "55,4,-4": 2,
+    "55,4,-3": 2,
+    "55,4,-2": 2,
+    "55,4,-1": 2,
+    "55,4,0": 2,
+    "55,4,1": 2,
+    "57,2,2": 2,
+    "57,2,1": 2,
+    "57,2,0": 2,
+    "57,2,-1": 2,
+    "57,2,-2": 2,
+    "57,2,-3": 2,
+    "57,2,-4": 2,
+    "57,2,-8": 2,
+    "57,2,-7": 2,
+    "57,2,-6": 2,
+    "57,2,-5": 2,
+    "57,3,2": 2,
+    "55,4,2": 2,
+    "56,4,2": 2,
+    "57,4,2": 2,
+    "56,4,1": 2,
+    "57,4,1": 2,
+    "57,3,1": 2,
+    "56,4,0": 2,
+    "56,4,-1": 2,
+    "56,4,-2": 2,
+    "56,4,-3": 2,
+    "56,4,-4": 2,
+    "56,4,-5": 2,
+    "56,4,-7": 2,
+    "56,4,-6": 2,
+    "55,4,-8": 2,
+    "56,4,-8": 2,
+    "57,4,-8": 2,
+    "57,4,-7": 2,
+    "57,4,-6": 2,
+    "57,4,-5": 2,
+    "57,4,-4": 2,
+    "57,4,-3": 2,
+    "57,4,-2": 2,
+    "57,4,-1": 2,
+    "57,3,-8": 2,
+    "57,3,-7": 2,
+    "57,4,0": 2,
+    "57,3,0": 2,
+    "57,3,-1": 2,
+    "57,3,-2": 2,
+    "57,3,-3": 2,
+    "57,3,-4": 2,
+    "57,3,-6": 2,
+    "57,3,-5": 2,
+    "-39,1,3": 3,
+    "-39,2,3": 3,
+    "-39,3,3": 3,
+    "-39,4,3": 3,
+    "-40,1,3": 3,
+    "-40,2,3": 3,
+    "-40,3,3": 3,
+    "-40,4,3": 3,
+    "-41,1,3": 3,
+    "-41,2,3": 3,
+    "-41,3,3": 3,
+    "-41,4,3": 3,
+    "-42,1,3": 3,
+    "-42,2,3": 3,
+    "-42,3,3": 3,
+    "-42,4,3": 3,
+    "-39,1,-9": 3,
+    "-39,2,-9": 3,
+    "-39,3,-9": 3,
+    "-39,4,-9": 3,
+    "-39,4,-8": 3,
+    "-39,4,-7": 3,
+    "-39,4,-6": 3,
+    "-39,4,-5": 3,
+    "-39,4,-3": 3,
+    "-39,4,-4": 3,
+    "-39,4,-2": 3,
+    "-39,4,-1": 3,
+    "-40,4,-1": 3,
+    "-40,1,-9": 3,
+    "-40,2,-9": 3,
+    "-40,3,-9": 3,
+    "-40,4,-9": 3,
+    "-40,4,-8": 3,
+    "-40,4,-7": 3,
+    "-40,4,-6": 3,
+    "-40,4,-5": 3,
+    "-41,4,-5": 3,
+    "-39,4,0": 3,
+    "-39,4,1": 3,
+    "-39,4,2": 3,
+    "-40,4,0": 3,
+    "-40,4,1": 3,
+    "-40,4,2": 3,
+    "-40,4,-2": 3,
+    "-40,4,-3": 3,
+    "-40,4,-4": 3,
+    "-41,1,-9": 3,
+    "-41,2,-9": 3,
+    "-41,3,-9": 3,
+    "-41,4,-9": 3,
+    "-42,1,-9": 3,
+    "-42,2,-9": 3,
+    "-42,3,-9": 3,
+    "-42,4,-9": 3,
+    "-42,1,2": 3,
+    "-42,1,1": 3,
+    "-42,1,0": 3,
+    "-42,1,-1": 3,
+    "-42,1,-2": 3,
+    "-42,1,-3": 3,
+    "-42,1,-4": 3,
+    "-42,1,-5": 3,
+    "-42,1,-6": 3,
+    "-42,1,-7": 3,
+    "-42,1,-8": 3,
+    "-42,2,2": 3,
+    "-42,2,1": 3,
+    "-42,2,0": 3,
+    "-42,2,-1": 3,
+    "-42,2,-2": 3,
+    "-42,2,-3": 3,
+    "-42,2,-4": 3,
+    "-42,2,-5": 3,
+    "-42,2,-6": 3,
+    "-42,2,-7": 3,
+    "-42,2,-8": 3,
+    "-42,3,2": 3,
+    "-42,3,1": 3,
+    "-42,3,0": 3,
+    "-42,3,-1": 3,
+    "-42,3,-2": 3,
+    "-42,3,-3": 3,
+    "-42,3,-4": 3,
+    "-42,3,-5": 3,
+    "-42,3,-6": 3,
+    "-42,3,-7": 3,
+    "-42,3,-8": 3,
+    "-42,4,2": 3,
+    "-42,4,1": 3,
+    "-42,4,0": 3,
+    "-42,4,-1": 3,
+    "-42,4,-2": 3,
+    "-42,4,-3": 3,
+    "-42,4,-4": 3,
+    "-42,4,-5": 3,
+    "-42,4,-6": 3,
+    "-42,4,-7": 3,
+    "-42,4,-8": 3,
+    "-41,4,-8": 3,
+    "-41,4,-6": 3,
+    "-41,4,-7": 3,
+    "-41,4,-4": 3,
+    "-41,4,-3": 3,
+    "-41,4,-2": 3,
+    "-41,4,-1": 3,
+    "-41,4,0": 3,
+    "-41,4,1": 3,
+    "-41,4,2": 3,
+    "-38,1,3": 13,
+    "-38,2,3": 13,
+    "-38,3,3": 13,
+    "-38,4,3": 13,
+    "-38,1,-9": 13,
+    "-38,2,-9": 13,
+    "-38,3,-9": 13,
+    "-38,4,-9": 13,
+    "-38,4,-8": 13,
+    "-38,4,-7": 13,
+    "-38,4,-6": 13,
+    "-38,4,-5": 13,
+    "-38,4,-3": 13,
+    "-38,4,-4": 13,
+    "-38,4,-2": 13,
+    "-38,4,-1": 13,
+    "-38,4,0": 13,
+    "-38,4,1": 13,
+    "-38,4,2": 13,
+    "53,4,3": 1,
+    "53,3,3": 1,
+    "53,2,3": 1,
+    "53,1,3": 1,
+    "53,4,2": 1,
+    "53,4,1": 1,
+    "53,4,0": 1,
+    "53,4,-1": 1,
+    "53,4,-2": 1,
+    "53,4,-3": 1,
+    "53,4,-4": 1,
+    "53,4,-5": 1,
+    "53,4,-9": 1,
+    "53,4,-8": 1,
+    "53,4,-7": 1,
+    "53,4,-6": 1,
+    "53,3,-9": 1,
+    "53,2,-9": 1,
+    "53,1,-9": 1,
     "-200,-1,-200": 73,
     "-200,0,-200": 77,
     "-200,-1,-199": 73,
@@ -521051,7 +521051,7 @@ class SoccerAgent {
       }
       if (distanceToTeammate < 3)
         continue;
-      const forwardProgress = this.entity.team === "red" ? teammate.position.x - this.entity.position.x : this.entity.position.x - teammate.position.x;
+      const forwardProgress = this.entity.team === "red" ? this.entity.position.x - teammate.position.x : teammate.position.x - this.entity.position.x;
       if (forwardProgress < -12)
         continue;
       const teammateDistanceToGoal = this.entity.distanceBetween(teammate.position, goalPosition);
@@ -521161,7 +521161,7 @@ class SoccerAgent {
       if (isCounterAttackingContext && distanceToTeammate > roleDef.supportDistance * 3.5)
         continue;
       const teammateDistanceToGoal = this.entity.distanceBetween(teammate.position, { x: opponentGoalLineX, y: 1, z: AI_FIELD_CENTER_Z });
-      let forwardProgress = this.entity.team === "red" ? teammate.position.x - this.entity.position.x : this.entity.position.x - teammate.position.x;
+      let forwardProgress = this.entity.team === "red" ? this.entity.position.x - teammate.position.x : teammate.position.x - this.entity.position.x;
       if (isCounterAttackingContext && forwardProgress < -2)
         continue;
       if (!isCounterAttackingContext && forwardProgress < -8 && allTeammates.length > 1)
@@ -521408,14 +521408,14 @@ class SoccerAgent {
       const opponentPlayer = attachedPlayerRaw;
       const ownGoalLineX = this.entity.team === "red" ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
       const goalSideFactor = 1 + roleDef.defensiveContribution / 10;
-      const goalSideOffset = (this.entity.team === "red" ? -goalSideFactor : goalSideFactor) * 1.5;
+      const goalSideOffset = (this.entity.team === "red" ? goalSideFactor : -goalSideFactor) * 1.5;
       let targetX = opponentPlayer.position.x + goalSideOffset;
       if (this.entity.team === "red") {
-        targetX = Math.max(targetX, ownGoalLineX + 2);
-        targetX = Math.min(targetX, opponentPlayer.position.x - 1);
-      } else {
         targetX = Math.min(targetX, ownGoalLineX - 2);
         targetX = Math.max(targetX, opponentPlayer.position.x + 1);
+      } else {
+        targetX = Math.max(targetX, ownGoalLineX + 2);
+        targetX = Math.min(targetX, opponentPlayer.position.x - 1);
       }
       const zShiftFactor = 0.3;
       let targetZ = opponentPlayer.position.z + (AI_FIELD_CENTER_Z - opponentPlayer.position.z) * zShiftFactor;
@@ -521542,7 +521542,7 @@ class SoccerAgent {
     const opponentHasBall = attachedPlayer && attachedPlayer instanceof SoccerPlayerEntity2 && attachedPlayer.team !== this.entity.team;
     const teammates = sharedState_default.getAITeammates(this.entity);
     const fieldCenterX = (AI_GOAL_LINE_X_RED + AI_GOAL_LINE_X_BLUE) / 2;
-    const direction = this.entity.team === "red" ? 1 : -1;
+    const direction = this.entity.team === "red" ? -1 : 1;
     const ballDistanceFromGoal = Math.abs(ballPos.x - ownGoalLineX);
     const fieldLength = Math.abs(AI_GOAL_LINE_X_BLUE - AI_GOAL_LINE_X_RED);
     const defensiveLineDepthFactor = Math.min(0.9, Math.max(0.3, ballDistanceFromGoal / fieldLength));
@@ -521554,7 +521554,7 @@ class SoccerAgent {
       for (const opponent of opponents) {
         if (!opponent.isSpawned)
           continue;
-        const opponentInOurHalf = this.entity.team === "red" && opponent.position.x < fieldCenterX || this.entity.team === "blue" && opponent.position.x > fieldCenterX;
+        const opponentInOurHalf = this.entity.team === "red" && opponent.position.x > fieldCenterX || this.entity.team === "blue" && opponent.position.x < fieldCenterX;
         if (!opponentInOurHalf)
           continue;
         const distanceToOwnGoal = Math.abs(opponent.position.x - ownGoalLineX);
@@ -521877,7 +521877,7 @@ function createBehaviorTree(agent) {
               }
               if (!teammateSpace)
                 continue;
-              const forwardProgress = agent2.team === "red" ? teammate.position.x - agent2.position.x : agent2.position.x - teammate.position.x;
+              const forwardProgress = agent2.team === "red" ? agent2.position.x - teammate.position.x : teammate.position.x - agent2.position.x;
               if (forwardProgress < -12)
                 continue;
               const teammateDistanceToGoal = agent2.distanceBetween(teammate.position, goalPosition);
@@ -521914,7 +521914,7 @@ function createBehaviorTree(agent) {
               if (distanceToTeammate > 30)
                 continue;
               const distanceToGoal = agent2.distanceBetween(teammate.position, { x: opponentGoalLineX, y: 1, z: AI_FIELD_CENTER_Z });
-              const forwardProgress = agent2.team === "red" ? teammate.position.x - agent2.position.x : agent2.position.x - teammate.position.x;
+              const forwardProgress = agent2.team === "red" ? agent2.position.x - teammate.position.x : teammate.position.x - agent2.position.x;
               if (forwardProgress < -12)
                 continue;
               let score = 0;
@@ -522296,7 +522296,7 @@ function createBehaviorTree(agent) {
                 return basePos.x;
               case "left-back":
               case "right-back":
-                const isAttackingHalf = agent2.team === "red" && ball.position.x > fieldCenterX || agent2.team === "blue" && ball.position.x < fieldCenterX;
+                const isAttackingHalf = agent2.team === "red" && ball.position.x < fieldCenterX || agent2.team === "blue" && ball.position.x > fieldCenterX;
                 return isAttackingHalf ? basePos.x + 10 * attackDirection : basePos.x;
               case "central-midfielder-1":
               case "central-midfielder-2":
@@ -524586,7 +524586,7 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
           continue;
         }
       }
-      const isForward = this.team === "red" && teammate.position.x > this.position.x || this.team === "blue" && teammate.position.x < this.position.x;
+      const isForward = this.team === "red" && teammate.position.x < this.position.x || this.team === "blue" && teammate.position.x > this.position.x;
       const forwardPositionBonus = isForward ? 5 : 0;
       const teammateDistanceToGoal = Math.abs(teammate.position.x - opponentGoalX);
       const goalProximityBonus = 20 - Math.min(20, teammateDistanceToGoal / 2);
@@ -524842,7 +524842,7 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
     const roleDef = ROLE_DEFINITIONS[role];
     const roleArea = roleDef.preferredArea;
     let constrainedMinX, constrainedMaxX;
-    const attackingMultiplier = this.team === "red" ? 1 : -1;
+    const attackingMultiplier = this.team === "red" ? -1 : 1;
     const ownGoalLineX = this.team === "red" ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
     if (role === "goalkeeper") {
       constrainedMinX = ownGoalLineX + roleArea.minX;
@@ -524861,7 +524861,7 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
     const roleDef = ROLE_DEFINITIONS[role];
     const roleArea = roleDef.preferredArea;
     let constrainedMinX, constrainedMaxX;
-    const attackingMultiplier = this.team === "red" ? 1 : -1;
+    const attackingMultiplier = this.team === "red" ? -1 : 1;
     const ownGoalLineX = this.team === "red" ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
     if (role === "goalkeeper") {
       constrainedMinX = ownGoalLineX + roleArea.minX;
@@ -524906,7 +524906,7 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
     let x = 0;
     let z = 0;
     const ownGoalLineX = isRed ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
-    const forwardXMultiplier = isRed ? 1 : -1;
+    const forwardXMultiplier = isRed ? -1 : 1;
     if (ownGoalLineX === undefined || AI_FIELD_CENTER_Z === undefined || AI_DEFENSIVE_OFFSET_X === undefined || AI_MIDFIELD_OFFSET_X === undefined || AI_FORWARD_OFFSET_X === undefined || AI_WIDE_Z_BOUNDARY_MIN === undefined || AI_WIDE_Z_BOUNDARY_MAX === undefined || AI_MIDFIELD_Z_BOUNDARY_MIN === undefined || AI_MIDFIELD_Z_BOUNDARY_MAX === undefined) {
       console.error(`!!! AI ${this.player.username} (${this.aiRole}): Missing one or more gameConfig constants in getRoleBasedPosition! Defaulting to 0,0.`);
       return { x: 0, y: SAFE_SPAWN_Y, z: 0 };
@@ -527781,14 +527781,14 @@ class SoccerGame {
     if (isKickoffTeam) {
       if (player instanceof AIPlayerEntity2 && player.aiRole === "central-midfielder-1") {
         targetPosition = {
-          x: AI_FIELD_CENTER_X + (kickoffTeam === "red" ? -2 : 2),
+          x: AI_FIELD_CENTER_X + (kickoffTeam === "red" ? 2 : -2),
           y: SAFE_SPAWN_Y,
           z: AI_FIELD_CENTER_Z
         };
         console.log(`Positioning AI kickoff taker ${player.player.username} at center`);
       } else if (isHumanPlayer && player.role === "central-midfielder-1") {
         targetPosition = {
-          x: AI_FIELD_CENTER_X + (kickoffTeam === "red" ? -2 : 2),
+          x: AI_FIELD_CENTER_X + (kickoffTeam === "red" ? 2 : -2),
           y: SAFE_SPAWN_Y,
           z: AI_FIELD_CENTER_Z
         };
@@ -527799,14 +527799,14 @@ class SoccerGame {
     } else {
       if (player instanceof AIPlayerEntity2 && player.aiRole === "central-midfielder-1") {
         targetPosition = {
-          x: AI_FIELD_CENTER_X + (kickoffTeam === "red" ? 12 : -12),
+          x: AI_FIELD_CENTER_X + (kickoffTeam === "red" ? -12 : 12),
           y: SAFE_SPAWN_Y,
           z: AI_FIELD_CENTER_Z
         };
         console.log(`Positioning defending AI ${player.player.username} at center circle edge`);
       } else if (isHumanPlayer && player.role === "central-midfielder-1") {
         targetPosition = {
-          x: AI_FIELD_CENTER_X + (kickoffTeam === "red" ? 12 : -12),
+          x: AI_FIELD_CENTER_X + (kickoffTeam === "red" ? -12 : 12),
           y: SAFE_SPAWN_Y,
           z: AI_FIELD_CENTER_Z
         };
@@ -527824,15 +527824,15 @@ class SoccerGame {
   }
   getKickoffHalfPosition(player, kickoffTeam, isKickoffTeam) {
     const playerTeam = player.team;
-    const inOwnHalf = playerTeam === "red" ? AI_FIELD_CENTER_X - 5 : AI_FIELD_CENTER_X + 5;
+    const inOwnHalf = playerTeam === "red" ? AI_FIELD_CENTER_X + 5 : AI_FIELD_CENTER_X - 5;
     let basePosition;
     if (player instanceof AIPlayerEntity2) {
       const rolePosition = this.getRoleBasedPositionForTeam(player.aiRole, playerTeam);
       let adjustedX = rolePosition.x;
-      if (playerTeam === "red" && adjustedX > AI_FIELD_CENTER_X - 5) {
-        adjustedX = AI_FIELD_CENTER_X - 8;
-      } else if (playerTeam === "blue" && adjustedX < AI_FIELD_CENTER_X + 5) {
+      if (playerTeam === "red" && adjustedX < AI_FIELD_CENTER_X + 5) {
         adjustedX = AI_FIELD_CENTER_X + 8;
+      } else if (playerTeam === "blue" && adjustedX > AI_FIELD_CENTER_X - 5) {
+        adjustedX = AI_FIELD_CENTER_X - 8;
       }
       basePosition = {
         x: adjustedX,
@@ -527855,29 +527855,29 @@ class SoccerGame {
     let x = 0, z = AI_FIELD_CENTER_Z;
     switch (role) {
       case "goalkeeper":
-        x = ownGoalLineX + 1 * forwardXMultiplier * -1;
+        x = ownGoalLineX + 1 * forwardXMultiplier;
         break;
       case "left-back":
-        x = ownGoalLineX + 12 * forwardXMultiplier * -1;
+        x = ownGoalLineX + 12 * forwardXMultiplier;
         z = AI_FIELD_CENTER_Z - 15;
         break;
       case "right-back":
-        x = ownGoalLineX + 12 * forwardXMultiplier * -1;
+        x = ownGoalLineX + 12 * forwardXMultiplier;
         z = AI_FIELD_CENTER_Z + 15;
         break;
       case "central-midfielder-1":
-        x = ownGoalLineX + 34 * forwardXMultiplier * -1;
+        x = ownGoalLineX + 34 * forwardXMultiplier;
         z = AI_FIELD_CENTER_Z - 8;
         break;
       case "central-midfielder-2":
-        x = ownGoalLineX + 34 * forwardXMultiplier * -1;
+        x = ownGoalLineX + 34 * forwardXMultiplier;
         z = AI_FIELD_CENTER_Z + 8;
         break;
       case "striker":
-        x = ownGoalLineX + 43 * forwardXMultiplier * -1;
+        x = ownGoalLineX + 43 * forwardXMultiplier;
         break;
       default:
-        x = ownGoalLineX + 34 * forwardXMultiplier * -1;
+        x = ownGoalLineX + 34 * forwardXMultiplier;
         break;
     }
     return { x, y: SAFE_SPAWN_Y, z };
@@ -532218,43 +532218,43 @@ function getStartPosition(team, role) {
   switch (role) {
     case "goalkeeper":
       return {
-        x: baseX,
+        x: baseX + (isRedTeam ? -1 : 1),
         y: SAFE_SPAWN_Y,
         z: AI_FIELD_CENTER_Z
       };
     case "left-back":
       return {
-        x: baseX + (isRedTeam ? AI_DEFENSIVE_OFFSET_X : -AI_DEFENSIVE_OFFSET_X),
+        x: baseX + (isRedTeam ? -AI_DEFENSIVE_OFFSET_X : AI_DEFENSIVE_OFFSET_X),
         y: SAFE_SPAWN_Y,
         z: AI_WIDE_Z_BOUNDARY_MIN + 10
       };
     case "right-back":
       return {
-        x: baseX + (isRedTeam ? AI_DEFENSIVE_OFFSET_X : -AI_DEFENSIVE_OFFSET_X),
+        x: baseX + (isRedTeam ? -AI_DEFENSIVE_OFFSET_X : AI_DEFENSIVE_OFFSET_X),
         y: SAFE_SPAWN_Y,
         z: AI_WIDE_Z_BOUNDARY_MAX - 10
       };
     case "central-midfielder-1":
       return {
-        x: baseX + (isRedTeam ? AI_MIDFIELD_OFFSET_X : -AI_MIDFIELD_OFFSET_X),
+        x: baseX + (isRedTeam ? -AI_MIDFIELD_OFFSET_X : AI_MIDFIELD_OFFSET_X),
         y: SAFE_SPAWN_Y,
         z: AI_MIDFIELD_Z_BOUNDARY_MIN + 5
       };
     case "central-midfielder-2":
       return {
-        x: baseX + (isRedTeam ? AI_MIDFIELD_OFFSET_X : -AI_MIDFIELD_OFFSET_X),
+        x: baseX + (isRedTeam ? -AI_MIDFIELD_OFFSET_X : AI_MIDFIELD_OFFSET_X),
         y: SAFE_SPAWN_Y,
         z: AI_MIDFIELD_Z_BOUNDARY_MAX - 5
       };
     case "striker":
       return {
-        x: baseX + (isRedTeam ? AI_FORWARD_OFFSET_X : -AI_FORWARD_OFFSET_X),
+        x: baseX + (isRedTeam ? -AI_FORWARD_OFFSET_X : AI_FORWARD_OFFSET_X),
         y: SAFE_SPAWN_Y,
         z: AI_FIELD_CENTER_Z
       };
     default:
       return {
-        x: baseX,
+        x: baseX + (isRedTeam ? -1 : 1),
         y: SAFE_SPAWN_Y,
         z: AI_FIELD_CENTER_Z
       };

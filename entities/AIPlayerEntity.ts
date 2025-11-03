@@ -1904,9 +1904,11 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
         }
       }
       
-      // Calculate forward progression bonus
-      const isForward = (this.team === 'red' && teammate.position.x > this.position.x) ||
-                      (this.team === 'blue' && teammate.position.x < this.position.x);
+      // COORDINATE FIX: Calculate forward progression bonus
+      // Red attacks toward X=-37, so forward = teammate.x < my.x (decreasing X)
+      // Blue attacks toward X=52, so forward = teammate.x > my.x (increasing X)
+      const isForward = (this.team === 'red' && teammate.position.x < this.position.x) ||
+                      (this.team === 'blue' && teammate.position.x > this.position.x);
       const forwardPositionBonus = isForward ? 5 : 0;
       
       // Calculate proximity to goal bonus (for all players, not just striker)
@@ -2312,8 +2314,10 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     // const fieldCenterX = (AI_GOAL_LINE_X_RED + AI_GOAL_LINE_X_BLUE) / 2; // Use AI_FIELD_CENTER_X from gameConfig
     
     let constrainedMinX, constrainedMaxX;
-    // Determine the direction the AI attacks. Red attacks towards positive X, Blue towards negative X.
-    const attackingMultiplier = (this.team === 'red') ? 1 : -1;
+    // COORDINATE FIX: Determine the direction the AI attacks
+    // Red defends X=52, attacks toward X=-37 (NEGATIVE X direction = -1)
+    // Blue defends X=-37, attacks toward X=52 (POSITIVE X direction = +1)
+    const attackingMultiplier = (this.team === 'red') ? -1 : 1;
 
     // Calculate the boundaries based on ownGoalLineX and the role's defined X range.
     const ownGoalLineX = this.team === 'red' ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
@@ -2346,8 +2350,10 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     // const fieldCenterX = (AI_GOAL_LINE_X_RED + AI_GOAL_LINE_X_BLUE) / 2; // Use AI_FIELD_CENTER_X from gameConfig
     
     let constrainedMinX, constrainedMaxX;
-    // Determine the direction the AI attacks. Red attacks towards positive X, Blue towards negative X.
-    const attackingMultiplier = (this.team === 'red') ? 1 : -1;
+    // COORDINATE FIX: Determine the direction the AI attacks
+    // Red defends X=52, attacks toward X=-37 (NEGATIVE X direction = -1)
+    // Blue defends X=-37, attacks toward X=52 (POSITIVE X direction = +1)
+    const attackingMultiplier = (this.team === 'red') ? -1 : 1;
 
     // Calculate the boundaries based on ownGoalLineX and the role's defined X range.
     // roleArea.minX is typically 0 (center line) or a positive value representing distance from center line.
@@ -2437,8 +2443,10 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
 
     // Determine own goal line and forward direction based on team
     const ownGoalLineX = isRed ? AI_GOAL_LINE_X_RED : AI_GOAL_LINE_X_BLUE;
-    // Corrected: Red moves towards positive X, Blue towards negative X from their respective goal lines.
-    const forwardXMultiplier = isRed ? 1 : -1; 
+    // COORDINATE FIX: Red goal at X=52, Blue goal at X=-37
+    // Red team defends X=52 goal, attacks toward X=-37 (NEGATIVE X direction, multiplier = -1)
+    // Blue team defends X=-37 goal, attacks toward X=52 (POSITIVE X direction, multiplier = +1)
+    const forwardXMultiplier = isRed ? -1 : 1; 
 
     // Check if constants are defined
     if (ownGoalLineX === undefined || AI_FIELD_CENTER_Z === undefined ||
@@ -2453,8 +2461,8 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     switch (this.aiRole) {
       case 'goalkeeper':
         // Goalkeeper is 1 unit IN FRONT of their own goal line.
-        // If red goal is -37, forward is +1, so -37 + (1*1) = -36.
-        // If blue goal is 52, forward is -1, so 52 + (1*-1) = 51.
+        // Red goal at X=52, forward is -1, so 52 + (1*-1) = 51 (inside field)
+        // Blue goal at X=-37, forward is +1, so -37 + (1*1) = -36 (inside field)
         x = ownGoalLineX + (1 * forwardXMultiplier);
         z = AI_FIELD_CENTER_Z; // Center of the goal width
         break;
