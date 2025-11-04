@@ -1,4 +1,4 @@
-
+﻿
 <!-- Loading Overlay -->
 <div id="loading-overlay" class="loading-overlay">
   <div class="loading-content">
@@ -15,7 +15,7 @@
 <!-- Player Status HUD -->
 <div id="player-status-hud" class="player-status-hud" style="display: none;">
   <div class="role-indicator">
-    <div class="role-icon" id="role-icon">⚽</div>
+    <div class="role-icon" id="role-icon">âš½</div>
     <div class="role-info">
       <div class="role-name" id="role-name">Player</div>
       <div class="role-description" id="role-description">Ready to play</div>
@@ -31,7 +31,7 @@
   </div>
   
   <div class="ball-possession-indicator" id="ball-possession" style="display: none;">
-    <div class="possession-icon">⚽</div>
+    <div class="possession-icon">âš½</div>
     <div class="possession-text">Ball Possession</div>
   </div>
 </div>
@@ -2177,14 +2177,14 @@
 <!-- EMPTY POWERUP SLOT INDICATOR (for arcade mode) -->
 <div id="empty-powerup-slot" class="empty-powerup-slot" style="display: none;">
   <div class="empty-slot-content">
-    <div class="empty-slot-icon">⚡</div>
+    <div class="empty-slot-icon">âš¡</div>
     <div class="empty-slot-text">Collect Powerups!</div>
   </div>
 </div>
 
 <!-- MOBILE POWER-UP ACTIVATION BUTTON -->
 <div id="mobile-powerup-use-btn" class="mobile-powerup-use-btn" style="display: none;">
-  <div class="mobile-powerup-icon" id="mobile-powerup-icon">⚡</div>
+  <div class="mobile-powerup-icon" id="mobile-powerup-icon">âš¡</div>
   <div class="mobile-powerup-label">TAP TO USE!</div>
 </div>
 
@@ -2238,12 +2238,12 @@
 
 <!-- ARCADE MODE INDICATOR -->
 <div id="arcade-mode-indicator" class="arcade-mode-indicator">
-  <span>🎪</span> ARCADE MODE - ENHANCED SOCCER!
+  <span>🎮</span> ARCADE MODE - ENHANCED SOCCER!
 </div>
 
 <!-- PICKUP SYSTEM NOTIFICATION -->
 <div id="pickup-info" class="pickup-info" style="position: fixed !important; bottom: 10px !important; right: 10px !important; z-index: 1000 !important; display: none;">
-  <div class="pickup-title">⭐ PHYSICAL PICKUPS ACTIVE</div>
+  <div class="pickup-title">⭐ PHYSICAL PICKUPS ACTIVE</div>
   <div class="pickup-description">Run through power-ups to collect them! No more clicking buttons - just Mario/Sonic style pickup gameplay!</div>
 </div>
 
@@ -3637,7 +3637,7 @@
   }
 
   .bracket-connector::after {
-    content: '→';
+    content: 'â†’';
     position: absolute;
     right: -15px;
     top: -8px;
@@ -4428,14 +4428,16 @@
   }
 
   /* Force mobile controls to show when mobile is detected by JavaScript */
-  .mobile-controls.mobile-active {
+  /* DISABLED: Now using .game-active class instead */
+  /* .mobile-controls.mobile-active {
     display: block !important;
-  }
+  } */
 
   /* Hide mobile controls during opening/team selection screens */
-  .mobile-controls.mobile-gameplay {
+  /* DISABLED: Now using .game-active class instead */
+  /* .mobile-controls.mobile-gameplay {
     display: block !important;
-  }
+  } */
   
   /* Virtual Joystick for Movement */
   .virtual-joystick {
@@ -4594,9 +4596,10 @@
   }
   
   /* Hytopia SDK .mobile class support */
-  body.mobile .mobile-controls {
+  /* DISABLED: Controls now require .game-active class to prevent showing during opening screen */
+  /* body.mobile .mobile-controls {
     display: block !important;
-  }
+  } */
   
   body.mobile .desktop-only {
     display: none !important;
@@ -4612,9 +4615,10 @@
 
   /* Improved mobile detection - more reliable than pointer: coarse */
   @media (max-width: 768px) {
-    .mobile-controls {
+    /* DISABLED: Controls now require .game-active class to prevent showing during opening screen */
+    /* .mobile-controls {
       display: block;
-    }
+    } */
 
     /* Hide desktop-only elements on mobile */
     .desktop-only {
@@ -4852,67 +4856,180 @@
     margin-bottom: 10px !important;
   }
 
+  /* ===== MOBILE OPTIMIZATIONS (HYTOPIA SDK COMPLIANT) ===== */
+  /* Touch Target Sizing: 64px minimum per Apple/Google standards */
+
   body.mobile .game-mode-btn {
-    padding: 12px 15px !important;
-    font-size: 14px !important;
-    min-height: 50px !important;
+    padding: 18px 24px !important;
+    font-size: 22px !important;
+    min-height: 70px !important;
     width: 100% !important;
     max-width: 100% !important;
     flex: none !important;
     text-align: left !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  body.mobile .game-mode-btn:active {
+    transform: scale(0.97) !important;
+    transition: transform 0.1s ease !important;
   }
 
   body.mobile .mode-description {
-    font-size: 11px !important;
-    margin-top: 2px !important;
+    font-size: 14px !important;
+    margin-top: 6px !important;
+    line-height: 1.3 !important;
   }
 
   body.mobile .mode-features {
-    font-size: 10px !important;
-    margin-top: 2px !important;
+    font-size: 12px !important;
+    margin-top: 4px !important;
+    line-height: 1.2 !important;
   }
 
   body.mobile .player-count-selection {
-    padding: 10px !important;
-    margin: 10px 0 !important;
+    padding: 16px !important;
+    margin: 16px 0 !important;
   }
 
   body.mobile .player-count-title {
-    font-size: 18px !important;
-    margin-bottom: 10px !important;
+    font-size: 28px !important;
+    margin-bottom: 16px !important;
+    line-height: 1.2 !important;
   }
 
   body.mobile .player-count-buttons {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: 12px !important;
   }
 
   body.mobile .team-selection {
-    padding: 10px !important;
-    margin: 10px 0 !important;
+    padding: 16px !important;
+    margin: 16px 0 !important;
   }
 
   body.mobile .team-selection-title {
-    font-size: 18px !important;
-    margin-bottom: 10px !important;
+    font-size: 28px !important;
+    margin-bottom: 16px !important;
+    line-height: 1.2 !important;
   }
 
   body.mobile .team-buttons-container {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: 12px !important;
   }
 
   body.mobile .team-btn {
-    min-height: 50px !important;
-    font-size: 16px !important;
-    padding: 12px 15px !important;
+    min-height: 70px !important;
+    font-size: 22px !important;
+    padding: 18px 24px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  body.mobile .team-btn:active {
+    transform: scale(0.97) translateY(-2px) !important;
+    transition: transform 0.1s ease !important;
   }
 
   body.mobile .opening-ui-overlay {
-    overflow: hidden !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     height: 100vh !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Landscape Mode Optimization - 2 Column Grid */
+  @media (orientation: landscape) and (max-height: 600px) {
+    body.mobile .game-mode-selection {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 12px !important;
+      padding: 12px !important;
+    }
+
+    body.mobile .game-mode-btn {
+      min-height: 64px !important;
+      font-size: 18px !important;
+      padding: 12px 16px !important;
+    }
+
+    body.mobile .mode-description {
+      font-size: 12px !important;
+    }
+
+    body.mobile .team-buttons-container {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 12px !important;
+    }
+
+    body.mobile .team-btn {
+      min-height: 64px !important;
+      font-size: 18px !important;
+    }
+
+    body.mobile .player-count-title,
+    body.mobile .team-selection-title {
+      font-size: 22px !important;
+      margin-bottom: 12px !important;
+    }
+  }
+
+  /* Enhanced Visual Feedback for Touch */
+  body.mobile button:active,
+  body.mobile .btn:active,
+  body.mobile .control-btn:active {
+    transform: scale(0.95) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* Top Control Buttons - Larger Touch Targets */
+  body.mobile .control-btn {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 22px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Mobile Typography Improvements */
+  body.mobile .loading-title {
+    font-size: 28px !important;
+  }
+
+  body.mobile .loading-message {
+    font-size: 18px !important;
+  }
+
+  body.mobile .phase-indicator {
+    font-size: 14px !important;
+    padding: 6px 10px !important;
+  }
+
+  body.mobile .time-label {
+    font-size: 20px !important;
+  }
+
+  /* How To Play Button - Larger Touch Target */
+  body.mobile .how-to-play-btn {
+    padding: 16px 28px !important;
+    font-size: 18px !important;
+    min-height: 56px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Tab Buttons - Larger Touch Target */
+  body.mobile .tab-button {
+    padding: 14px 24px !important;
+    font-size: 16px !important;
+    min-height: 50px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 
   /* ===== PHASE 2 ENHANCED MOBILE UI (HYTOPIA SDK COMPLIANT) ===== */
@@ -5195,7 +5312,7 @@
 <!-- ENHANCED PLAYER ROLE & STATUS DISPLAY -->
 <div id="player-status-hud" class="player-status-hud" style="display: none;">
   <div class="role-indicator" id="role-indicator">
-    <div class="role-icon" id="role-icon">⚽</div>
+    <div class="role-icon" id="role-icon">âš½</div>
     <div class="role-info">
       <div class="role-name" id="role-name">Player</div>
       <div class="role-description" id="role-description">Ready to play</div>
@@ -5211,7 +5328,7 @@
   </div>
   
   <div class="ball-possession-indicator" id="ball-possession" style="display: none;">
-    <div class="possession-icon">⚽</div>
+    <div class="possession-icon">âš½</div>
     <div class="possession-text">Ball Possession</div>
   </div>
 </div>
@@ -5224,7 +5341,7 @@
 <!-- PLAYER PERFORMANCE INDICATORS -->
 <div id="performance-indicators" class="performance-indicators" style="display: none;">
   <div class="performance-stat">
-    <div class="stat-icon">⚽</div>
+    <div class="stat-icon">âš½</div>
     <div class="stat-value" id="shots-stat">0</div>
     <div class="stat-label">Shots</div>
   </div>
@@ -5249,7 +5366,7 @@
 <div id="team-formation-display" class="team-formation-display" style="display: none;">
   <div class="formation-header">
     <div class="formation-title">Team Formation</div>
-    <div class="formation-toggle" onclick="toggleFormationDisplay()">📋</div>
+    <div class="formation-toggle" onclick="toggleFormationDisplay()">📹</div>
   </div>
   <div class="formation-field">
     <div class="field-player" id="player-gk">GK</div>
@@ -5263,10 +5380,10 @@
 
 <!-- Control Buttons -->
 <div class="control-buttons">
-      <button class="control-btn" id="audio-toggle" onclick="toggleAudio()" title="Toggle Audio">🔊</button>
+      <button class="control-btn" id="audio-toggle" onclick="toggleAudio()" title="Toggle Audio">🔔</button>
     <button class="control-btn" id="stats-toggle" onclick="toggleStatsPanel()" title="Toggle Statistics">📊</button>
-    <button class="control-btn" id="powerup-toggle" onclick="togglePowerUpPanel()" title="Toggle Power-Ups (Arcade Mode)" style="display: none;">🎪</button>
-    <button class="control-btn" id="pass-button" onclick="forcePassToTeammate()" title="Pass to Teammate (Left Click)">⚽</button>
+    <button class="control-btn" id="powerup-toggle" onclick="togglePowerUpPanel()" title="Toggle Power-Ups (Arcade Mode)" style="display: none;">🎮</button>
+    <button class="control-btn" id="pass-button" onclick="forcePassToTeammate()" title="Pass to Teammate (Left Click)">âš½</button>
 </div>
 
 <!-- Statistics Panel -->
@@ -5306,7 +5423,7 @@
 <!-- Power-Up Panel (Arcade Mode Only) -->
 <div class="powerup-panel hidden" id="powerup-panel">
   <div class="powerup-header">
-    <div class="powerup-title">🎪 Arcade Power-Ups</div>
+    <div class="powerup-title">🎮 Arcade Power-Ups</div>
   </div>
   
   <div class="powerup-active" id="active-powerup" style="display: none;">
@@ -5321,9 +5438,9 @@
     </div>
     <div style="font-size: 11px; color: #ffcccc; line-height: 1.4;">
       🧊 <strong>Freeze Blast</strong> - Freezes nearby opponents<br>
-              ⚡ <strong>Speed Boost</strong> - Doubles movement speed<br>
+              âš¡ <strong>Speed Boost</strong> - Doubles movement speed<br>
         🔥 <strong>Fireball</strong> - Explosive area damage<br>
-      ⚽ <strong>Mega Kick</strong> - Triple shot power<br>
+      âš½ <strong>Mega Kick</strong> - Triple shot power<br>
       🛡️ <strong>Shield</strong> - Temporary protection
     </div>
     <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">
@@ -5346,7 +5463,7 @@
 
   <!-- ===== ARCADE MODE POWER-UP SYSTEM ===== -->
   <div id="arcade-mode-indicator" class="arcade-mode-indicator">
-    🎪 ARCADE MODE - Enhanced Soccer!
+    🎮 ARCADE MODE - Enhanced Soccer!
   </div>
 
   <div id="powerup-container" class="powerup-container" style="display: none;">
@@ -5369,7 +5486,7 @@
     </div>
     
     <div class="powerup-button" id="mega-kick-btn" onclick="activatePowerUp('mega_kick')" title="Mega Kick - Triple shot power">
-      ⚡
+      âš¡
       <div class="powerup-cooldown-overlay" id="mega-kick-cooldown"></div>
     </div>
 
@@ -5399,14 +5516,14 @@
     <button class="how-to-play-btn">
       How to Play
       <div class="how-to-play-tooltip">
-        <p>⚽ Use WASD or Arrow keys to move</p>
-        <p>⚽ Left Click to pass</p>
-        <p>⚽ Type /pass in chat to force a pass when you have the ball</p>
-        <p>⚽ Press F to request pass from teammate</p>
-        <p>⚽ Hold Right Mouse Button to charge a shot / Release to shoot</p>
-        <p>⚽ Space bar to tackle or dodge</p>
-        <p>⚽ Highest score when time expires wins!</p>
-        <p>⚽ Select your game mode and team to get started!</p>
+        <p>âš½ Use WASD or Arrow keys to move</p>
+        <p>âš½ Left Click to pass</p>
+        <p>âš½ Type /pass in chat to force a pass when you have the ball</p>
+        <p>âš½ Press F to request pass from teammate</p>
+        <p>âš½ Hold Right Mouse Button to charge a shot / Release to shoot</p>
+        <p>âš½ Space bar to tackle or dodge</p>
+        <p>âš½ Highest score when time expires wins!</p>
+        <p>âš½ Select your game mode and team to get started!</p>
       </div>
     </button>
   </div>
@@ -5421,7 +5538,7 @@
         <div class="mode-features">• Pure soccer gameplay • 2 x 5-minute halves • No power-ups</div>
       </button>
       <button class="game-mode-btn arcade" id="arcadeModeBtn">
-        🎪 Arcade Mode
+        🎮 Arcade Mode
         <div class="mode-description">Enhanced Soccer with Physical Pickups</div>
         <div class="mode-features">• Physical power-up pickups to collect • Mario/Sonic-style gameplay • 2 x 5-minute halves</div>
       </button>
@@ -5560,10 +5677,10 @@
         <!-- Tournament Controls -->
         <div class="tournament-controls">
           <button class="tournament-btn join" id="joinTournamentBtn">
-            ✅ Join Tournament
+            âœ… Join Tournament
           </button>
           <button class="tournament-btn leave" id="leaveTournamentBtn" style="display: none;">
-            ❌ Leave Tournament
+            âŒ Leave Tournament
           </button>
           <button class="tournament-btn ready" id="readyCheckBtn" style="display: none;">
             🔔 Ready for Match
@@ -5596,21 +5713,21 @@
         
         <div class="ready-check-controls">
           <button class="ready-btn confirm" id="confirmReadyBtn">
-            ✅ I'm Ready
+            âœ… I'm Ready
           </button>
           <button class="ready-btn cancel" id="cancelReadyBtn">
-            ❌ Not Ready
+            âŒ Not Ready
           </button>
         </div>
         
         <div class="ready-status">
           <div class="player-ready-status">
             <span class="status-label">You:</span>
-            <span class="status-indicator" id="yourReadyStatus">❓ Waiting</span>
+            <span class="status-indicator" id="yourReadyStatus">â“ Waiting</span>
           </div>
           <div class="player-ready-status">
             <span class="status-label">Opponent:</span>
-            <span class="status-indicator" id="opponentReadyStatus">❓ Waiting</span>
+            <span class="status-indicator" id="opponentReadyStatus">â“ Waiting</span>
           </div>
         </div>
       </div>
@@ -5808,26 +5925,47 @@
       if (typeof hytopia !== 'undefined' && hytopia.sendData && typeof hytopia.isMobile !== 'undefined') {
         // Check if device is mobile using built-in detection
         if (hytopia.isMobile === true) {
-          console.log('[Mobile] Device detected - triggering auto-start FIFA mode');
+          console.log('[Mobile] Device detected - optimizing UI for touch');
 
-          // Send mobile auto-start request to server
-          hytopia.sendData({
-            type: 'mobile-auto-start-fifa',
-            deviceInfo: {
-              userAgent: navigator.userAgent,
-              screenWidth: window.screen.width,
-              screenHeight: window.screen.height,
-              timestamp: Date.now()
-            }
-          });
+          // Add mobile class to body for CSS selectors
+          document.body.classList.add('mobile');
+          console.log('[Mobile] body.mobile class added for CSS');
 
-          // Hide the opening UI for mobile players
-          const openingScreen = document.getElementById('opening-screen');
+          // CRITICAL FIX: DON'T hide opening screen - optimize it for mobile instead!
+          // Hytopia SDK expects mobile users to have the same choices as desktop users
+          const openingScreen = document.getElementById('opening-ui-overlay');
           if (openingScreen) {
-            openingScreen.style.display = 'none';
+            openingScreen.classList.add('mobile-optimized');
+            console.log('[Mobile] Opening screen optimized for touch');
           }
 
-          console.log('[Mobile] Auto-start request sent to server');
+          // Make game mode buttons larger for touch
+          document.querySelectorAll('.game-mode-btn').forEach(btn => {
+            btn.style.minHeight = '70px';
+            btn.style.fontSize = '22px';
+            btn.style.padding = '20px 30px';
+            btn.style.marginBottom = '12px';
+          });
+
+          // Make team buttons larger for touch
+          document.querySelectorAll('.team-btn').forEach(btn => {
+            btn.style.minHeight = '70px';
+            btn.style.fontSize = '22px';
+            btn.style.padding = '20px 30px';
+          });
+
+          // Make player count selection buttons larger
+          document.querySelectorAll('.player-count-btn').forEach(btn => {
+            btn.style.minHeight = '60px';
+            btn.style.fontSize = '20px';
+            btn.style.padding = '16px 24px';
+          });
+
+          // NOTE: We do NOT initialize custom mobile controls here
+          // Hytopia SDK provides built-in mobile joystick and camera controls
+          // Custom controls would conflict with Hytopia's native mobile support
+
+          console.log('[Mobile] UI optimized - user can now select mode and team');
         } else {
           console.log('[Desktop] Browser player - showing full UI');
         }
@@ -5864,7 +6002,7 @@
     //     canvas.addEventListener('webglcontextlost', (event) => {
     //       event.preventDefault();
     //       console.error("🚨 WebGL context lost - GPU memory exhausted!");
-    //       console.log("💡 To recover: Refresh the page or restart the browser");
+    //       console.log("⚠️ To recover: Refresh the page or restart the browser");
     //       
     //       // Show user-friendly error message
     //       const errorMessage = document.createElement('div');
@@ -5899,7 +6037,7 @@
     //     });
     //     
     //     canvas.addEventListener('webglcontextrestored', () => {
-    //       console.log("✅ WebGL context restored");
+    //       console.log("âœ… WebGL context restored");
     //     });
     //     
     //     console.log("🛡️ Client-side GPU memory monitoring enabled");
@@ -5911,12 +6049,12 @@
     // 
     // checkCanvas();
     
-    console.log("⚠️ WebGL context event listeners disabled - violate Hytopia SDK InputManager rules");
+    console.log("âš ï¸ WebGL context event listeners disabled - violate Hytopia SDK InputManager rules");
   }
   
   // DISABLED: GPU memory management DOMContentLoaded listener (violates Hytopia SDK InputManager)
   // NOTE: GPU memory management should be handled through Hytopia SDK lifecycle
-  console.log("⚠️ GPU memory management DOMContentLoaded listener disabled - violates Hytopia SDK InputManager rules");
+  console.log("âš ï¸ GPU memory management DOMContentLoaded listener disabled - violates Hytopia SDK InputManager rules");
   
   // ===== SCENE UI REGISTRATIONS =====
   // Register the power-bar SceneUI template to prevent "template power-bar not registered" errors
@@ -6053,7 +6191,7 @@
         • Traditional soccer rules and mechanics
       `;
     } else if (mode === 'arcade') {
-      titleEl.textContent = '🎪 Arcade Mode Selected';
+      titleEl.textContent = '🎮 Arcade Mode Selected';
       descEl.textContent = 'Fast-paced soccer action with enhanced gameplay features and special effects.';
       featuresEl.innerHTML = `
         • 2 x 5-minute halves for rapid gameplay<br>
@@ -6111,9 +6249,9 @@
             behavior: 'smooth',
             block: 'center'
           });
-          console.log('✅ Tournament UI displayed successfully');
+          console.log('âœ… Tournament UI displayed successfully');
         } else {
-          console.error('❌ Tournament UI element not found!');
+          console.error('âŒ Tournament UI element not found!');
         }
       }, 500);
     } else {
@@ -6149,18 +6287,18 @@
     
     // Validate playerCount parameter
     if (!playerCount || (playerCount !== 'single' && playerCount !== 'multiplayer')) {
-      console.error('❌ Invalid playerCount parameter:', playerCount);
+      console.error('âŒ Invalid playerCount parameter:', playerCount);
       return;
     }
     
     // Ensure game mode was selected first
     if (!selectedGameMode) {
-      console.error('❌ No game mode selected yet');
+      console.error('âŒ No game mode selected yet');
       alert('Please select a game mode (FIFA or Arcade) first!');
       return;
     }
     
-    console.log(`✅ Player count selected: ${playerCount}`);
+    console.log(`âœ… Player count selected: ${playerCount}`);
     selectedPlayerCount = playerCount;
     
     // Maintain cursor state throughout function
@@ -6181,13 +6319,13 @@
     if (playerCount === 'single') {
       const singleBtn = document.getElementById('singlePlayerBtn');
       if (!singleBtn) {
-        console.error('❌ Single player button not found!');
+        console.error('âŒ Single player button not found!');
         return;
       }
       
       singleBtn.classList.add('selected');
       singleBtn.style.cursor = 'pointer';
-      console.log('✅ Single player button selected');
+      console.log('âœ… Single player button selected');
       
       // Hide multiplayer lobby
       const multiplayerLobby = document.getElementById('multiplayerLobby');
@@ -6204,7 +6342,7 @@
         const teamSelection = document.getElementById('teamSelection');
         if (teamSelection) {
           teamSelection.style.display = 'block';
-          console.log('✅ Team selection shown for single player');
+          console.log('âœ… Team selection shown for single player');
           
           // Smooth scroll to team selection
           teamSelection.scrollIntoView({
@@ -6212,7 +6350,7 @@
             block: 'center'
           });
         } else {
-          console.error('❌ Team selection element not found!');
+          console.error('âŒ Team selection element not found!');
         }
         
         // Re-apply cursor state after scroll
@@ -6225,22 +6363,22 @@
     } else if (playerCount === 'multiplayer') {
       const multiBtn = document.getElementById('multiplayerBtn');
       if (!multiBtn) {
-        console.error('❌ Multiplayer button not found!');
+        console.error('âŒ Multiplayer button not found!');
         return;
       }
       
       multiBtn.classList.add('selected');
       multiBtn.style.cursor = 'pointer';
       isMultiplayerLobby = true;
-      console.log('✅ Multiplayer button selected');
+      console.log('âœ… Multiplayer button selected');
       
       // Show multiplayer lobby
       const multiplayerLobby = document.getElementById('multiplayerLobby');
       if (multiplayerLobby) {
         multiplayerLobby.style.display = 'block';
-        console.log('✅ Multiplayer lobby shown');
+        console.log('âœ… Multiplayer lobby shown');
       } else {
-        console.error('❌ Multiplayer lobby element not found!');
+        console.error('âŒ Multiplayer lobby element not found!');
       }
       
       // Send to server that we want multiplayer mode
@@ -6248,9 +6386,9 @@
         hytopia.sendData({
           type: "join-multiplayer-lobby"
         });
-        console.log('✅ Multiplayer lobby message sent to server');
+        console.log('âœ… Multiplayer lobby message sent to server');
       } else {
-        console.warn('⚠️  Hytopia not available, multiplayer lobby simulation only');
+        console.warn('âš ï¸  Hytopia not available, multiplayer lobby simulation only');
       }
       
       // For now, simulate waiting for second player
@@ -6279,18 +6417,18 @@
     const currentPlayersElement = document.querySelector('.current-players');
     if (currentPlayersElement) {
       currentPlayersElement.textContent = '2';
-      console.log('✅ Player count display updated');
+      console.log('âœ… Player count display updated');
     } else {
-      console.error('❌ Current players element not found');
+      console.error('âŒ Current players element not found');
     }
     
     // Update lobby message with error handling
     const lobbyMessage = document.querySelector('.lobby-message');
     if (lobbyMessage) {
       lobbyMessage.textContent = 'Match ready! Players will be assigned to different teams.';
-      console.log('✅ Lobby message updated');
+      console.log('âœ… Lobby message updated');
     } else {
-      console.error('❌ Lobby message element not found');
+      console.error('âŒ Lobby message element not found');
     }
     
     // Hide lobby and show team selection after brief delay
@@ -6300,22 +6438,22 @@
       
       if (multiplayerLobby) {
         multiplayerLobby.style.display = 'none';
-        console.log('✅ Multiplayer lobby hidden');
+        console.log('âœ… Multiplayer lobby hidden');
       } else {
-        console.error('❌ Multiplayer lobby element not found');
+        console.error('âŒ Multiplayer lobby element not found');
       }
       
       if (teamSelection) {
         teamSelection.style.display = 'block';
-        console.log('✅ Team selection shown for multiplayer');
+        console.log('âœ… Team selection shown for multiplayer');
         
         // Update team selection title for multiplayer
         const teamTitle = document.querySelector('.team-selection-title');
         if (teamTitle) {
           teamTitle.textContent = 'Teams Auto-Assigned - Choose Your Team Color';
-          console.log('✅ Team selection title updated for multiplayer');
+          console.log('âœ… Team selection title updated for multiplayer');
         } else {
-          console.error('❌ Team selection title element not found');
+          console.error('âŒ Team selection title element not found');
         }
         
         // Smooth scroll to team selection
@@ -6324,7 +6462,7 @@
           block: 'center'
         });
       } else {
-        console.error('❌ Team selection element not found');
+        console.error('âŒ Team selection element not found');
       }
     }, 2000);
   }
@@ -6416,10 +6554,10 @@
     
     if (powerUpPanel.classList.contains("hidden")) {
       powerUpPanel.classList.remove("hidden");
-      toggleBtn.textContent = "🎪";
+      toggleBtn.textContent = "🎮";
     } else {
       powerUpPanel.classList.add("hidden");
-      toggleBtn.textContent = "🎪";
+      toggleBtn.textContent = "🎮";
     }
   }
 
@@ -6461,25 +6599,25 @@
       const powerUpInfo = {
         // Core Power-Ups
         'freeze_blast': { name: '🧊 Freeze Blast', desc: 'Freezes nearby opponents for 3 seconds' },
-        'stamina': { name: '⚡ Stamina Restore', desc: 'Restores stamina and boosts regeneration' },
+        'stamina': { name: 'âš¡ Stamina Restore', desc: 'Restores stamina and boosts regeneration' },
         'fireball': { name: '🔥 Fireball', desc: 'Launches an explosive fireball that stuns and burns' },
-        'mega_kick': { name: '⚽ Mega Kick', desc: 'Next ball kick has 2x power and speed' },
+        'mega_kick': { name: 'âš½ Mega Kick', desc: 'Next ball kick has 2x power and speed' },
         'shield': { name: '🛡️ Shield', desc: 'Blocks one attack for 15 seconds' },
-        'speed': { name: '⚡ Speed Boost', desc: 'Increased movement speed for 8 seconds' },
-        'speed_boost': { name: '⚡ Speed Boost', desc: 'Increased movement speed for 8 seconds' }, // Alias for consistency
+        'speed': { name: 'âš¡ Speed Boost', desc: 'Increased movement speed for 8 seconds' },
+        'speed_boost': { name: 'âš¡ Speed Boost', desc: 'Increased movement speed for 8 seconds' }, // Alias for consistency
         'power': { name: '💪 Power Enhancement', desc: 'Increased shot power for 15 seconds' },
         'precision': { name: '🎯 Precision Enhancement', desc: 'Improved accuracy for 15 seconds' },
         'shuriken': { name: '🥷 Shuriken Throw', desc: 'Launches stunning projectile that can be dodged' },
 
         // Enhanced Power-Ups
-        'time_slow': { name: '⏰ Time Slow', desc: 'Slows down all opponents for 8 seconds' },
+        'time_slow': { name: 'â° Time Slow', desc: 'Slows down all opponents for 8 seconds' },
         'ball_magnet': { name: '🧲 Ball Magnet', desc: 'Ball automatically follows you for 10 seconds' },
-        'crystal_barrier': { name: '💎 Crystal Barrier', desc: 'Creates protective crystal shields for 15 seconds' },
+        'crystal_barrier': { name: '🔷 Crystal Barrier', desc: 'Creates protective crystal shields for 15 seconds' },
         'elemental_mastery': { name: '🌊 Elemental Mastery', desc: 'Controls field elements and effects for 12 seconds' },
         'tidal_wave': { name: '🌊 Tidal Wave', desc: 'Creates splash zones and waves for 6 seconds' },
         'reality_warp': { name: '🌀 Reality Warp', desc: 'Creates portals and warps space for 15 seconds' },
         'honey_trap': { name: '🍯 Honey Trap', desc: 'Creates sticky slow zones for 10 seconds' },
-        'star_rain': { name: '⭐ Star Rain', desc: 'Rains stars from the sky (coming soon!)' }
+        'star_rain': { name: '⭐ Star Rain', desc: 'Rains stars from the sky (coming soon!)' }
       };
       
       const info = powerUpInfo[powerUpData.type] || { name: powerUpData.type, desc: 'Unknown power-up' };
@@ -6564,7 +6702,7 @@
   function toggleAudio() {
     audioEnabled = !audioEnabled;
     const audioBtn = document.getElementById("audio-toggle");
-    audioBtn.textContent = audioEnabled ? "🔊" : "🔇";
+    audioBtn.textContent = audioEnabled ? "🔔" : "🔇";
     audioBtn.title = audioEnabled ? "Mute Audio" : "Enable Audio";
     
     playUISound("button-click");
@@ -6654,11 +6792,8 @@
             console.log('📱 Opening UI overlay hidden - game controls now active');
           }
 
-          // Show mobile controls on mobile devices
-          if (document.body.classList.contains('mobile') && typeof showMobileControls === 'function') {
-            console.log('📱 Showing mobile controls after team selection');
-            showMobileControls();
-          }
+          // Mobile controls are handled entirely by Hytopia SDK
+          // No custom initialization needed
         }, 500);
       }
     }, 200);
@@ -6713,9 +6848,9 @@
         min-height: 35px !important;
       `;
       
-      console.log("✅ Main scoreboard initialized with scores:", redScore.textContent, blueScore.textContent);
+      console.log("âœ… Main scoreboard initialized with scores:", redScore.textContent, blueScore.textContent);
     } else {
-      console.error("❌ Could not find main score elements!");
+      console.error("âŒ Could not find main score elements!");
     }
     
     // Initialize other UI elements
@@ -6748,10 +6883,10 @@
         visibility: visible !important;
         opacity: 1 !important;
       `;
-      console.log("✅ Main scoreboard container forced visible");
+      console.log("âœ… Main scoreboard container forced visible");
     }
     
-    console.log("✅ Score display initialization complete");
+    console.log("âœ… Score display initialization complete");
   }
 
   // Add click event listeners immediately (DOM is already loaded since script is at bottom)
@@ -6802,9 +6937,9 @@
     if (createTournamentBtn) {
       // HYTOPIA-COMPLIANT: Use onclick instead of addEventListener
       createTournamentBtn.setAttribute('onclick', 'handleTournamentCreation(event); return false;');
-      console.log("✅ Tournament creation event listener added successfully");
+      console.log("âœ… Tournament creation event listener added successfully");
     } else {
-      console.error("❌ Could not find tournament creation button!");
+      console.error("âŒ Could not find tournament creation button!");
     }
 
     // Tournament Join Button Handler
@@ -6812,9 +6947,9 @@
     if (joinTournamentBtn) {
       // HYTOPIA-COMPLIANT: Use onclick instead of addEventListener
       joinTournamentBtn.setAttribute('onclick', 'handleTournamentJoin(event); return false;');
-      console.log("✅ Tournament join event listener added successfully");
+      console.log("âœ… Tournament join event listener added successfully");
     } else {
-      console.error("❌ Could not find tournament join button!");
+      console.error("âŒ Could not find tournament join button!");
     }
 
     // Tournament Leave Button Handler
@@ -6822,9 +6957,9 @@
     if (leaveTournamentBtn) {
       // HYTOPIA-COMPLIANT: Use onclick instead of addEventListener
       leaveTournamentBtn.setAttribute('onclick', 'handleTournamentLeave(event); return false;');
-      console.log("✅ Tournament leave event listener added successfully");
+      console.log("âœ… Tournament leave event listener added successfully");
     } else {
-      console.error("❌ Could not find tournament leave button!");
+      console.error("âŒ Could not find tournament leave button!");
     }
 
     // Ready Check Button Handler
@@ -6832,9 +6967,9 @@
     if (confirmReadyBtn) {
       // HYTOPIA-COMPLIANT: Use onclick instead of addEventListener
       confirmReadyBtn.setAttribute('onclick', 'handleReadyConfirm(event); return false;');
-      console.log("✅ Ready confirm event listener added successfully");
+      console.log("âœ… Ready confirm event listener added successfully");
     } else {
-      console.error("❌ Could not find ready confirm button!");
+      console.error("âŒ Could not find ready confirm button!");
     }
 
     // Back to Lobby Button Handler
@@ -6842,9 +6977,9 @@
     if (backToLobbyBtn) {
       // HYTOPIA-COMPLIANT: Use onclick instead of addEventListener
       backToLobbyBtn.setAttribute('onclick', 'handleBackToLobby(event); return false;');
-      console.log("✅ Back to lobby event listener added successfully");
+      console.log("âœ… Back to lobby event listener added successfully");
     } else {
-      console.error("❌ Could not find back to lobby button!");
+      console.error("âŒ Could not find back to lobby button!");
     }
     
     // PICKUP MODE EVENT LISTENER DISABLED
@@ -6900,11 +7035,11 @@
         
         successCount++;
       } catch (error) {
-        console.error(`❌ Error initializing button ${index}:`, error);
+        console.error(`âŒ Error initializing button ${index}:`, error);
       }
     });
     
-    console.log(`✅ Successfully initialized ${successCount} buttons`);
+    console.log(`âœ… Successfully initialized ${successCount} buttons`);
     
     // Specific validation for critical buttons
     const criticalButtons = [
@@ -6921,11 +7056,11 @@
     criticalButtons.forEach(buttonId => {
       const button = document.getElementById(buttonId);
       if (button) {
-        console.log(`✅ Found critical button: ${buttonId}`);
+        console.log(`âœ… Found critical button: ${buttonId}`);
         button.style.cursor = 'pointer';
         button.style.pointerEvents = 'auto';
       } else {
-        console.error(`❌ Critical button missing: ${buttonId}`);
+        console.error(`âŒ Critical button missing: ${buttonId}`);
       }
     });
   }
@@ -6934,9 +7069,9 @@
   try {
     initializeScoreDisplay();
     initializeAllButtons();
-    console.log('✅ UI initialization completed successfully');
+    console.log('âœ… UI initialization completed successfully');
   } catch (error) {
-    console.error('❌ UI initialization error:', error);
+    console.error('âŒ UI initialization error:', error);
   }
 
   // Final safety check - ensure all buttons are responsive
@@ -6959,7 +7094,7 @@
       console.warn(`🔧 Fixed ${buttonIssues} button cursor/pointer issues`);
     }
     
-    console.log(`✅ Final button check: ${allButtons.length} buttons verified as clickable`);
+    console.log(`âœ… Final button check: ${allButtons.length} buttons verified as clickable`);
   }, 1000);
   
   // ===== MESSAGE HANDLERS =====
@@ -7033,7 +7168,7 @@
       // ===== TOURNAMENT MESSAGE HANDLERS =====
       else if (data.type === "tournament-created") {
         console.log("🔧 DEBUG: tournament-created handler triggered!");
-        console.log("✅ Tournament created successfully:", data.tournament);
+        console.log("âœ… Tournament created successfully:", data.tournament);
         
         // ROBUST ERROR HANDLING - Work around Hytopia SDK issues
         try {
@@ -7047,8 +7182,8 @@
           try {
             showTournamentSuccess(`Tournament "${data.tournament.name}" created successfully!`);
           } catch (e) {
-            console.warn("⚠️ Success message failed, using fallback:", e);
-            alert(`✅ Tournament "${data.tournament.name}" created successfully!`);
+            console.warn("âš ï¸ Success message failed, using fallback:", e);
+            alert(`âœ… Tournament "${data.tournament.name}" created successfully!`);
           }
           
           // Re-enable create button with protection
@@ -7065,7 +7200,7 @@
                 console.log("🔧 DEBUG: Create tournament button not found");
               }
             } catch (e) {
-              console.warn("⚠️ Button re-enable failed:", e);
+              console.warn("âš ï¸ Button re-enable failed:", e);
             }
           }, 100);
           
@@ -7075,7 +7210,7 @@
               const nameField = document.getElementById("tournamentName");
               if (nameField) nameField.value = "";
             } catch (e) {
-              console.warn("⚠️ Form clear failed:", e);
+              console.warn("âš ï¸ Form clear failed:", e);
             }
           }, 200);
           
@@ -7109,34 +7244,34 @@
                   const lobbyName = document.getElementById("tournamentLobbyName");
                   if (lobbyName) lobbyName.textContent = data.tournament.name;
                 } catch (e) {
-                  console.warn("⚠️ Lobby name update failed:", e);
+                  console.warn("âš ï¸ Lobby name update failed:", e);
                 }
                 
                 try {
                   const lobbyDetails = document.getElementById("tournamentLobbyDetails");
                   if (lobbyDetails) lobbyDetails.textContent = `${data.tournament.maxPlayers} Players • ${data.tournament.type} • ${data.tournament.gameMode.toUpperCase()} Mode`;
                 } catch (e) {
-                  console.warn("⚠️ Lobby details update failed:", e);
+                  console.warn("âš ï¸ Lobby details update failed:", e);
                 }
                 
                 try {
                   const lobbyStatus = document.getElementById("tournamentLobbyStatus");
                   if (lobbyStatus) lobbyStatus.textContent = "Registration Open";
                 } catch (e) {
-                  console.warn("⚠️ Lobby status update failed:", e);
+                  console.warn("âš ï¸ Lobby status update failed:", e);
                 }
                 
-                console.log("✅ Successfully switched to tournament lobby view");
+                console.log("âœ… Successfully switched to tournament lobby view");
               }
             } catch (e) {
-              console.error("❌ Critical error in lobby view switch:", e);
+              console.error("âŒ Critical error in lobby view switch:", e);
               // Fallback: at least show a success message
-              alert("✅ Tournament created! Please refresh the page if the lobby doesn't appear.");
+              alert("âœ… Tournament created! Please refresh the page if the lobby doesn't appear.");
             }
           }, 300);
           
         } catch (mainError) {
-          console.error("❌ Critical error in tournament-created handler:", mainError);
+          console.error("âŒ Critical error in tournament-created handler:", mainError);
           // Ultimate fallback
           setTimeout(() => {
             const button = document.getElementById("createTournamentBtn");
@@ -7144,12 +7279,12 @@
               button.disabled = false;
               button.textContent = "🏆 Create Tournament";
             }
-            alert("✅ Tournament created successfully! Please refresh if needed.");
+            alert("âœ… Tournament created successfully! Please refresh if needed.");
           }, 500);
         }
       }
       else if (data.type === "tournament-error") {
-        console.error("❌ Tournament error:", data.message);
+        console.error("âŒ Tournament error:", data.message);
         
         // Clear timeout to prevent auto-recovery
         if (window.tournamentCreationTimeout) {
@@ -7167,7 +7302,7 @@
         }
       }
       else if (data.type === "tournament-joined") {
-        console.log("✅ Successfully joined tournament");
+        console.log("âœ… Successfully joined tournament");
         showTournamentSuccess("Successfully joined tournament!");
         
         // Store tournament ID
@@ -7181,7 +7316,7 @@
         if (leaveBtn) leaveBtn.style.display = "block";
       }
       else if (data.type === "tournament-left") {
-        console.log("✅ Successfully left tournament");
+        console.log("âœ… Successfully left tournament");
         showTournamentSuccess("Left tournament");
         
         // Clear tournament ID
@@ -7388,9 +7523,9 @@
     if (redScore && blueScore) {
       redScore.textContent = red;
       blueScore.textContent = blue;
-      console.log("✅ MAIN SCOREBOARD updated to:", red, "vs", blue);
+      console.log("âœ… MAIN SCOREBOARD updated to:", red, "vs", blue);
     } else {
-      console.error("❌ Could not find main score elements!");
+      console.error("âŒ Could not find main score elements!");
     }
     
     // Ensure scoreboard container is visible
@@ -7398,7 +7533,7 @@
       mainScoreboard.style.display = "flex";
       mainScoreboard.style.visibility = "visible";
       mainScoreboard.style.opacity = "1";
-      console.log("✅ Main scoreboard container forced visible");
+      console.log("âœ… Main scoreboard container forced visible");
     }
   };
   
@@ -7490,19 +7625,19 @@
     "central-midfielder-1": {
       name: "Central Mid",
       description: "Control the field",
-      icon: "⚡",
+      icon: "âš¡",
       className: "midfielder"
     },
     "central-midfielder-2": {
       name: "Central Mid",
       description: "Support attack",
-      icon: "⚡",
+      icon: "âš¡",
       className: "midfielder"
     },
     striker: {
       name: "Striker",
       description: "Score goals",
-      icon: "⚽",
+      icon: "âš½",
       className: "striker"
     }
   };
@@ -7525,7 +7660,7 @@
     // Initialize stamina
     updateStamina(100);
 
-    console.log("✅ Enhanced UI systems initialized");
+    console.log("âœ… Enhanced UI systems initialized");
   }
 
   // Update player role display
@@ -7533,7 +7668,7 @@
     const config = roleConfigs[role] || {
       name: "Player",
       description: "Ready to play",
-      icon: "⚽",
+      icon: "âš½",
       className: "player"
     };
 
@@ -7615,14 +7750,14 @@
     feedback.className = `action-feedback ${type}`;
     
     const icons = {
-      success: "✅",
-      info: "ℹ️", 
-      warning: "⚠️",
-      error: "❌"
+      success: "âœ…",
+      info: "â„¹ï¸", 
+      warning: "âš ï¸",
+      error: "âŒ"
     };
 
     feedback.innerHTML = `
-      <div class="feedback-icon">${icons[type] || "ℹ️"}</div>
+      <div class="feedback-icon">${icons[type] || "â„¹ï¸"}</div>
       <div class="feedback-content">
         <div class="feedback-title">${title}</div>
         <div class="feedback-message">${message}</div>
@@ -7790,7 +7925,7 @@
         setTimeout(() => {
           const btn = document.getElementById('createTournamentBtn');
           if (btn) {
-            btn.textContent = '✅ Tournament Created!';
+            btn.textContent = 'âœ… Tournament Created!';
             btn.disabled = false;
             btn.style.opacity = '1';
             console.log("🚨 EMERGENCY: Button reset completed");
@@ -7913,7 +8048,7 @@
         setTimeout(() => {
           // Show error message
           if (data.message) {
-            alert("⚠️ Tournament Error: " + data.message);
+            alert("âš ï¸ Tournament Error: " + data.message);
           }
           console.log("🚨 EMERGENCY: Error message displayed");
         }, 100);
@@ -8032,9 +8167,9 @@
           redScore.textContent = data.score.red;
           blueScore.textContent = data.score.blue;
           console.log(`📊 AFTER UPDATE - Red: ${redScore.textContent}, Blue: ${blueScore.textContent}`);
-          console.log("✅ MAIN SCOREBOARD UPDATED:", data.score.red, "vs", data.score.blue);
+          console.log("âœ… MAIN SCOREBOARD UPDATED:", data.score.red, "vs", data.score.blue);
       } else {
-          console.log("⏸️ SKIPPING score update - in goal-scored status, letting goal-scored event handle it");
+          console.log("â¸ï¸ SKIPPING score update - in goal-scored status, letting goal-scored event handle it");
         }
       } else {
         console.log("🔄 Game-state update without score data - keeping current score");
@@ -8046,11 +8181,11 @@
           mainScoreboard.style.display = "flex";
           mainScoreboard.style.opacity = "1";
           mainScoreboard.style.visibility = "visible";
-          console.log("✅ Scoreboard shown - game status:", data.status);
+          console.log("âœ… Scoreboard shown - game status:", data.status);
         } else if (data.status === "waiting") {
           // Keep scoreboard visible but show lobby state
           mainScoreboard.style.display = "flex";
-          console.log("✅ Scoreboard visible in lobby - game status:", data.status);
+          console.log("âœ… Scoreboard visible in lobby - game status:", data.status);
         }
       }
       
@@ -8066,7 +8201,7 @@
       // Handle enhanced UI features
       handleEnhancedGameState(data);
       
-      console.log("✅ Game state update complete");
+      console.log("âœ… Game state update complete");
     }
 
     if (data.type === "team-counts") {
@@ -8081,7 +8216,7 @@
     }
 
     if (data.type === "stoppage-time-notification") {
-      console.log("⏱️ Stoppage time notification received:", data);
+      console.log("â±ï¸ Stoppage time notification received:", data);
       showStoppageTimeNotification(data);
     }
 
@@ -8133,7 +8268,7 @@
         redScore.textContent = data.score.red;
         blueScore.textContent = data.score.blue;
         console.log(`🥅 AFTER GOAL UPDATE - Red: ${redScore.textContent}, Blue: ${blueScore.textContent}`);
-        console.log("✅ GOAL EVENT - Main scoreboard updated:", data.score.red, "vs", data.score.blue);
+        console.log("âœ… GOAL EVENT - Main scoreboard updated:", data.score.red, "vs", data.score.blue);
         
         // Add goal celebration animation
         const scoringTeam = data.team === "red" ? redScore : blueScore;
@@ -8146,7 +8281,7 @@
         animateScoreChange("red", data.score.red);
         animateScoreChange("blue", data.score.blue);
       } else {
-        console.error("❌ Could not find scoreboard elements or score data for goal update!");
+        console.error("âŒ Could not find scoreboard elements or score data for goal update!");
       }
       
       // Show enhanced goal celebration and play sound
@@ -8173,7 +8308,7 @@
           message: data.message || `${powerupName} activated!`
         });
       } else {
-        console.log("⚠️ Unrecognized power-up type:", data.powerUpType, "- skipping notification");
+        console.log("âš ï¸ Unrecognized power-up type:", data.powerUpType, "- skipping notification");
       }
     }
 
@@ -8281,7 +8416,7 @@
       document.body.appendChild(indicator);
     }
     
-    indicator.textContent = `⚙️ ${message}`;
+    indicator.textContent = `âš™ï¸ ${message}`;
     indicator.style.opacity = "1";
     indicator.style.transform = "translateX(0)";
   }
@@ -8341,7 +8476,7 @@
     const notification = document.createElement('div');
     notification.className = 'stoppage-time-notification';
     notification.innerHTML = `
-      <div class="stoppage-time-icon">⏱️</div>
+      <div class="stoppage-time-icon">â±ï¸</div>
       <div><strong>STOPPAGE TIME</strong></div>
       <div class="stoppage-time-message">${data.message}</div>
     `;
@@ -8469,16 +8604,16 @@
       const iconMap = {
         'Freeze Blast': '🧊',
         'Fireball': '🔥',
-        'Mega Kick': '⚽',
+        'Mega Kick': 'âš½',
         'Shield': '🛡️',
-        'Speed Boost': '⚡',
-        'Stamina': '💊',
+        'Speed Boost': 'âš¡',
+        'Stamina': '🗲',
         'Power Boost': '💪',
         'Precision': '🎯',
         'Shuriken': '🌀'
       };
 
-      mobileIcon.textContent = iconMap[abilityName] || '⚡';
+      mobileIcon.textContent = iconMap[abilityName] || 'âš¡';
       mobileBtn.style.display = 'flex';
 
       console.log("📱 Mobile power-up button shown");
@@ -8511,9 +8646,9 @@
 
     // If media query matches or window width is small, log it
     if (window.innerWidth <= 768 || window.matchMedia('(max-width: 768px)').matches) {
-      console.log('✅ MOBILE LAYOUT SHOULD BE ACTIVE');
+      console.log('âœ… MOBILE LAYOUT SHOULD BE ACTIVE');
     } else {
-      console.log('❌ DESKTOP LAYOUT ACTIVE (width > 768px)');
+      console.log('âŒ DESKTOP LAYOUT ACTIVE (width > 768px)');
     }
   });
 
@@ -8528,7 +8663,7 @@
         emptySlot.classList.add("visible");
       }, 200);
       
-      console.log("⚡ Empty powerup slot shown - indicating pickup availability");
+      console.log("âš¡ Empty powerup slot shown - indicating pickup availability");
     }
   }
 
@@ -8630,7 +8765,7 @@
       notification.style.background = "linear-gradient(135deg, rgba(200, 100, 0, 0.9), rgba(150, 80, 0, 0.9))";
       notification.style.color = "#ffffff";
       notification.style.borderColor = "#ffaa00";
-      notification.textContent = data.message || "❌ Powerup failed";
+      notification.textContent = data.message || "âŒ Powerup failed";
     }
 
     // Show notification
@@ -8671,7 +8806,7 @@
     if (gameModeSelection) gameModeSelection.style.display = "none";
     
     if (!gameOverContent) {
-      console.error("❌ game-over-content element not found!");
+      console.error("âŒ game-over-content element not found!");
       return;
     }
     
@@ -8728,7 +8863,7 @@
     panel.classList.remove("hidden");
       console.log("🎯 Removed hidden class from instructions panel");
     } else {
-      console.error("❌ Instructions panel not found!");
+      console.error("âŒ Instructions panel not found!");
     }
   }
 
@@ -8839,7 +8974,7 @@
   function updatePlayerStats(playerStats) {
     // Ensure playerStats is an array before trying to filter
     if (!Array.isArray(playerStats)) {
-      console.log("⚠️ updatePlayerStats called with non-array data:", typeof playerStats, playerStats);
+      console.log("âš ï¸ updatePlayerStats called with non-array data:", typeof playerStats, playerStats);
       return;
     }
     
@@ -9245,7 +9380,7 @@
             <div style="font-size: 12px; color: #87CEEB;">${player.role.replace(/-/g, ' ')}</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 14px;">⚽ ${player.goals} | 🦵 ${player.tackles}</div>
+            <div style="font-size: 14px;">âš½ ${player.goals} | 🦵 ${player.tackles}</div>
             <div style="font-size: 12px; color: #87CEEB;">${Math.round(player.distanceTraveled)}m</div>
           </div>
         </div>
@@ -9264,7 +9399,7 @@
             <div style="font-size: 12px; color: #87CEEB;">${player.role.replace(/-/g, ' ')}</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 14px;">⚽ ${player.goals} | 🦵 ${player.tackles}</div>
+            <div style="font-size: 14px;">âš½ ${player.goals} | 🦵 ${player.tackles}</div>
             <div style="font-size: 12px; color: #87CEEB;">${Math.round(player.distanceTraveled)}m</div>
           </div>
         </div>
@@ -9288,7 +9423,7 @@
     
     countdownSection.innerHTML = `
       <div style="font-size: 24px; color: #FFD700; margin-bottom: 20px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); animation: pulse 2s infinite;">
-        ⏱️ HALFTIME BREAK
+        â±ï¸ HALFTIME BREAK
       </div>
       <div style="font-size: 18px; color: #87CEEB; margin-bottom: 30px; font-weight: 500;">
         Review the stats and click when ready to continue
@@ -9350,16 +9485,16 @@
         // Ensure button is always visible and clickable
         ensureHalftimeButtonVisible();
         
-        console.log("✅ Hytopia-compliant halftime button setup complete");
+        console.log("âœ… Hytopia-compliant halftime button setup complete");
       } else {
-        console.error("❌ Could not find halftime button for setup");
+        console.error("âŒ Could not find halftime button for setup");
       }
     }, 100);
     
     // Additional failsafe check after a longer delay
     setTimeout(() => {
       if (!ensureHalftimeButtonVisible()) {
-        console.error("❌ CRITICAL: Halftime button not found after 1 second!");
+        console.error("âŒ CRITICAL: Halftime button not found after 1 second!");
       }
     }, 1000);
     
@@ -9377,11 +9512,11 @@
       console.log("🔄 Halftime listener received message:", data.type, "isHalftime:", data.isHalftime, "status:", data.status);
       
       if (data.type === "game-state" && !data.isHalftime && data.status === "playing") {
-        console.log("✅ Halftime has ended, removing overlay");
+        console.log("âœ… Halftime has ended, removing overlay");
         // Halftime has ended, remove the overlay
         removeHalftimeStatsOverlay();
       } else if (data.type === "game-state" && data.message === "Starting 2nd Half") {
-        console.log("✅ Starting 2nd Half message received, removing overlay");
+        console.log("âœ… Starting 2nd Half message received, removing overlay");
         // Also remove overlay when we get the specific 2nd half message
         removeHalftimeStatsOverlay();
       }
@@ -9403,9 +9538,9 @@
       button.disabled = true;
       button.style.opacity = '0.5';
       button.style.cursor = 'not-allowed';
-      button.textContent = '⏳ Starting...';
+      button.textContent = 'â³ Starting...';
       button.style.animation = 'none'; // Stop the glow animation
-      console.log("✅ Button disabled to prevent multiple clicks");
+      console.log("âœ… Button disabled to prevent multiple clicks");
     }
     
     // Send event to server to start second half
@@ -9413,7 +9548,7 @@
       hytopia.sendData({
         type: 'start-second-half'
       });
-      console.log("✅ Start second half event sent to server");
+      console.log("âœ… Start second half event sent to server");
       
       // Add a failsafe to remove the overlay after a short delay
       // This ensures the UI responds even if the server message is delayed
@@ -9423,7 +9558,7 @@
       }, 3000);
       
     } else {
-      console.error("❌ Could not send start-second-half event - hytopia not available");
+      console.error("âŒ Could not send start-second-half event - hytopia not available");
     }
     
     // Play button click sound
@@ -9442,10 +9577,10 @@
       button.style.cursor = 'pointer';
       button.style.zIndex = '10002';
       button.style.position = 'relative';
-      console.log("✅ Halftime button visibility ensured");
+      console.log("âœ… Halftime button visibility ensured");
       return true;
     }
-    console.warn("⚠️ Halftime button not found for visibility check");
+    console.warn("âš ï¸ Halftime button not found for visibility check");
     return false;
   }
 
@@ -9454,16 +9589,16 @@
     console.log("🔄 Attempting to remove FIRST HALF COMPLETE! overlay");
     const overlay = document.getElementById('halftime-stats-overlay');
     if (overlay) {
-      console.log("✅ Halftime overlay found, removing with animation");
+      console.log("âœ… Halftime overlay found, removing with animation");
       overlay.style.animation = 'fadeOut 0.5s ease-out';
       setTimeout(() => {
         if (overlay.parentNode) {
           document.body.removeChild(overlay);
-          console.log("✅ Halftime overlay successfully removed from DOM");
+          console.log("âœ… Halftime overlay successfully removed from DOM");
         }
       }, 500);
     } else {
-      console.log("⚠️ Halftime overlay not found - may have been already removed");
+      console.log("âš ï¸ Halftime overlay not found - may have been already removed");
     }
   }
 
@@ -9494,7 +9629,7 @@
 
   // DISABLED: Window error event listener (violates Hytopia SDK InputManager)
   // NOTE: Error handling should be done through try-catch blocks for Hytopia compatibility
-  console.log("⚠️ Window error event listener disabled - violates Hytopia SDK InputManager rules");
+  console.log("âš ï¸ Window error event listener disabled - violates Hytopia SDK InputManager rules");
 
   // ===== HYTOPIA-COMPLIANT UI INITIALIZATION =====
   // No pointer lock blocking needed - server manages this with player.ui.lockPointer()
@@ -9502,7 +9637,7 @@
   // DISABLED: DOMContentLoaded and button event listeners (violate Hytopia SDK InputManager)
   // HYTOPIA-COMPLIANT: All button interactions handled via onclick attributes set during initialization
   // NOTE: This entire section was causing InputManager crashes - replaced with onclick attributes
-  console.log('⚠️ DOMContentLoaded UI handlers disabled - violate Hytopia SDK InputManager rules');
+  console.log('âš ï¸ DOMContentLoaded UI handlers disabled - violate Hytopia SDK InputManager rules');
 
   function handleGameReset(data) {
     console.log("Game reset received:", data.message);
@@ -9574,7 +9709,7 @@
     
     notification.innerHTML = `
       <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 18px;">✅</span>
+        <span style="font-size: 18px;">âœ…</span>
         <span>${message}</span>
       </div>
     `;
@@ -9690,7 +9825,7 @@
       'freeze_blast': '🧊 FREEZE!',
       'stamina': '🧪 STAMINA!',
       'fireball': '🔥 FIREBALL!',
-      'mega_kick': '⚽ MEGA KICK!',
+      'mega_kick': 'âš½ MEGA KICK!',
       'random_powerup': '🎲 RANDOM!'
     };
 
@@ -9825,10 +9960,10 @@
     // Show pickup notification for pickup-only mode
     if (pickupInfo) {
       pickupInfo.style.display = 'block';
-      pickupInfo.innerHTML = '⭐ PHYSICAL PICKUPS ACTIVE<br><small>Run through pickups on the field to collect abilities!</small>';
+      pickupInfo.innerHTML = '⭐ PHYSICAL PICKUPS ACTIVE<br><small>Run through pickups on the field to collect abilities!</small>';
     }
     
-    console.log('🎪 Arcade Mode UI activated - Pickup-only mode!');
+    console.log('🎮 Arcade Mode UI activated - Pickup-only mode!');
   }
 
   // Initialize enhanced power-up system - DISABLED for pickup-only mode
@@ -9864,7 +9999,7 @@
   function setupPowerupKeyboardControls() {
     // NOTE: Power-up activation handled by server-side input processing
     // Players can use number keys 1-8 which are properly handled by Hytopia SDK
-    console.log("⚠️ Power-up keyboard controls disabled - handled by Hytopia SDK input system");
+    console.log("âš ï¸ Power-up keyboard controls disabled - handled by Hytopia SDK input system");
   }
 
   // Activate specific power-up - DISABLED for pickup-only mode
@@ -10062,16 +10197,16 @@
     const iconMap = {
       'freeze_blast': '🧊',
       'fireball': '🔥',
-      'mega_kick': '⚽',
+      'mega_kick': 'âš½',
       'random_powerup': '🎲',
       'shield': '🛡️',
       'stamina': '🧪',
-      'speed': '⚡',
+      'speed': 'âš¡',
       'power': '💥',
       'precision': '🎯',
       'shuriken': '🥷'
     };
-    return iconMap[powerUpType] || '⚡';
+    return iconMap[powerUpType] || 'âš¡';
   }
 
   // Enhanced powerup feedback function
@@ -10164,661 +10299,39 @@
   window.showPowerupFeedback = showPowerupFeedback;
   window.forcePassToTeammate = forcePassToTeammate;
 
-  // ===== PHASE 1 MOBILE CONTROLS SYSTEM (HYTOPIA SDK COMPLIANT) =====
-  
-  // Mobile controls state variables
-  let mobileControlsInitialized = false;
-  let mobileCameraState = {
-    enabled: true,
-    sensitivity: 0.003,
-    maxPitch: Math.PI / 3,
-    touchStartPos: null,
-    lastTouchPos: null,
-    isDragging: false,
-    deadzone: 5,
-    smoothing: 0.1
-  };
-  
-  // Initialize mobile controls
+  // ===== MOBILE CONTROLS =====
+  // Mobile controls (joystick, camera, sprint) are handled entirely by the Hytopia SDK
+  // No custom implementation needed - Hytopia automatically provides:
+  // - Virtual joystick for movement (bottom-left)
+  // - Touch drag for camera rotation (anywhere on screen)
+  // - Sprint by pulling joystick all the way out
+
+  // Placeholder functions for backwards compatibility (empty implementations)
   function initializeMobileControls() {
-    // Check for mobile via Hytopia SDK .mobile class or custom detection
-    const isMobileViaClass = document.body.classList.contains('mobile');
-    const isMobileViaDetection = detectMobileDevice();
-    
-    if (mobileControlsInitialized || (!isMobileViaClass && !isMobileViaDetection)) {
-      return;
-    }
-    
-    console.log('📱 Initializing mobile controls...');
-    
-    // Create mobile controls container
-    const mobileControlsContainer = document.createElement('div');
-    mobileControlsContainer.id = 'mobile-controls-container';
-    mobileControlsContainer.className = 'mobile-controls'; // Start hidden - will be shown after team selection
-
-    // Mobile controls will be hidden until player spawns into game
-    mobileControlsContainer.style.display = 'none';
-    mobileControlsContainer.style.visibility = 'hidden';
-    
-    // Create virtual joystick
-    const virtualJoystick = document.createElement('div');
-    virtualJoystick.className = 'virtual-joystick';
-    virtualJoystick.id = 'virtual-joystick';
-    
-    const joystickKnob = document.createElement('div');
-    joystickKnob.className = 'joystick-knob';
-    joystickKnob.id = 'joystick-knob';
-    
-    virtualJoystick.appendChild(joystickKnob);
-    
-    // Create action buttons
-    const mobileActions = document.createElement('div');
-    mobileActions.className = 'mobile-actions';
-    
-    // Apply compact mode for smaller screens
-    if (window.innerWidth <= 480 || window.innerHeight <= 640) {
-      mobileActions.classList.add('compact');
-    }
-    
-    // Shoot button (Hytopia-compliant - onclick only)
-    const shootButton = document.createElement('button');
-    shootButton.className = 'mobile-action-btn primary';
-    shootButton.id = 'mobile-shoot-btn';
-    shootButton.textContent = 'KICK';
-    shootButton.setAttribute('onclick', 'handleMobileQuickAction("shoot")');
-    
-    // Pass button (Hytopia-compliant - onclick only)
-    const passButton = document.createElement('button');
-    passButton.className = 'mobile-action-btn secondary';
-    passButton.id = 'mobile-pass-btn';
-    passButton.textContent = 'PASS';
-    passButton.setAttribute('onclick', 'handleMobileQuickAction("pass")');
-    
-    // Tackle button (Hytopia-compliant - onclick only)
-    const tackleButton = document.createElement('button');
-    tackleButton.className = 'mobile-action-btn';
-    tackleButton.id = 'mobile-tackle-btn';
-    tackleButton.textContent = 'TACKLE';
-    tackleButton.setAttribute('onclick', 'handleMobileQuickAction("tackle")');
-    
-    // Dodge button (Hytopia-compliant - onclick only)
-    const dodgeButton = document.createElement('button');
-    dodgeButton.className = 'mobile-action-btn';
-    dodgeButton.id = 'mobile-dodge-btn';
-    dodgeButton.textContent = 'DODGE';
-    dodgeButton.setAttribute('onclick', 'handleMobileQuickAction("dodge")');
-    
-    // Power-up button for arcade mode (F key equivalent)
-    const powerupButton = document.createElement('button');
-    powerupButton.className = 'mobile-action-btn power-up';
-    powerupButton.id = 'mobile-powerup-btn';
-    powerupButton.textContent = '⚡ F';
-    powerupButton.setAttribute('onclick', 'handleMobileQuickAction("powerup")');
-    powerupButton.title = 'Activate Power-up (F key)';
-    
-    // Add buttons to actions container
-    mobileActions.appendChild(shootButton);
-    mobileActions.appendChild(passButton);
-    mobileActions.appendChild(tackleButton);
-    mobileActions.appendChild(dodgeButton);
-    mobileActions.appendChild(powerupButton);
-    
-    // Create mobile performance indicator
-    const performanceIndicator = document.createElement('div');
-    performanceIndicator.className = 'mobile-performance-indicator';
-    performanceIndicator.id = 'mobile-performance-indicator';
-    performanceIndicator.textContent = 'Mobile Mode';
-    
-    // Add all elements to container
-    mobileControlsContainer.appendChild(virtualJoystick);
-    mobileControlsContainer.appendChild(mobileActions);
-    mobileControlsContainer.appendChild(performanceIndicator);
-    
-    // Add container to document
-    document.body.appendChild(mobileControlsContainer);
-    
-    // Auto-fade buttons during gameplay for better visibility
-    let gameplayFadeTimer;
-    
-    // Add fade-out during active input periods
-    const enableGameplayFade = () => {
-      clearTimeout(gameplayFadeTimer);
-      mobileActions.classList.add('gameplay-fade');
-      
-      gameplayFadeTimer = setTimeout(() => {
-        mobileActions.classList.remove('gameplay-fade');
-      }, 4000); // 4 seconds of reduced opacity
-    };
-    
-    // Listen for joystick movement to trigger fade
-    document.addEventListener('touchstart', (e) => {
-      if (e.target.closest('.virtual-joystick')) {
-        enableGameplayFade();
-      }
-    });
-    
-    document.addEventListener('touchmove', (e) => {
-      if (e.target.closest('.virtual-joystick')) {
-        enableGameplayFade();
-      }
-    });
-    
-    // Initialize camera control events
-    initializeMobileCameraControls();
-    
-    // Initialize joystick event handling
-    initializeJoystickEvents();
-    
-    // Notify server about mobile mode
-    if (typeof hytopia !== 'undefined' && hytopia.sendData) {
-      hytopia.sendData({
-        type: "mobile-mode-enabled",
-        deviceInfo: {
-          userAgent: navigator.userAgent,
-          screenWidth: window.innerWidth,
-          screenHeight: window.innerHeight,
-          touchCapable: 'ontouchstart' in window,
-          devicePixelRatio: window.devicePixelRatio || 1
-        }
-      });
-    }
-    
-    mobileControlsInitialized = true;
-    console.log('✅ Mobile controls initialized successfully');
-  }
-  
-  // Initialize SDK-COMPLIANT VIRTUAL JOYSTICK - MOVEMENT INPUT INJECTION
-  function initializeJoystickEvents() {
-    const joystick = document.getElementById('virtual-joystick');
-    const knob = document.getElementById('joystick-knob');
-    
-    if (!joystick || !knob) {
-      console.warn('📱 Joystick elements not found');
-      return;
-    }
-    
-    console.log('📱 Initializing SDK-compliant virtual joystick...');
-    
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-    let currentMovement = { w: false, a: false, s: false, d: false };
-    const maxDistance = 35; // Maximum distance knob can move from center
-    const threshold = 0.3; // Movement threshold (dead zone)
-    
-    // Store joystick center position
-    function updateJoystickCenter() {
-      const joystickRect = joystick.getBoundingClientRect();
-      startX = joystickRect.left + joystickRect.width / 2;
-      startY = joystickRect.top + joystickRect.height / 2;
-    }
-    
-    updateJoystickCenter();
-    
-    // Update movement input using SDK-compliant hytopia.pressInput()
-    function updateMovementInput(newMovement) {
-      // Only update inputs that have changed
-      Object.keys(newMovement).forEach(key => {
-        if (currentMovement[key] !== newMovement[key]) {
-          if (typeof hytopia !== 'undefined' && hytopia.pressInput) {
-            hytopia.pressInput(key, newMovement[key]);
-            console.log(`📱 Movement input: ${key} = ${newMovement[key]}`);
-          }
-          currentMovement[key] = newMovement[key];
-        }
-      });
-    }
-    
-    // Update joystick position and calculate movement
-    function updateJoystickPosition(clientX, clientY) {
-      updateJoystickCenter(); // Recalculate center in case of orientation change
-      
-      // Calculate distance from center
-      const deltaX = clientX - startX;
-      const deltaY = clientY - startY;
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      
-      // Limit to max distance
-      let finalX = deltaX;
-      let finalY = deltaY;
-      
-      if (distance > maxDistance) {
-        finalX = (deltaX / distance) * maxDistance;
-        finalY = (deltaY / distance) * maxDistance;
-      }
-      
-      // Update knob position
-      knob.style.transform = `translate(${finalX}px, ${finalY}px)`;
-      
-      // Calculate movement direction (normalized)
-      const normalizedX = finalX / maxDistance;
-      const normalizedY = -finalY / maxDistance; // Invert Y for proper direction
-      
-      // Determine WASD input based on joystick position
-      const newMovement = {
-        w: normalizedY > threshold,
-        s: normalizedY < -threshold,
-        a: normalizedX < -threshold,
-        d: normalizedX > threshold
-      };
-      
-      // Update input only if movement changed
-      updateMovementInput(newMovement);
-    }
-    
-    // Reset joystick to center
-    function resetJoystick() {
-      // Reset knob to center
-      knob.style.transform = 'translate(0px, 0px)';
-      
-      // Stop all movement
-      const stopMovement = { w: false, a: false, s: false, d: false };
-      updateMovementInput(stopMovement);
-    }
-    
-    // Mouse events (for testing on desktop)
-    joystick.onclick = function(e) {
-      e.preventDefault();
-      isDragging = true;
-      updateJoystickPosition(e.clientX, e.clientY);
-    };
-    
-    document.onmousemove = function(e) {
-      if (isDragging) {
-        updateJoystickPosition(e.clientX, e.clientY);
-      }
-    };
-    
-    document.onmouseup = function(e) {
-      if (isDragging) {
-        isDragging = false;
-        resetJoystick();
-      }
-    };
-    
-    // Touch events for mobile devices
-    joystick.ontouchstart = function(e) {
-      e.preventDefault();
-      isDragging = true;
-      
-      const touch = e.touches[0];
-      updateJoystickPosition(touch.clientX, touch.clientY);
-    };
-    
-    document.ontouchmove = function(e) {
-      if (isDragging && e.touches.length > 0) {
-        e.preventDefault();
-        const touch = e.touches[0];
-        updateJoystickPosition(touch.clientX, touch.clientY);
-      }
-    };
-    
-    document.ontouchend = function(e) {
-      if (isDragging) {
-        e.preventDefault();
-        isDragging = false;
-        resetJoystick();
-      }
-    };
-    
-    // Handle window resize to update joystick center
-    window.onresize = function() {
-      updateJoystickCenter();
-    };
-    
-    console.log('✅ SDK-compliant virtual joystick initialized successfully');
-  }
-  
-  // Handle mobile action quick press (for onclick events) - SDK-COMPLIANT INPUT INJECTION
-  function handleMobileQuickAction(action) {
-    try {
-      console.log(`📱 Quick action: ${action}`);
-      
-      // Map mobile actions to player input keys
-      const inputKeyMap = {
-        'shoot': 'ml',     // Left mouse click
-        'pass': 'mr',      // Right mouse click  
-        'tackle': 'e',     // Interaction key
-        'dodge': 'space',  // Space/jump key
-        'powerup': 'f'     // F key for power-ups
-      };
-      
-      const inputKey = inputKeyMap[action];
-      if (!inputKey) {
-        console.warn(`📱 Unknown quick action: ${action}`);
-        return;
-      }
-      
-      // INJECT QUICK INPUT (press and release immediately) - SDK-Compliant
-      if (typeof hytopia !== 'undefined' && hytopia.pressInput) {
-        hytopia.pressInput(inputKey, true);
-        setTimeout(() => hytopia.pressInput(inputKey, false), 50);
-        console.log(`📱 Quick input: ${inputKey}`);
-      } else {
-        console.warn('📱 hytopia.pressInput not available');
-        return;
-      }
-      
-      // Visual feedback
-      const button = document.getElementById(`mobile-${action}-btn`);
-      if (button) {
-        button.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-          button.style.transform = 'scale(1)';
-        }, 100);
-      }
-      
-    } catch (error) {
-      console.error('📱 Error handling quick action:', error);
-    }
+    // Hytopia SDK handles all mobile controls automatically
+    console.log('📱 Mobile controls handled by Hytopia SDK');
   }
 
-  // Show mobile controls after player spawns into game
-  function showMobileControls() {
-    try {
-      console.log('📱 Showing mobile controls after player spawn...');
-
-      const mobileControlsContainer = document.getElementById('mobile-controls-container');
-      if (mobileControlsContainer) {
-        mobileControlsContainer.classList.add('mobile-gameplay');
-        mobileControlsContainer.style.display = 'block';
-        mobileControlsContainer.style.visibility = 'visible';
-        mobileControlsContainer.style.opacity = '1';
-
-        // Force children to be visible
-        const joystick = mobileControlsContainer.querySelector('.virtual-joystick');
-        const actions = mobileControlsContainer.querySelector('.mobile-actions');
-
-        if (joystick) {
-          joystick.style.display = 'flex';
-          joystick.style.visibility = 'visible';
-          joystick.style.opacity = '1';
-          console.log('✅ Joystick visibility forced');
-        }
-
-        if (actions) {
-          actions.style.display = 'grid';
-          actions.style.visibility = 'visible';
-          actions.style.opacity = '1';
-          console.log('✅ Action buttons visibility forced');
-        }
-
-        console.log('✅ Mobile controls now visible');
-        console.log('  - Container display:', mobileControlsContainer.style.display);
-        console.log('  - Container visibility:', mobileControlsContainer.style.visibility);
-        console.log('  - Joystick element:', !!joystick);
-        console.log('  - Actions element:', !!actions);
-      } else {
-        console.warn('📱 Mobile controls container not found');
-      }
-    } catch (error) {
-      console.error('📱 Error showing mobile controls:', error);
-    }
-  }
-
-  // Make showMobileControls available globally for server-side calls
-  window.showMobileControls = showMobileControls;
-
-  // LEGACY FUNCTION - REPLACED BY SDK-COMPLIANT VERSION IN initializeJoystickEvents()
-  // This function is kept for compatibility but is no longer used
-  function updateJoystickPosition(touch) {
-    console.warn('📱 Legacy updateJoystickPosition called - using SDK-compliant version instead');
-  }
-  
-  // LEGACY FUNCTION - REPLACED BY SDK-COMPLIANT VERSION IN initializeJoystickEvents()
-  // This function is kept for compatibility but is no longer used
-  function resetJoystick() {
-    console.warn('📱 Legacy resetJoystick called - using SDK-compliant version instead');
-  }
-  
-  // Initialize mobile camera controls - BACKGROUND CAMERA SYSTEM (NO OVERLAY)
-  function initializeMobileCameraControls() {
-    console.log('📱 Initializing mobile camera controls (background)...');
-    
-    // Use document body for camera controls but exclude UI elements
-    const isUIElement = (element) => {
-      return element.closest('.mobile-action-btn') || 
-             element.closest('.virtual-joystick') || 
-             element.closest('button') ||
-             element.closest('.mobile-performance-indicator') ||
-             element.closest('.enhanced-mobile-scoreboard') ||
-             element.closest('.mobile-game-menu');
-    };
-    
-    // DISABLED: Touch event listeners (violate Hytopia SDK InputManager)
-    // NOTE: Camera controls should be handled by Hytopia SDK input system
-    console.log("⚠️ Touch camera controls disabled - violate Hytopia SDK InputManager rules");
-    
-    // DISABLED: Touch move camera controls (violate Hytopia SDK InputManager)
-    // NOTE: Touch camera controls should be handled by Hytopia SDK input system  
-    console.log("⚠️ Touch move camera controls disabled - violate Hytopia SDK InputManager rules");
-    
-    // DISABLED: Touch end event listener (violates Hytopia SDK InputManager)
-    console.log("⚠️ Touch end camera controls disabled - violate Hytopia SDK InputManager rules");
-    
-    console.log('✅ Mobile camera controls initialized (background mode)');
-  }
-  
-  // Handle mobile action button presses - SDK-COMPLIANT INPUT INJECTION
-  function handleMobileAction(action, pressed) {
-    try {
-      console.log(`📱 Mobile action: ${action} ${pressed ? 'pressed' : 'released'}`);
-      
-      // Map mobile actions to player input keys
-      const inputKeyMap = {
-        'shoot': 'ml',    // Left mouse click
-        'pass': 'mr',     // Right mouse click  
-        'tackle': 'e',    // Interaction key
-        'dodge': 'space'  // Space/jump key
-      };
-      
-      const inputKey = inputKeyMap[action];
-      if (!inputKey) {
-        console.warn(`📱 Unknown mobile action: ${action}`);
-        return;
-      }
-      
-      // INJECT INPUT INTO PLAYER INPUT SYSTEM (SDK-Compliant)
-      if (typeof hytopia !== 'undefined' && hytopia.pressInput) {
-        hytopia.pressInput(inputKey, pressed);
-        console.log(`📱 Injected input: ${inputKey} = ${pressed}`);
-      } else {
-        console.warn('📱 hytopia.pressInput not available');
-        return;
-      }
-      
-      // Visual feedback
-      if (pressed) {
-        // Add visual feedback to button
-        const button = document.getElementById(`mobile-${action}-btn`);
-        if (button) {
-          button.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
-          setTimeout(() => {
-            if (action === 'shoot') {
-              button.style.backgroundColor = 'rgba(0, 123, 255, 0.8)';
-            } else if (action === 'pass') {
-              button.style.backgroundColor = 'rgba(40, 167, 69, 0.8)';
-            } else {
-              button.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
-            }
-          }, 200);
-        }
-      }
-      
-      console.log(`📱 Mobile action processed successfully: ${action}`);
-      
-    } catch (error) {
-      console.error('📱 Error handling mobile action:', error);
-    }
-  }
-  
-  // DISABLED: DOMContentLoaded and window load event listeners (violate Hytopia SDK InputManager)
-  // NOTE: Mobile controls initialization should be handled through Hytopia SDK lifecycle
-  console.log("⚠️ DOM and window event listeners disabled - violate Hytopia SDK InputManager rules");
-  
-  // Mobile configuration functions - NEW CUSTOMIZATION SYSTEM
-  function setJoystickSensitivity(sensitivity) {
-    joystickConfig.sensitivity = Math.max(0.1, Math.min(3.0, sensitivity));
-    console.log(`📱 Joystick sensitivity set to ${joystickConfig.sensitivity}`);
-    
-    // Send feedback to UI
-    updateMobileGameStatus(`⚙️ Sensitivity: ${Math.round(joystickConfig.sensitivity * 100)}%`);
-    setTimeout(() => updateMobileGameStatus('Ready to play!'), 2000);
-  }
-  
-  function setJoystickDeadzone(deadzone) {
-    joystickConfig.deadzone = Math.max(0.0, Math.min(0.5, deadzone));
-    console.log(`📱 Joystick deadzone set to ${joystickConfig.deadzone}`);
-    
-    updateMobileGameStatus(`⚙️ Deadzone: ${Math.round(joystickConfig.deadzone * 100)}%`);
-    setTimeout(() => updateMobileGameStatus('Ready to play!'), 2000);
-  }
-  
-  function setCameraSensitivity(sensitivity) {
-    mobileCameraState.sensitivity = Math.max(0.001, Math.min(0.01, sensitivity));
-    console.log(`📱 Camera sensitivity set to ${mobileCameraState.sensitivity}`);
-    
-    updateMobileGameStatus(`📷 Camera: ${Math.round(mobileCameraState.sensitivity * 1000)}%`);
-    setTimeout(() => updateMobileGameStatus('Ready to play!'), 2000);
-  }
-  
-  function resetMobileControls() {
-    // Reset to default configuration
-    joystickConfig = {
-      deadzone: 0.15,
-      sensitivity: 1.0,
-      maxDistance: 40,
-      smoothing: 0.8,
-      autoRecenter: true,
-      dynamicSensitivity: true,
-      inputThrottle: 16,
-      lastInputTime: 0
-    };
-    
-    mobileCameraState.sensitivity = 0.003;
-    
-    updateMobileGameStatus('🔄 Controls reset to default');
-    setTimeout(() => updateMobileGameStatus('Ready to play!'), 2000);
-    
-    console.log('📱 Mobile controls reset to default configuration');
-  }
-  
-  function getMobileControlsConfig() {
-    return {
-      joystick: { ...joystickConfig },
-      camera: { sensitivity: mobileCameraState.sensitivity, deadzone: mobileCameraState.deadzone }
-    };
-  }
-  
-  // Enhanced device detection function with Hytopia SDK support
+  function handleMobileAction() { /* Handled by Hytopia SDK */ }
+  function handleMobileQuickAction() { /* Handled by Hytopia SDK */ }
   function detectMobileDevice() {
-    // First check Hytopia SDK's mobile detection if available
-    if (typeof hytopia !== 'undefined' && typeof hytopia.isMobile !== 'undefined') {
-      console.log('📱 Using Hytopia SDK mobile detection:', hytopia.isMobile);
-      return hytopia.isMobile;
-    }
-    
-    // Fallback to custom detection for development/testing
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
-    const touchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const screenWidth = window.innerWidth || document.documentElement.clientWidth;
-    
-    // Multiple detection methods for better reliability
-    const isMobileUA = mobileRegex.test(userAgent.toLowerCase());
-    const isMobileScreen = screenWidth <= 768;
-    const isTouchDevice = touchCapable;
-    const isSmallScreen = screenWidth <= 1024 && window.innerHeight <= 768;
-    
-    // Consider it mobile if any of these conditions are true
-    isMobileDevice = isMobileUA || (isTouchDevice && isMobileScreen) || (isTouchDevice && isSmallScreen);
-    
-    console.log('📱 Enhanced mobile device detection:', {
-      userAgent: userAgent,
-      isMobile: isMobileDevice,
-      isMobileUA: isMobileUA,
-      touchCapable: isTouchDevice,
-      screenWidth: screenWidth,
-      screenHeight: window.innerHeight,
-      reason: isMobileUA ? 'User Agent' : isTouchDevice && isMobileScreen ? 'Touch + Screen Size' : isTouchDevice && isSmallScreen ? 'Touch + Small Screen' : 'Not Mobile'
-    });
-    
-    return isMobileDevice;
+    return typeof hytopia !== 'undefined' && hytopia.isMobile === true;
   }
-  
-  // Test mobile controls function (for debugging)
-  function testMobileControls() {
-    console.log('📱 Testing mobile controls...');
-    
-    // Force mobile detection
-    isMobileDevice = true;
-    
-    // Force initialization
-    mobileControlsInitialized = false;
-    initializeMobileControls();
-    
-    // Test button visibility
-    const controls = document.getElementById('mobile-controls-container');
-    if (controls) {
-      controls.style.display = 'block';
-      controls.style.visibility = 'visible';
-      controls.style.zIndex = '99999';
-      console.log('📱 Mobile controls forced visible');
-      
-      // Add red debug border
-      controls.style.border = '3px solid red';
-      setTimeout(() => {
-        controls.style.border = 'none';
-      }, 3000);
-      
-      // Test button events (Hytopia-compliant onclick)
-      setTimeout(() => {
-        console.log('📱 Testing button events...');
-        const shootBtn = document.getElementById('mobile-shoot-btn');
-        if (shootBtn) {
-          console.log('📱 Simulating shoot button click (Hytopia-compliant)...');
-          handleMobileQuickAction('shoot');
-        }
-      }, 1000);
-      
-      return 'Mobile controls test completed - should be visible now with button test';
-    } else {
-      console.error('📱 Mobile controls container not found');
-      return 'Mobile controls container not found';
-    }
-  }
-  
-  // Check mobile controls status
-  function checkMobileControlsStatus() {
-    const shootButton = document.getElementById('mobile-shoot-btn');
-    const status = {
-      isMobileDevice: isMobileDevice,
-      controlsInitialized: mobileControlsInitialized,
-      controlsContainer: !!document.getElementById('mobile-controls-container'),
-      joystick: !!document.getElementById('virtual-joystick'),
-      shootButton: !!shootButton,
-      passButton: !!document.getElementById('mobile-pass-btn'),
-      tackleButton: !!document.getElementById('mobile-tackle-btn'),
-      dodgeButton: !!document.getElementById('mobile-dodge-btn'),
-      screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight,
-      touchCapable: 'ontouchstart' in window,
-      hytopiaAvailable: typeof hytopia !== 'undefined',
-      buttonEventsSet: shootButton ? !!shootButton.getAttribute('onclick') : false
-    };
-    
-    console.log('📱 Mobile Controls Status:', status);
-    
-    // Test button events if available (Hytopia-compliant)
-    if (shootButton) {
-      console.log('📱 Testing shoot button event setup (Hytopia-compliant)...');
-      console.log('📱 Shoot button onclick:', shootButton.getAttribute('onclick'));
-    }
-    
-    return status;
+  function testMobileControls() { console.log('📱 Mobile controls: Use Hytopia SDK'); }
+  function checkMobileControlsStatus() { return { message: 'Using Hytopia SDK mobile controls' }; }
+  function setJoystickSensitivity() { /* Handled by Hytopia SDK */ }
+  function setJoystickDeadzone() { /* Handled by Hytopia SDK */ }
+  function setCameraSensitivity() { /* Handled by Hytopia SDK */ }
+  function resetMobileControls() { /* Handled by Hytopia SDK */ }
+  function getMobileControlsConfig() { return {}; }
+  function initializeJoystickEvents() { /* Handled by Hytopia SDK */ }
+  function initializeMobileCameraControls() { /* Handled by Hytopia SDK */ }
+  function showMobileControls() {
+    // Show message that Hytopia SDK handles controls
+    console.log('📱 Mobile controls are handled by Hytopia SDK');
   }
 
-  // Make mobile functions globally accessible (Hytopia-compliant)
+  // Make mobile functions globally accessible for backwards compatibility
   window.initializeMobileControls = initializeMobileControls;
   window.handleMobileAction = handleMobileAction;
   window.handleMobileQuickAction = handleMobileQuickAction;
@@ -10830,7 +10343,7 @@
   window.setCameraSensitivity = setCameraSensitivity;
   window.resetMobileControls = resetMobileControls;
   window.getMobileControlsConfig = getMobileControlsConfig;
-
+  window.showMobileControls = showMobileControls;
   // ===== TOURNAMENT SYSTEM FUNCTIONS =====
 
   // Tournament Creation Handler
@@ -10883,7 +10396,7 @@
       if (typeof hytopia !== 'undefined' && hytopia.sendData) {
         hytopia.sendData(tournamentData);
       } else {
-        console.error('❌ Hytopia not available for tournament creation');
+        console.error('âŒ Hytopia not available for tournament creation');
         showTournamentError("Connection error - please try again");
         
         // Re-enable button
@@ -10894,7 +10407,7 @@
       }
 
     } catch (error) {
-      console.error('❌ Tournament creation error:', error);
+      console.error('âŒ Tournament creation error:', error);
       showTournamentError("Failed to create tournament - please try again");
       
       // Re-enable button
@@ -10916,8 +10429,8 @@
       const leaveBtn = document.getElementById('leaveTournamentBtn');
       
       if (joinBtn && joinBtn.style.display === 'none') {
-        console.log('⚠️ Already joined tournament - preventing duplicate join');
-        alert('⚠️ You are already in the tournament!');
+        console.log('âš ï¸ Already joined tournament - preventing duplicate join');
+        alert('âš ï¸ You are already in the tournament!');
         return;
       }
       
@@ -10931,7 +10444,7 @@
       console.log('🔧 DEBUG Join - final tournamentId:', selectedTournamentId);
       
       if (!selectedTournamentId) {
-        console.error('❌ DEBUG Join - No tournament ID found in either location');
+        console.error('âŒ DEBUG Join - No tournament ID found in either location');
         showTournamentError("No tournament selected");
         return;
       }
@@ -10943,12 +10456,12 @@
           tournamentId: selectedTournamentId
         });
       } else {
-        console.error('❌ Hytopia not available for tournament join');
+        console.error('âŒ Hytopia not available for tournament join');
         showTournamentError("Connection error - please try again");
       }
 
     } catch (error) {
-      console.error('❌ Tournament join error:', error);
+      console.error('âŒ Tournament join error:', error);
       showTournamentError("Failed to join tournament - please try again");
     }
   }
@@ -10973,12 +10486,12 @@
           tournamentId: currentTournamentId
         });
       } else {
-        console.error('❌ Hytopia not available for tournament leave');
+        console.error('âŒ Hytopia not available for tournament leave');
         showTournamentError("Connection error - please try again");
       }
 
     } catch (error) {
-      console.error('❌ Tournament leave error:', error);
+      console.error('âŒ Tournament leave error:', error);
       showTournamentError("Failed to leave tournament - please try again");
     }
   }
@@ -11006,12 +10519,12 @@
           ready: true
         });
       } else {
-        console.error('❌ Hytopia not available for ready check');
+        console.error('âŒ Hytopia not available for ready check');
         showTournamentError("Connection error - please try again");
       }
 
     } catch (error) {
-      console.error('❌ Ready check error:', error);
+      console.error('âŒ Ready check error:', error);
       showTournamentError("Failed to confirm ready - please try again");
     }
   }
@@ -11035,10 +10548,10 @@
       window.currentTournamentId = null;
       window.currentMatchId = null;
       
-      console.log('✅ Returned to main lobby');
+      console.log('âœ… Returned to main lobby');
 
     } catch (error) {
-      console.error('❌ Back to lobby error:', error);
+      console.error('âŒ Back to lobby error:', error);
     }
   }
 
@@ -11194,7 +10707,7 @@
       console.log('🔧 DEBUG: players data:', players);
       
       if (!playersGrid) {
-        console.error('❌ ERROR: tournamentPlayersGrid element not found!');
+        console.error('âŒ ERROR: tournamentPlayersGrid element not found!');
         return;
       }
       
@@ -11233,7 +10746,7 @@
         `;
         
         const statusColor = player.isOnline ? '#10b981' : '#6b7280';
-        const readyIcon = player.isReady ? '✅' : '⏳';
+        const readyIcon = player.isReady ? 'âœ…' : 'â³';
         
         playerDiv.innerHTML = `
           <span style="font-weight: bold; color: white;">${player.displayName || player.username}</span>
@@ -11248,9 +10761,9 @@
       playersGrid.style.display = 'block';
       playersGrid.style.visibility = 'visible';
       
-      console.log('✅ Tournament players list updated with', players.length, 'players');
+      console.log('âœ… Tournament players list updated with', players.length, 'players');
     } catch (e) {
-      console.error('❌ Error updating players list:', e);
+      console.error('âŒ Error updating players list:', e);
     }
   }
   
@@ -11309,11 +10822,11 @@
           const statusIndicator = document.createElement('div');
           statusIndicator.className = 'match-status-indicator';
           const statusIcons = {
-            'completed': '✅',
-            'in-progress': '⚡',
-            'scheduled': '⏳'
+            'completed': 'âœ…',
+            'in-progress': 'âš¡',
+            'scheduled': 'â³'
           };
-          statusIndicator.textContent = statusIcons[match.status] || '◯';
+          statusIndicator.textContent = statusIcons[match.status] || 'â—¯';
           matchCard.appendChild(statusIndicator);
 
           // Match number
@@ -11364,9 +10877,9 @@
 
       bracketContainer.appendChild(bracketWrapper);
 
-      console.log('✅ Visual tournament bracket updated');
+      console.log('âœ… Visual tournament bracket updated');
     } catch (e) {
-      console.error('❌ Error updating bracket:', e);
+      console.error('âŒ Error updating bracket:', e);
     }
   }
   
@@ -11395,9 +10908,9 @@
       };
       
       updateTimer();
-      console.log('✅ Ready check timer started');
+      console.log('âœ… Ready check timer started');
     } catch (e) {
-      console.error('❌ Error starting timer:', e);
+      console.error('âŒ Error starting timer:', e);
     }
   }
   
@@ -11412,7 +10925,7 @@
         userAgentLength: navigator.userAgent ? navigator.userAgent.length : 0
       });
     } catch (e) {
-      console.error("❌ Navigator access error:", e);
+      console.error("âŒ Navigator access error:", e);
     }
     
     console.log("Tournament creation status:", {
@@ -11450,12 +10963,12 @@
       
       if (tournamentSelection) {
         tournamentSelection.style.display = "none";
-        console.log("✅ Hidden tournament selection");
+        console.log("âœ… Hidden tournament selection");
       }
       
       if (tournamentLobby) {
         tournamentLobby.style.display = "block";
-        console.log("✅ Shown tournament lobby");
+        console.log("âœ… Shown tournament lobby");
         
         // Set default values if tournament was created
         const lobbyName = document.getElementById("tournamentLobbyName");
@@ -11466,22 +10979,22 @@
         if (lobbyDetails) lobbyDetails.textContent = "8 Players • Single Elimination • FIFA Mode";
         if (lobbyStatus) lobbyStatus.textContent = "Registration Open";
         
-        console.log("✅ Updated lobby information");
+        console.log("âœ… Updated lobby information");
         
         // Show success message
         try {
           showTournamentSuccess("Switched to tournament lobby view");
         } catch (e) {
-          alert("✅ Tournament lobby view activated");
+          alert("âœ… Tournament lobby view activated");
         }
         
         return true;
       } else {
-        console.error("❌ Tournament lobby element not found");
+        console.error("âŒ Tournament lobby element not found");
         return false;
       }
     } catch (e) {
-      console.error("❌ Force lobby failed:", e);
+      console.error("âŒ Force lobby failed:", e);
       alert("Force lobby failed: " + e.message);
       return false;
     }
@@ -11501,14 +11014,14 @@
         button.style.pointerEvents = "auto";
         button.style.backgroundColor = "";
         button.classList.remove("disabled");
-        console.log("✅ Button reset complete");
+        console.log("âœ… Button reset complete");
       }
       
       // Clear all timeouts
       if (window.tournamentCreationTimeout) {
         clearTimeout(window.tournamentCreationTimeout);
         window.tournamentCreationTimeout = null;
-        console.log("✅ Timeout cleared");
+        console.log("âœ… Timeout cleared");
       }
       
       // Clear form
@@ -11516,37 +11029,37 @@
       if (nameField) {
         nameField.value = "";
         nameField.disabled = false;
-        console.log("✅ Form cleared");
+        console.log("âœ… Form cleared");
       }
       
       // Reset any stuck UI states
       const tournamentSelection = document.getElementById("tournamentSelection");
       if (tournamentSelection) {
         tournamentSelection.style.display = "block";
-        console.log("✅ Tournament selection shown");
+        console.log("âœ… Tournament selection shown");
       }
       
       const tournamentLobby = document.getElementById("tournamentLobby");
       if (tournamentLobby && tournamentLobby.style.display === "block") {
         tournamentLobby.style.display = "none";
-        console.log("✅ Tournament lobby hidden");
+        console.log("âœ… Tournament lobby hidden");
       }
       
       // Clear tournament IDs if no actual tournament exists
       window.selectedTournamentId = null;
-      console.log("✅ Cleared tournament IDs");
+      console.log("âœ… Cleared tournament IDs");
       
       console.log("🎯 Enhanced fix complete. Tournament creation should work now.");
       
       try {
         showTournamentSuccess("Tournament creation reset complete");
       } catch (e) {
-        alert("✅ Tournament creation reset complete");
+        alert("âœ… Tournament creation reset complete");
       }
       
       return true;
     } catch (e) {
-      console.error("❌ Enhanced fix failed:", e);
+      console.error("âŒ Enhanced fix failed:", e);
       alert("Enhanced fix failed: " + e.message);
       return false;
     }
@@ -11576,7 +11089,7 @@
     
     errorNotification.innerHTML = `
       <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 20px;">❌</span>
+        <span style="font-size: 20px;">âŒ</span>
         <span>${message}</span>
       </div>
     `;
@@ -11620,7 +11133,7 @@
     
     successNotification.innerHTML = `
       <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 20px;">✅</span>
+        <span style="font-size: 20px;">âœ…</span>
         <span>${message}</span>
       </div>
     `;
@@ -11661,7 +11174,7 @@
         
         // Update UI
         const yourStatus = document.getElementById('yourReadyStatus');
-        if (yourStatus) yourStatus.textContent = '✅ Ready';
+        if (yourStatus) yourStatus.textContent = 'âœ… Ready';
         
         // Hide ready check after confirmation
         setTimeout(() => {
@@ -11670,16 +11183,16 @@
         }, 2000);
         
       } else {
-        console.error('❌ Hytopia not available for ready confirmation');
+        console.error('âŒ Hytopia not available for ready confirmation');
       }
     } catch (error) {
-      console.error('❌ Ready confirmation error:', error);
+      console.error('âŒ Ready confirmation error:', error);
     }
   };
   
   window.cancelReady = function() {
     try {
-      console.log('❌ Cancelling ready for match...');
+      console.log('âŒ Cancelling ready for match...');
       
       if (typeof hytopia !== 'undefined' && hytopia.sendData) {
         hytopia.sendData({
@@ -11690,17 +11203,17 @@
         
         // Update UI
         const yourStatus = document.getElementById('yourReadyStatus');
-        if (yourStatus) yourStatus.textContent = '❌ Not Ready';
+        if (yourStatus) yourStatus.textContent = 'âŒ Not Ready';
         
         // Hide ready check
         const readyCheck = document.getElementById('tournamentReadyCheck');
         if (readyCheck) readyCheck.style.display = 'none';
         
       } else {
-        console.error('❌ Hytopia not available for ready cancellation');
+        console.error('âŒ Hytopia not available for ready cancellation');
       }
     } catch (error) {
-      console.error('❌ Ready cancellation error:', error);
+      console.error('âŒ Ready cancellation error:', error);
     }
   };
   window.showTournamentError = showTournamentError;
@@ -11740,7 +11253,7 @@
     initializeMobileGameMenu();
     
     enhancedMobileUIInitialized = true;
-    console.log('✅ Phase 2 Enhanced Mobile UI initialized');
+    console.log('âœ… Phase 2 Enhanced Mobile UI initialized');
   }
   
   // Create enhanced mobile scoreboard
@@ -12000,7 +11513,7 @@
     
     // DISABLED: Touch gesture event listeners (violate Hytopia SDK InputManager)
     // NOTE: Touch gestures should be handled by Hytopia SDK input system
-    console.log("⚠️ Touch gesture event listeners disabled - violate Hytopia SDK InputManager rules");
+    console.log("âš ï¸ Touch gesture event listeners disabled - violate Hytopia SDK InputManager rules");
     
     console.log('📱 Touch gesture system initialized');
   }
@@ -12037,10 +11550,10 @@
     mobileGameMenu.innerHTML = `
       <div class="mobile-menu-title">Game Menu</div>
       <button class="mobile-menu-button" onclick="resumeGameMobile()">
-        ▶️ Resume Game
+        â–¶ï¸ Resume Game
       </button>
       <button class="mobile-menu-button" onclick="showMobileSettings()">
-        ⚙️ Settings
+        âš™ï¸ Settings
       </button>
       <button class="mobile-menu-button danger" onclick="quitGameMobile()">
         🚪 Quit Game
@@ -12069,7 +11582,7 @@
       gameStatus.style.display = 'block';
       
       // Auto-hide after 3 seconds if it's a temporary message
-      if (message.includes('⚡') || message.includes('🔍')) {
+      if (message.includes('âš¡') || message.includes('🔍')) {
         setTimeout(() => {
           if (gameStatus.textContent === message) {
             gameStatus.style.display = 'none';
@@ -12106,7 +11619,7 @@
     hideMobileTeamSelection();
     
     // Show confirmation
-    updateMobileGameStatus(`✅ Joined ${team.toUpperCase()} team!`);
+    updateMobileGameStatus(`âœ… Joined ${team.toUpperCase()} team!`);
   }
   
   function showMobileGameMenu() {
@@ -12130,7 +11643,7 @@
   
   function showMobileSettings() {
     hideMobileGameMenu();
-    updateMobileGameStatus('⚙️ Settings - Coming soon!');
+    updateMobileGameStatus('âš™ï¸ Settings - Coming soon!');
   }
   
   function quitGameMobile() {
@@ -12142,7 +11655,7 @@
   
   // DISABLED: DOMContentLoaded mobile UI initialization (violates Hytopia SDK InputManager)
   // NOTE: Mobile UI initialization should be handled through Hytopia SDK lifecycle
-  console.log("⚠️ DOMContentLoaded mobile UI initialization disabled - violates Hytopia SDK InputManager rules");
+  console.log("âš ï¸ DOMContentLoaded mobile UI initialization disabled - violates Hytopia SDK InputManager rules");
   
   // Make Phase 2 mobile functions globally accessible
   window.initializeEnhancedMobileUI = initializeEnhancedMobileUI;
@@ -12172,229 +11685,19 @@
   We only need to add custom action buttons.
 ======================================== -->
 
-<!-- Mobile Action Buttons Container -->
-<div class="mobile-controls">
-  <!-- Shoot Button (Right side) -->
-  <button id="mobile-shoot-btn" class="mobile-button mobile-shoot">
-    <span class="mobile-button-icon">⚽</span>
-    <span class="mobile-button-label">SHOOT</span>
-  </button>
+<!-- ========================================
+     MOBILE CONTROLS
+     ======================================== -->
+<!--
+  Mobile controls are handled entirely by the Hytopia SDK:
+  - Movement: Virtual joystick (bottom-left)
+  - Camera: Touch drag (anywhere on screen)
+  - Sprint: Pull joystick all the way out
 
-  <!-- Pass Button (Right side) -->
-  <button id="mobile-pass-btn" class="mobile-button mobile-pass">
-    <span class="mobile-button-icon">👟</span>
-    <span class="mobile-button-label">PASS</span>
-  </button>
+  Custom action buttons (shoot, pass, tackle) could not be reliably
+  implemented due to z-index/rendering conflicts with the Hytopia canvas.
+  Mobile players can use the keyboard overlay feature on their devices
+  to access game actions if needed.
+-->
 
-  <!-- Sprint Button (Left side) -->
-  <button id="mobile-sprint-btn" class="mobile-button mobile-sprint">
-    <span class="mobile-button-icon">⚡</span>
-    <span class="mobile-button-label">SPRINT</span>
-  </button>
-
-  <!-- Tackle Button (Right side) -->
-  <button id="mobile-tackle-btn" class="mobile-button mobile-tackle">
-    <span class="mobile-button-icon">🛡️</span>
-    <span class="mobile-button-label">TACKLE</span>
-  </button>
-</div>
-
-<style>
-  /* ========================================
-     MOBILE CONTROLS - SDK COMPLIANT
-     ======================================== */
-
-  /* Hide mobile controls by default */
-  .mobile-controls {
-    display: none;
-  }
-
-  /* Show mobile controls only when Hytopia detects mobile device */
-  body.mobile .mobile-controls {
-    display: block !important;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: auto;
-    pointer-events: none; /* Allow touch-through to Hytopia's controls */
-    z-index: 1000;
-  }
-
-  /* Mobile Button Base Styles */
-  body.mobile .mobile-button {
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    transition: all 0.15s ease;
-    pointer-events: auto; /* Enable touch for buttons */
-    cursor: pointer;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-
-  /* Button pressed state */
-  body.mobile .mobile-button:active,
-  body.mobile .mobile-button.active {
-    transform: scale(0.9);
-    background: rgba(0, 0, 0, 0.9);
-    border-color: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
-  }
-
-  /* Button Icon */
-  body.mobile .mobile-button-icon {
-    font-size: 28px;
-    margin-bottom: 2px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
-  }
-
-  /* Button Label */
-  body.mobile .mobile-button-label {
-    font-size: 9px;
-    font-weight: bold;
-    color: rgba(255, 255, 255, 0.9);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  }
-
-  /* ========================================
-     BUTTON POSITIONING (Landscape Mode)
-     ======================================== */
-
-  /* Shoot Button - Bottom right */
-  body.mobile .mobile-shoot {
-    bottom: 80px;
-    right: 30px;
-    background: linear-gradient(135deg, rgba(220, 50, 50, 0.8), rgba(180, 30, 30, 0.8));
-  }
-
-  body.mobile .mobile-shoot:active {
-    background: linear-gradient(135deg, rgba(250, 70, 70, 0.9), rgba(200, 40, 40, 0.9));
-  }
-
-  /* Pass Button - Bottom right, above shoot */
-  body.mobile .mobile-pass {
-    bottom: 170px;
-    right: 30px;
-    background: linear-gradient(135deg, rgba(50, 150, 255, 0.8), rgba(30, 120, 200, 0.8));
-  }
-
-  body.mobile .mobile-pass:active {
-    background: linear-gradient(135deg, rgba(70, 170, 255, 0.9), rgba(40, 140, 220, 0.9));
-  }
-
-  /* Sprint Button - Bottom left */
-  body.mobile .mobile-sprint {
-    bottom: 80px;
-    left: 30px;
-    background: linear-gradient(135deg, rgba(255, 200, 50, 0.8), rgba(220, 160, 30, 0.8));
-  }
-
-  body.mobile .mobile-sprint:active {
-    background: linear-gradient(135deg, rgba(255, 220, 70, 0.9), rgba(240, 180, 40, 0.9));
-  }
-
-  /* Tackle Button - Mid right */
-  body.mobile .mobile-tackle {
-    bottom: 260px;
-    right: 30px;
-    background: linear-gradient(135deg, rgba(150, 80, 255, 0.8), rgba(120, 60, 200, 0.8));
-  }
-
-  body.mobile .mobile-tackle:active {
-    background: linear-gradient(135deg, rgba(170, 100, 255, 0.9), rgba(140, 80, 220, 0.9));
-  }
-
-  /* ========================================
-     SMALLER SCREENS (Tablets/Small Phones)
-     ======================================== */
-
-  @media (max-height: 600px) {
-    body.mobile .mobile-button {
-      width: 60px;
-      height: 60px;
-    }
-
-    body.mobile .mobile-button-icon {
-      font-size: 24px;
-    }
-
-    body.mobile .mobile-button-label {
-      font-size: 8px;
-    }
-
-    body.mobile .mobile-shoot {
-      bottom: 60px;
-      right: 20px;
-    }
-
-    body.mobile .mobile-pass {
-      bottom: 135px;
-      right: 20px;
-    }
-
-    body.mobile .mobile-sprint {
-      bottom: 60px;
-      left: 20px;
-    }
-
-    body.mobile .mobile-tackle {
-      bottom: 210px;
-      right: 20px;
-    }
-  }
-</style>
-
-<script>
-  // ========================================
-  // MOBILE CONTROLS JAVASCRIPT
-  // SDK-Compliant using hytopia.pressInput()
-  // ========================================
-
-  // Only initialize if we're on mobile (Hytopia adds .mobile class to body)
-  if (document.body.classList.contains('mobile') || hytopia.isMobile) {
-    console.log('📱 Initializing mobile controls (SDK-compliant)');
-
-    // HYTOPIA SDK-COMPLIANT: Using setAttribute instead of addEventListener
-    // Helper function to handle button press/release using attributes (not addEventListener)
-    function setupMobileButton(buttonId, inputKey) {
-      const button = document.getElementById(buttonId);
-      if (!button) {
-        console.warn(`Mobile button ${buttonId} not found`);
-        return;
-      }
-
-      // Create handler functions in global scope
-      const touchStartHandler = `event.preventDefault(); this.classList.add('active'); hytopia.pressInput('${inputKey}', true); console.log('📱 Mobile: ${buttonId} pressed (${inputKey})');`;
-      const touchEndHandler = `event.preventDefault(); this.classList.remove('active'); hytopia.pressInput('${inputKey}', false); console.log('📱 Mobile: ${buttonId} released (${inputKey})');`;
-      const touchCancelHandler = `event.preventDefault(); this.classList.remove('active'); hytopia.pressInput('${inputKey}', false);`;
-
-      // HYTOPIA-COMPLIANT: Use setAttribute instead of addEventListener
-      button.setAttribute('ontouchstart', touchStartHandler);
-      button.setAttribute('ontouchend', touchEndHandler);
-      button.setAttribute('ontouchcancel', touchCancelHandler);
-    }
-
-    // Setup all mobile buttons
-    // These map to the same input keys that desktop players use
-    setupMobileButton('mobile-shoot-btn', 'mr');  // Right mouse button = Shoot
-    setupMobileButton('mobile-pass-btn', 'ml');   // Left mouse button = Pass
-    setupMobileButton('mobile-sprint-btn', 'sh'); // Shift key = Sprint
-    setupMobileButton('mobile-tackle-btn', 'e');  // E key = Tackle
-
-    console.log('✅ Mobile controls initialized successfully (SDK-compliant)');
-  }
-</script>
+<!-- No custom CSS needed - Hytopia SDK handles all mobile controls -->
