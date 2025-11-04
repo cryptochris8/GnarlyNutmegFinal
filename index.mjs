@@ -76673,9 +76673,9 @@ var init_gameConfig = __esm(() => {
   BALL_CONFIG = {
     SCALE: 0.2,
     RADIUS: 0.2,
-    FRICTION: 0.4,
-    LINEAR_DAMPING: 0.7,
-    ANGULAR_DAMPING: 3,
+    FRICTION: 0.25,
+    LINEAR_DAMPING: 0.4,
+    ANGULAR_DAMPING: 2.5,
     HORIZONTAL_FORCE: 0.4,
     VERTICAL_FORCE: 0.6,
     UPWARD_BIAS: 0.2
@@ -76841,7 +76841,7 @@ class SharedState {
     stationaryDuration: 0
   };
   STATIONARY_THRESHOLD = 1;
-  STATIONARY_TIME_LIMIT = 5000;
+  STATIONARY_TIME_LIMIT = 3000;
   STATIONARY_CHECK_INTERVAL = 1000;
   constructor() {}
   static getInstance() {
@@ -81365,11 +81365,11 @@ function createSoccerBall(world) {
       const ballPosition = entity.position;
       const ballVelocity = entity.linearVelocity;
       const ballSpeed = Math.sqrt(ballVelocity.x * ballVelocity.x + ballVelocity.z * ballVelocity.z);
-      let PROXIMITY_POSSESSION_DISTANCE = 2;
-      let MAX_BALL_SPEED_FOR_PROXIMITY = 4;
+      let PROXIMITY_POSSESSION_DISTANCE = 2.5;
+      let MAX_BALL_SPEED_FOR_PROXIMITY = 5;
       if (ballSpeed > 1) {
-        PROXIMITY_POSSESSION_DISTANCE = 3;
-        MAX_BALL_SPEED_FOR_PROXIMITY = 8;
+        PROXIMITY_POSSESSION_DISTANCE = 3.5;
+        MAX_BALL_SPEED_FOR_PROXIMITY = 10;
         console.log(`\uD83D\uDCE5 Pass reception mode active: radius=${PROXIMITY_POSSESSION_DISTANCE}u, max_speed=${MAX_BALL_SPEED_FOR_PROXIMITY}`);
       }
       if (ballSpeed < MAX_BALL_SPEED_FOR_PROXIMITY) {
@@ -520839,12 +520839,12 @@ var ROLE_DEFINITIONS = {
     defensiveContribution: 8,
     offensiveContribution: 5,
     preferredArea: {
-      minX: -25,
-      maxX: 30,
-      minZ: -30,
-      maxZ: -8
+      minX: -40,
+      maxX: 55,
+      minZ: -35,
+      maxZ: -5
     },
-    pursuitTendency: 0.6,
+    pursuitTendency: 0.7,
     positionRecoverySpeed: 0.7,
     supportDistance: 18,
     interceptDistance: 15
@@ -520860,12 +520860,12 @@ var ROLE_DEFINITIONS = {
     defensiveContribution: 8,
     offensiveContribution: 5,
     preferredArea: {
-      minX: -25,
-      maxX: 30,
-      minZ: 2,
-      maxZ: 23
+      minX: -40,
+      maxX: 55,
+      minZ: -1,
+      maxZ: 30
     },
-    pursuitTendency: 0.6,
+    pursuitTendency: 0.7,
     positionRecoverySpeed: 0.7,
     supportDistance: 18,
     interceptDistance: 15
@@ -520881,12 +520881,12 @@ var ROLE_DEFINITIONS = {
     defensiveContribution: 6,
     offensiveContribution: 7,
     preferredArea: {
-      minX: -20,
-      maxX: 35,
-      minZ: -20,
-      maxZ: 5
+      minX: -40,
+      maxX: 55,
+      minZ: -25,
+      maxZ: 8
     },
-    pursuitTendency: 0.75,
+    pursuitTendency: 0.85,
     positionRecoverySpeed: 0.6,
     supportDistance: 22,
     interceptDistance: 18
@@ -520902,12 +520902,12 @@ var ROLE_DEFINITIONS = {
     defensiveContribution: 6,
     offensiveContribution: 7,
     preferredArea: {
-      minX: -20,
-      maxX: 35,
-      minZ: -11,
-      maxZ: 20
+      minX: -40,
+      maxX: 55,
+      minZ: -14,
+      maxZ: 25
     },
-    pursuitTendency: 0.75,
+    pursuitTendency: 0.85,
     positionRecoverySpeed: 0.6,
     supportDistance: 22,
     interceptDistance: 18
@@ -520924,12 +520924,12 @@ var ROLE_DEFINITIONS = {
     defensiveContribution: 3,
     offensiveContribution: 10,
     preferredArea: {
-      minX: -10,
-      maxX: 45,
-      minZ: -18,
-      maxZ: 12
+      minX: -40,
+      maxX: 55,
+      minZ: -30,
+      maxZ: 25
     },
-    pursuitTendency: 0.85,
+    pursuitTendency: 0.95,
     positionRecoverySpeed: 0.5,
     supportDistance: 20,
     interceptDistance: 15
@@ -523564,6 +523564,10 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
   MIDFIELDER_MAX_POSSESSION_TIME = 5000;
   STRIKER_MAX_POSSESSION_TIME = 4000;
   restartBehavior = null;
+  passingState = "none";
+  passingStateStartTime = null;
+  PASS_STOPPING_TIME = 300;
+  PASS_RECOVERY_TIME = 200;
   staminaManager;
   goalkeeperBehavior;
   ballHandler;
@@ -524113,15 +524117,58 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
         z: wideZBoundary * 0.75
       };
       const hasAdvancingSpace = this.distanceBetween(myPosition, midfielderPosition) > 6;
-      if (Math.random() > 0.3 || !hasAdvancingSpace) {
-        console.log(`Left Back ${this.player.username} looking to pass`);
-        this.passBall();
-        targetPos = {
-          x: myPosition.x + (this.team === "red" ? 5 : -5),
-          y: myPosition.y,
-          z: wideZBoundary * 0.75
-        };
+      const shouldPass = Math.random() > 0.5 || !hasAdvancingSpace;
+      if (shouldPass) {
+        switch (this.passingState) {
+          case "none":
+            console.log(`${this.player.username} \uD83D\uDED1 starting stop-and-pass sequence`);
+            this.passingState = "stopping";
+            this.passingStateStartTime = Date.now();
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+          case "stopping":
+            const stoppingTime = Date.now() - this.passingStateStartTime;
+            if (stoppingTime >= this.PASS_STOPPING_TIME) {
+              console.log(`${this.player.username} ⚽ ready to pass (planted feet)`);
+              this.passingState = "ready";
+            }
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+          case "ready":
+            console.log(`${this.player.username} ✅ executing FIFA-like crisp pass`);
+            const passSuccess = this.passBall();
+            if (passSuccess) {
+              this.passingState = "passed";
+              this.passingStateStartTime = Date.now();
+            } else {
+              console.log(`${this.player.username} ❌ pass failed, resetting`);
+              this.resetPassingState();
+            }
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+          case "passed":
+            const timeSincePass = Date.now() - this.passingStateStartTime;
+            if (timeSincePass >= this.PASS_RECOVERY_TIME) {
+              console.log(`${this.player.username} \uD83C\uDFC3 moving to support position`);
+              this.resetPassingState();
+            }
+            targetPos = this.calculateSupportPosition(myPosition, ballPosition);
+            break;
+        }
       } else {
+        this.resetPassingState();
         console.log(`Left Back ${this.player.username} advancing up the left flank`);
         targetPos = {
           x: myPosition.x + (opponentGoalLineX - myPosition.x) * 0.3,
@@ -524215,15 +524262,58 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
         z: wideZBoundary * 0.75
       };
       const hasAdvancingSpace = this.distanceBetween(myPosition, midfielderPosition) > 6;
-      if (Math.random() > 0.3 || !hasAdvancingSpace) {
-        console.log(`Right Back ${this.player.username} looking to pass`);
-        this.passBall();
-        targetPos = {
-          x: myPosition.x + (this.team === "red" ? 5 : -5),
-          y: myPosition.y,
-          z: wideZBoundary * 0.75
-        };
+      const shouldPass = Math.random() > 0.5 || !hasAdvancingSpace;
+      if (shouldPass) {
+        switch (this.passingState) {
+          case "none":
+            console.log(`${this.player.username} \uD83D\uDED1 starting stop-and-pass sequence`);
+            this.passingState = "stopping";
+            this.passingStateStartTime = Date.now();
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+          case "stopping":
+            const stoppingTime = Date.now() - this.passingStateStartTime;
+            if (stoppingTime >= this.PASS_STOPPING_TIME) {
+              console.log(`${this.player.username} ⚽ ready to pass (planted feet)`);
+              this.passingState = "ready";
+            }
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+          case "ready":
+            console.log(`${this.player.username} ✅ executing FIFA-like crisp pass`);
+            const passSuccess = this.passBall();
+            if (passSuccess) {
+              this.passingState = "passed";
+              this.passingStateStartTime = Date.now();
+            } else {
+              console.log(`${this.player.username} ❌ pass failed, resetting`);
+              this.resetPassingState();
+            }
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+          case "passed":
+            const timeSincePass = Date.now() - this.passingStateStartTime;
+            if (timeSincePass >= this.PASS_RECOVERY_TIME) {
+              console.log(`${this.player.username} \uD83C\uDFC3 moving to support position`);
+              this.resetPassingState();
+            }
+            targetPos = this.calculateSupportPosition(myPosition, ballPosition);
+            break;
+        }
       } else {
+        this.resetPassingState();
         console.log(`Right Back ${this.player.username} advancing up the right flank`);
         targetPos = {
           x: myPosition.x + (opponentGoalLineX - myPosition.x) * 0.3,
@@ -524321,15 +524411,65 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
         this.shootBall(shootTarget, 1.2);
         targetPos = { x: opponentGoal.x, y: myPosition.y, z: myPosition.z };
       } else {
-        if (Math.random() > 0.3) {
-          console.log(`Midfielder ${this.player.username} looking to pass`);
-          this.passBall();
+        const shouldPass = Math.random() > 0.4;
+        if (shouldPass) {
+          switch (this.passingState) {
+            case "none":
+              console.log(`${this.player.username} \uD83D\uDED1 starting stop-and-pass sequence`);
+              this.passingState = "stopping";
+              this.passingStateStartTime = Date.now();
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+            case "stopping":
+              const stoppingTime = Date.now() - this.passingStateStartTime;
+              if (stoppingTime >= this.PASS_STOPPING_TIME) {
+                console.log(`${this.player.username} ⚽ ready to pass (planted feet)`);
+                this.passingState = "ready";
+              }
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+            case "ready":
+              console.log(`${this.player.username} ✅ executing FIFA-like crisp pass`);
+              const passSuccess = this.passBall();
+              if (passSuccess) {
+                this.passingState = "passed";
+                this.passingStateStartTime = Date.now();
+              } else {
+                console.log(`${this.player.username} ❌ pass failed, resetting`);
+                this.resetPassingState();
+              }
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+            case "passed":
+              const timeSincePass = Date.now() - this.passingStateStartTime;
+              if (timeSincePass >= this.PASS_RECOVERY_TIME) {
+                console.log(`${this.player.username} \uD83C\uDFC3 moving to support position`);
+                this.resetPassingState();
+              }
+              targetPos = this.calculateSupportPosition(myPosition, ballPosition);
+              break;
+          }
+        } else {
+          this.resetPassingState();
+          console.log(`Midfielder ${this.player.username} dribbling forward`);
+          targetPos = {
+            x: opponentGoalLineX,
+            y: myPosition.y,
+            z: myPosition.z + sidePreference * 3
+          };
         }
-        targetPos = {
-          x: opponentGoalLineX,
-          y: myPosition.y,
-          z: myPosition.z + sidePreference * 3
-        };
       }
     } else {
       const ballInOurHalf = this.team === "red" && ballPosition.x < AI_FIELD_CENTER_X || this.team === "blue" && ballPosition.x > AI_FIELD_CENTER_X;
@@ -524559,7 +524699,14 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
       if (teammate === this)
         continue;
       const distanceToTeammate = this.distanceBetween(this.position, teammate.position);
-      if (distanceToTeammate > 30)
+      let maxPassRange = 30;
+      if (this.aiRole === "goalkeeper")
+        maxPassRange = 45;
+      if (this.aiRole === "central-midfielder-1")
+        maxPassRange = 40;
+      if (this.aiRole === "central-midfielder-2")
+        maxPassRange = 40;
+      if (distanceToTeammate > maxPassRange)
         continue;
       let spaceScore = 10;
       const opponents = this.team === "red" ? sharedState_default.getBlueAITeam() : sharedState_default.getRedAITeam();
@@ -524632,7 +524779,7 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
             z: bestTargetPlayer.linearVelocity.z
           };
         }
-        const passSpeed = 2.8;
+        const passSpeed = 3.5;
         const passTravelTime = passDist / passSpeed;
         const predictedX = bestTargetPlayer.position.x + teammateVelocity.x * passTravelTime;
         const predictedZ = bestTargetPlayer.position.z + teammateVelocity.z * passTravelTime;
@@ -524667,7 +524814,7 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
       };
     }
     const distanceToTarget = this.distanceBetween(this.position, passTargetPosition);
-    let powerMultiplier = Math.min(0.8, 0.4 + distanceToTarget / 50);
+    let powerMultiplier = Math.min(1.2, 0.5 + distanceToTarget / 40);
     const fieldCenterX = (AI_GOAL_LINE_X_RED + AI_GOAL_LINE_X_BLUE) / 2;
     const fieldCenterZ = AI_FIELD_CENTER_Z;
     const distanceFromCenterX = Math.abs(passTargetPosition.x - fieldCenterX);
@@ -524717,6 +524864,7 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
     }
     if (!hasBall && this.ballPossessionStartTime !== null) {
       this.ballPossessionStartTime = null;
+      this.resetPassingState();
       console.log(`TIMER RESET: ${this.aiRole} ${this.player.username} no longer has the ball`);
     }
     if (hasBall && this.ballPossessionStartTime !== null) {
@@ -524982,16 +525130,66 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
           z: myPosition.z
         };
       } else {
-        if (Math.random() < 0.2) {
-          console.log(`Striker ${this.player.username} looking to pass`);
-          this.passBall();
+        const shouldPass = Math.random() < 0.35;
+        if (shouldPass) {
+          switch (this.passingState) {
+            case "none":
+              console.log(`${this.player.username} \uD83D\uDED1 starting stop-and-pass sequence`);
+              this.passingState = "stopping";
+              this.passingStateStartTime = Date.now();
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+            case "stopping":
+              const stoppingTime = Date.now() - this.passingStateStartTime;
+              if (stoppingTime >= this.PASS_STOPPING_TIME) {
+                console.log(`${this.player.username} ⚽ ready to pass (planted feet)`);
+                this.passingState = "ready";
+              }
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+            case "ready":
+              console.log(`${this.player.username} ✅ executing FIFA-like crisp pass`);
+              const passSuccess = this.passBall();
+              if (passSuccess) {
+                this.passingState = "passed";
+                this.passingStateStartTime = Date.now();
+              } else {
+                console.log(`${this.player.username} ❌ pass failed, resetting`);
+                this.resetPassingState();
+              }
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+            case "passed":
+              const timeSincePass = Date.now() - this.passingStateStartTime;
+              if (timeSincePass >= this.PASS_RECOVERY_TIME) {
+                console.log(`${this.player.username} \uD83C\uDFC3 moving to support position`);
+                this.resetPassingState();
+              }
+              targetPos = this.calculateSupportPosition(myPosition, ballPosition);
+              break;
+          }
+        } else {
+          this.resetPassingState();
+          console.log(`Striker ${this.player.username} dribbling toward goal`);
+          const centralizing = 0.3;
+          targetPos = {
+            x: opponentGoalLineX,
+            y: myPosition.y,
+            z: myPosition.z * (1 - centralizing) + AI_FIELD_CENTER_Z * centralizing
+          };
         }
-        const centralizing = 0.3;
-        targetPos = {
-          x: opponentGoalLineX,
-          y: myPosition.y,
-          z: myPosition.z * (1 - centralizing) + AI_FIELD_CENTER_Z * centralizing
-        };
       }
     } else {
       const inAttackingHalf = this.team === "red" && ballPosition.x > AI_FIELD_CENTER_X || this.team === "blue" && ballPosition.x < AI_FIELD_CENTER_X;
@@ -525114,15 +525312,15 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
     direction.z /= length;
     sharedState_default.setAttachedPlayer(null);
     const baseForce = typeof PASS_FORCE2 === "number" ? PASS_FORCE2 : 10;
-    let effectiveMultiplier = Math.min(powerMultiplier, 1);
+    let effectiveMultiplier = Math.min(powerMultiplier, 1.3);
     if (this.aiRole === "goalkeeper") {
-      effectiveMultiplier = Math.min(effectiveMultiplier, 0.8);
+      effectiveMultiplier = Math.min(effectiveMultiplier, 1);
     } else if (this.aiRole === "striker") {
-      effectiveMultiplier = Math.min(effectiveMultiplier, 0.9);
+      effectiveMultiplier = Math.min(effectiveMultiplier, 1.2);
     } else {
-      effectiveMultiplier = Math.min(effectiveMultiplier, 0.85);
+      effectiveMultiplier = Math.min(effectiveMultiplier, 1.1);
     }
-    const effectivePassForce = Math.min(baseForce * effectiveMultiplier, 8);
+    const effectivePassForce = Math.min(baseForce * effectiveMultiplier, 10);
     const verticalComponent = direction.y * effectivePassForce;
     const maxVerticalForce = 2.5;
     const finalVerticalForce = Math.min(verticalComponent, maxVerticalForce);
@@ -525178,6 +525376,42 @@ class AIPlayerEntity2 extends SoccerPlayerEntity2 {
       y: targetPoint.y,
       z: clampedZ
     };
+  }
+  resetPassingState() {
+    this.passingState = "none";
+    this.passingStateStartTime = null;
+  }
+  calculateSupportPosition(myPosition, ballPosition) {
+    const roleDefinition = ROLE_DEFINITIONS[this.aiRole];
+    const opponentGoalX = this.team === "red" ? AI_GOAL_LINE_X_BLUE : AI_GOAL_LINE_X_RED;
+    const forwardDirection = this.team === "red" ? -1 : 1;
+    switch (this.aiRole) {
+      case "left-back":
+      case "right-back":
+        return {
+          x: myPosition.x + forwardDirection * 5,
+          y: myPosition.y,
+          z: myPosition.z
+        };
+      case "central-midfielder-1":
+      case "central-midfielder-2":
+        const sideOffset = (Math.random() - 0.5) * 10;
+        return {
+          x: myPosition.x + forwardDirection * 8,
+          y: myPosition.y,
+          z: myPosition.z + sideOffset
+        };
+      case "striker":
+        return {
+          x: opponentGoalX + forwardDirection * -15,
+          y: myPosition.y,
+          z: AI_FIELD_CENTER_Z + (Math.random() - 0.5) * 20
+        };
+      case "goalkeeper":
+        return myPosition;
+      default:
+        return myPosition;
+    }
   }
   getMaxPossessionTime() {
     const context = {

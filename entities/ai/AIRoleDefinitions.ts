@@ -67,12 +67,12 @@ export const ROLE_DEFINITIONS: Record<SoccerAIRole, RoleDefinition> = {
     defensiveContribution: 8,
     offensiveContribution: 5,
     preferredArea: {
-      minX: -25,
-      maxX: 30,
-      minZ: -30,
-      maxZ: -8,
+      minX: -40, // EXPANDED from -25 to cover full field width
+      maxX: 55, // EXPANDED from 30 to cover full field length
+      minZ: -35, // EXPANDED from -30 to cover outer boundary
+      maxZ: -5, // EXPANDED from -8 to cover more area
     },
-    pursuitTendency: 0.6,
+    pursuitTendency: 0.7, // INCREASED from 0.6 for better ball pursuit
     positionRecoverySpeed: 0.7,
     supportDistance: 18,
     interceptDistance: 15,
@@ -88,12 +88,12 @@ export const ROLE_DEFINITIONS: Record<SoccerAIRole, RoleDefinition> = {
     defensiveContribution: 8,
     offensiveContribution: 5,
     preferredArea: {
-      minX: -25,
-      maxX: 30,
-      minZ: 2,
-      maxZ: 23,
+      minX: -40, // EXPANDED from -25 to cover full field width
+      maxX: 55, // EXPANDED from 30 to cover full field length
+      minZ: -1, // EXPANDED from 2 to cover more area
+      maxZ: 30, // EXPANDED from 23 to cover outer boundary
     },
-    pursuitTendency: 0.6,
+    pursuitTendency: 0.7, // INCREASED from 0.6 for better ball pursuit
     positionRecoverySpeed: 0.7,
     supportDistance: 18,
     interceptDistance: 15,
@@ -109,12 +109,12 @@ export const ROLE_DEFINITIONS: Record<SoccerAIRole, RoleDefinition> = {
     defensiveContribution: 6,
     offensiveContribution: 7,
     preferredArea: {
-      minX: -20,
-      maxX: 35,
-      minZ: -20,
-      maxZ: 5,
+      minX: -40, // EXPANDED from -20 to cover full field width
+      maxX: 55, // EXPANDED from 35 to cover full field length
+      minZ: -25, // EXPANDED from -20 to cover more area
+      maxZ: 8, // EXPANDED from 5 to cover more area
     },
-    pursuitTendency: 0.75,
+    pursuitTendency: 0.85, // INCREASED from 0.75 for aggressive ball pursuit
     positionRecoverySpeed: 0.6,
     supportDistance: 22,
     interceptDistance: 18,
@@ -130,12 +130,12 @@ export const ROLE_DEFINITIONS: Record<SoccerAIRole, RoleDefinition> = {
     defensiveContribution: 6,
     offensiveContribution: 7,
     preferredArea: {
-      minX: -20,
-      maxX: 35,
-      minZ: -11,
-      maxZ: 20,
+      minX: -40, // EXPANDED from -20 to cover full field width
+      maxX: 55, // EXPANDED from 35 to cover full field length
+      minZ: -14, // EXPANDED from -11 to cover more area
+      maxZ: 25, // EXPANDED from 20 to cover more area
     },
-    pursuitTendency: 0.75,
+    pursuitTendency: 0.85, // INCREASED from 0.75 for aggressive ball pursuit
     positionRecoverySpeed: 0.6,
     supportDistance: 22,
     interceptDistance: 18,
@@ -152,12 +152,12 @@ export const ROLE_DEFINITIONS: Record<SoccerAIRole, RoleDefinition> = {
     defensiveContribution: 3,
     offensiveContribution: 10,
     preferredArea: {
-      minX: -10,
-      maxX: 45,
-      minZ: -18,
-      maxZ: 12,
+      minX: -40, // EXPANDED from -10 to cover full field width
+      maxX: 55, // EXPANDED from 45 to cover full field length
+      minZ: -30, // EXPANDED from -18 to cover more area
+      maxZ: 25, // EXPANDED from 12 to cover more area
     },
-    pursuitTendency: 0.85,
+    pursuitTendency: 0.95, // INCREASED from 0.85 for most aggressive ball pursuit
     positionRecoverySpeed: 0.5,
     supportDistance: 20,
     interceptDistance: 15,

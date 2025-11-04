@@ -76,11 +76,11 @@ export const BALL_CONFIG = {
   // Ball properties
   SCALE: 0.2,
   RADIUS: 0.2,
-  FRICTION: 0.4, // Increased from 0.3 to slow down ball movement more
+  FRICTION: 0.25, // REDUCED from 0.4 to prevent ball from stopping in outer areas
 
-  // Movement damping - increase to slow the ball down faster
-  LINEAR_DAMPING: 0.7, // Reduced from 0.8 for better crossbar bouncing
-  ANGULAR_DAMPING: 3.0, // Reduced from 3.5 for more natural ball rotation
+  // Movement damping - REDUCED to keep ball moving longer
+  LINEAR_DAMPING: 0.4, // REDUCED from 0.7 to prevent ball from stopping too quickly
+  ANGULAR_DAMPING: 2.5, // REDUCED from 3.0 for more natural ball rotation
 
   // ENHANCED: Impact forces for realistic crossbar bouncing
   HORIZONTAL_FORCE: 0.4, // Increased from 0.3 for better bounce response

@@ -40,7 +40,7 @@ class SharedState {
     
     // Configuration for stationary ball detection
     private readonly STATIONARY_THRESHOLD = 1.0; // Ball must move less than 1 unit to be considered stationary
-    private readonly STATIONARY_TIME_LIMIT = 5000; // 5 seconds before ball is considered idle
+    private readonly STATIONARY_TIME_LIMIT = 3000; // REDUCED from 5000ms to 3000ms (3 seconds) for faster AI response
     private readonly STATIONARY_CHECK_INTERVAL = 1000; // Check every 1 second
 
     private constructor() {}

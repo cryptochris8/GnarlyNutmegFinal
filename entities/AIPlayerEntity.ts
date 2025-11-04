@@ -91,6 +91,12 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
   // Restart behavior type to determine how AI behaves after ball resets
   private restartBehavior: 'pass-to-teammates' | 'normal' | null = null;
 
+  // FIFA-like stop-and-pass state machine
+  private passingState: 'none' | 'stopping' | 'ready' | 'passed' = 'none';
+  private passingStateStartTime: number | null = null;
+  private readonly PASS_STOPPING_TIME = 300; // 300ms to stop and plant feet (FIFA-like)
+  private readonly PASS_RECOVERY_TIME = 200; // 200ms delay after pass before moving
+
   // AI module instances
   private staminaManager: AIStaminaManager;
   private goalkeeperBehavior: AIGoalkeeperBehavior;
@@ -1058,35 +1064,98 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     // Left back has the ball
     if (hasBall) {
       console.log(`Left Back ${this.player.username} has the ball`);
-      
+
       // Determine if we should pass or advance
       const opponentGoalLineX = this.team === 'red' ? AI_GOAL_LINE_X_BLUE : AI_GOAL_LINE_X_RED;
-      
+
       // Check if there's space to advance
-      const midfielderPosition = { 
-        x: goalLineX + (this.team === 'red' ? AI_MIDFIELD_OFFSET_X : -AI_MIDFIELD_OFFSET_X), 
-        y: myPosition.y, 
-        z: wideZBoundary * 0.75 
+      const midfielderPosition = {
+        x: goalLineX + (this.team === 'red' ? AI_MIDFIELD_OFFSET_X : -AI_MIDFIELD_OFFSET_X),
+        y: myPosition.y,
+        z: wideZBoundary * 0.75
       };
-      
+
       const hasAdvancingSpace = this.distanceBetween(myPosition, midfielderPosition) > 6;
-      
-      // Higher chance to pass (70%) than advance (30%)
-      if (Math.random() > 0.3 || !hasAdvancingSpace) {
-        console.log(`Left Back ${this.player.username} looking to pass`);
-        this.passBall();
-        // Target slightly forward
-        targetPos = { 
-          x: myPosition.x + (this.team === 'red' ? 5 : -5), 
-          y: myPosition.y, 
-          z: wideZBoundary * 0.75 
-        };
+
+      // FIFA-LIKE: 50% chance to pass (more balanced), 50% to advance
+      const shouldPass = Math.random() > 0.5 || !hasAdvancingSpace;
+
+      if (shouldPass) {
+        // FIFA-LIKE STOP-AND-PASS STATE MACHINE
+        switch (this.passingState) {
+          case 'none':
+            // Start stopping to pass
+            console.log(`${this.player.username} 🛑 starting stop-and-pass sequence`);
+            this.passingState = 'stopping';
+            this.passingStateStartTime = Date.now();
+
+            // STOP MOVING - set target to current position
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+
+          case 'stopping':
+            // Wait for player to slow down and plant feet
+            const stoppingTime = Date.now() - this.passingStateStartTime!;
+
+            if (stoppingTime >= this.PASS_STOPPING_TIME) {
+              console.log(`${this.player.username} ⚽ ready to pass (planted feet)`);
+              this.passingState = 'ready';
+            }
+
+            // STAY STOPPED
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+
+          case 'ready':
+            // Execute the crisp pass
+            console.log(`${this.player.username} ✅ executing FIFA-like crisp pass`);
+            const passSuccess = this.passBall();
+
+            if (passSuccess) {
+              this.passingState = 'passed';
+              this.passingStateStartTime = Date.now();
+            } else {
+              // Pass failed, reset and try dribbling
+              console.log(`${this.player.username} ❌ pass failed, resetting`);
+              this.resetPassingState();
+            }
+
+            // STILL STOPPED during pass execution
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+
+          case 'passed':
+            // Move to support position after pass
+            const timeSincePass = Date.now() - this.passingStateStartTime!;
+
+            if (timeSincePass >= this.PASS_RECOVERY_TIME) {
+              console.log(`${this.player.username} 🏃 moving to support position`);
+              this.resetPassingState();
+            }
+
+            // Move to intelligent support position
+            targetPos = this.calculateSupportPosition(myPosition, ballPosition);
+            break;
+        }
       } else {
-        // Advance up the left flank
+        // Not passing - dribble forward normally, reset passing state
+        this.resetPassingState();
         console.log(`Left Back ${this.player.username} advancing up the left flank`);
-        targetPos = { 
+        targetPos = {
           x: myPosition.x + (opponentGoalLineX - myPosition.x) * 0.3, // Move forward cautiously
-          y: myPosition.y, 
+          y: myPosition.y,
           z: wideZBoundary * 0.75 // Stay wide on left side
         };
       }
@@ -1256,35 +1325,98 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     // Right back has the ball
     if (hasBall) {
       console.log(`Right Back ${this.player.username} has the ball`);
-      
+
       // Determine if we should pass or advance
       const opponentGoalLineX = this.team === 'red' ? AI_GOAL_LINE_X_BLUE : AI_GOAL_LINE_X_RED;
-      
+
       // Check if there's space to advance
-      const midfielderPosition = { 
-        x: goalLineX + (this.team === 'red' ? AI_MIDFIELD_OFFSET_X : -AI_MIDFIELD_OFFSET_X), 
-        y: myPosition.y, 
-        z: wideZBoundary * 0.75 
+      const midfielderPosition = {
+        x: goalLineX + (this.team === 'red' ? AI_MIDFIELD_OFFSET_X : -AI_MIDFIELD_OFFSET_X),
+        y: myPosition.y,
+        z: wideZBoundary * 0.75
       };
-      
+
       const hasAdvancingSpace = this.distanceBetween(myPosition, midfielderPosition) > 6;
-      
-      // Higher chance to pass (70%) than advance (30%)
-      if (Math.random() > 0.3 || !hasAdvancingSpace) {
-        console.log(`Right Back ${this.player.username} looking to pass`);
-        this.passBall();
-        // Target slightly forward
-        targetPos = { 
-          x: myPosition.x + (this.team === 'red' ? 5 : -5), 
-          y: myPosition.y, 
-          z: wideZBoundary * 0.75 
-        };
+
+      // FIFA-LIKE: 50% chance to pass (more balanced), 50% to advance
+      const shouldPass = Math.random() > 0.5 || !hasAdvancingSpace;
+
+      if (shouldPass) {
+        // FIFA-LIKE STOP-AND-PASS STATE MACHINE
+        switch (this.passingState) {
+          case 'none':
+            // Start stopping to pass
+            console.log(`${this.player.username} 🛑 starting stop-and-pass sequence`);
+            this.passingState = 'stopping';
+            this.passingStateStartTime = Date.now();
+
+            // STOP MOVING - set target to current position
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+
+          case 'stopping':
+            // Wait for player to slow down and plant feet
+            const stoppingTime = Date.now() - this.passingStateStartTime!;
+
+            if (stoppingTime >= this.PASS_STOPPING_TIME) {
+              console.log(`${this.player.username} ⚽ ready to pass (planted feet)`);
+              this.passingState = 'ready';
+            }
+
+            // STAY STOPPED
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+
+          case 'ready':
+            // Execute the crisp pass
+            console.log(`${this.player.username} ✅ executing FIFA-like crisp pass`);
+            const passSuccess = this.passBall();
+
+            if (passSuccess) {
+              this.passingState = 'passed';
+              this.passingStateStartTime = Date.now();
+            } else {
+              // Pass failed, reset and try dribbling
+              console.log(`${this.player.username} ❌ pass failed, resetting`);
+              this.resetPassingState();
+            }
+
+            // STILL STOPPED during pass execution
+            targetPos = {
+              x: myPosition.x,
+              y: myPosition.y,
+              z: myPosition.z
+            };
+            break;
+
+          case 'passed':
+            // Move to support position after pass
+            const timeSincePass = Date.now() - this.passingStateStartTime!;
+
+            if (timeSincePass >= this.PASS_RECOVERY_TIME) {
+              console.log(`${this.player.username} 🏃 moving to support position`);
+              this.resetPassingState();
+            }
+
+            // Move to intelligent support position
+            targetPos = this.calculateSupportPosition(myPosition, ballPosition);
+            break;
+        }
       } else {
-        // Advance up the right flank
+        // Not passing - dribble forward normally, reset passing state
+        this.resetPassingState();
         console.log(`Right Back ${this.player.username} advancing up the right flank`);
-        targetPos = { 
+        targetPos = {
           x: myPosition.x + (opponentGoalLineX - myPosition.x) * 0.3, // Move forward cautiously
-          y: myPosition.y, 
+          y: myPosition.y,
           z: wideZBoundary * 0.75 // Stay wide on right side
         };
       }
@@ -1464,18 +1596,89 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
       } 
       // Otherwise, look to pass or dribble forward
       else {
-        // Higher chance to pass as a midfielder (box-to-box distributor)
-        if (Math.random() > 0.3) {
-          console.log(`Midfielder ${this.player.username} looking to pass`);
-          this.passBall();
+        // FIFA-LIKE: 60% chance to pass (midfielders are main distributors), 40% to dribble
+        const shouldPass = Math.random() > 0.4;
+
+        if (shouldPass) {
+          // FIFA-LIKE STOP-AND-PASS STATE MACHINE
+          switch (this.passingState) {
+            case 'none':
+              // Start stopping to pass
+              console.log(`${this.player.username} 🛑 starting stop-and-pass sequence`);
+              this.passingState = 'stopping';
+              this.passingStateStartTime = Date.now();
+
+              // STOP MOVING - set target to current position
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+
+            case 'stopping':
+              // Wait for player to slow down and plant feet
+              const stoppingTime = Date.now() - this.passingStateStartTime!;
+
+              if (stoppingTime >= this.PASS_STOPPING_TIME) {
+                console.log(`${this.player.username} ⚽ ready to pass (planted feet)`);
+                this.passingState = 'ready';
+              }
+
+              // STAY STOPPED
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+
+            case 'ready':
+              // Execute the crisp pass
+              console.log(`${this.player.username} ✅ executing FIFA-like crisp pass`);
+              const passSuccess = this.passBall();
+
+              if (passSuccess) {
+                this.passingState = 'passed';
+                this.passingStateStartTime = Date.now();
+              } else {
+                // Pass failed, reset and try dribbling
+                console.log(`${this.player.username} ❌ pass failed, resetting`);
+                this.resetPassingState();
+              }
+
+              // STILL STOPPED during pass execution
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+
+            case 'passed':
+              // Move to support position after pass
+              const timeSincePass = Date.now() - this.passingStateStartTime!;
+
+              if (timeSincePass >= this.PASS_RECOVERY_TIME) {
+                console.log(`${this.player.username} 🏃 moving to support position`);
+                this.resetPassingState();
+              }
+
+              // Move to intelligent support position
+              targetPos = this.calculateSupportPosition(myPosition, ballPosition);
+              break;
+          }
+        } else {
+          // Not passing - dribble forward normally, reset passing state
+          this.resetPassingState();
+          console.log(`Midfielder ${this.player.username} dribbling forward`);
+          // Dribble toward the opponent's goal while staying on preferred side
+          targetPos = {
+            x: opponentGoalLineX,
+            y: myPosition.y,
+            z: myPosition.z + (sidePreference * 3) // Slight drift to preferred side
+          };
         }
-        
-        // Dribble toward the opponent's goal while staying on preferred side
-        targetPos = { 
-          x: opponentGoalLineX, 
-          y: myPosition.y, 
-          z: myPosition.z + (sidePreference * 3) // Slight drift to preferred side
-        };
       }
     } 
     // The midfielder doesn't have the ball
@@ -1874,7 +2077,14 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
       
       // Calculate distance to teammate
       const distanceToTeammate = this.distanceBetween(this.position, teammate.position);
-      if (distanceToTeammate > 30) continue; // Skip teammates that are too far away
+
+      // FIFA-LIKE: Role-based pass range (allows long balls)
+      let maxPassRange = 30; // Default
+      if (this.aiRole === 'goalkeeper') maxPassRange = 45;              // GK can launch long
+      if (this.aiRole === 'central-midfielder-1') maxPassRange = 40;    // CM can play long
+      if (this.aiRole === 'central-midfielder-2') maxPassRange = 40;    // CM can play long
+
+      if (distanceToTeammate > maxPassRange) continue; // Skip teammates that are too far away
       
       // Calculate how open the teammate is (space score)
       let spaceScore = 10;
@@ -1977,7 +2187,7 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
         }
 
         // Predict where teammate will be when ball arrives
-        const passSpeed = 2.8; // Consistent with updated pass force
+        const passSpeed = 3.5; // FIFA-LIKE: Increased from 2.8 for crisper passes
         const passTravelTime = passDist / passSpeed;
         const predictedX = bestTargetPlayer.position.x + (teammateVelocity.x * passTravelTime);
         const predictedZ = bestTargetPlayer.position.z + (teammateVelocity.z * passTravelTime);
@@ -2028,9 +2238,9 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
 
     // Use a power multiplier based on the distance to the target
     const distanceToTarget = this.distanceBetween(this.position, passTargetPosition);
-    
-    // More conservative power calculation to prevent out-of-bounds passes
-    let powerMultiplier = Math.min(0.8, 0.4 + (distanceToTarget / 50)); // Reduced max from 1.0 to 0.8
+
+    // FIFA-LIKE: More aggressive power calculation for crisper passes
+    let powerMultiplier = Math.min(1.2, 0.5 + (distanceToTarget / 40)); // Increased from 0.8 max and adjusted scaling
     
     // Additional safety check: reduce power if target is near field boundaries
     const fieldCenterX = (AI_GOAL_LINE_X_RED + AI_GOAL_LINE_X_BLUE) / 2;
@@ -2106,6 +2316,7 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     // Check and reset the timer if the player no longer has the ball
     if (!hasBall && this.ballPossessionStartTime !== null) {
       this.ballPossessionStartTime = null;
+      this.resetPassingState();  // Also reset passing state when losing ball
       console.log(`TIMER RESET: ${this.aiRole} ${this.player.username} no longer has the ball`);
     }
     
@@ -2562,20 +2773,90 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
       } 
       // Too far to shoot - dribble toward goal or look to pass
       else {
-        // Decide whether to pass (20% chance) or dribble (80% chance)
-        // Reduced pass probability for strikers in attack
-        if (Math.random() < 0.2) {
-          console.log(`Striker ${this.player.username} looking to pass`);
-          this.passBall();
+        // FIFA-LIKE: 35% chance to pass (increased from 20%), 65% to dribble
+        const shouldPass = Math.random() < 0.35;
+
+        if (shouldPass) {
+          // FIFA-LIKE STOP-AND-PASS STATE MACHINE
+          switch (this.passingState) {
+            case 'none':
+              // Start stopping to pass
+              console.log(`${this.player.username} 🛑 starting stop-and-pass sequence`);
+              this.passingState = 'stopping';
+              this.passingStateStartTime = Date.now();
+
+              // STOP MOVING - set target to current position
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+
+            case 'stopping':
+              // Wait for player to slow down and plant feet
+              const stoppingTime = Date.now() - this.passingStateStartTime!;
+
+              if (stoppingTime >= this.PASS_STOPPING_TIME) {
+                console.log(`${this.player.username} ⚽ ready to pass (planted feet)`);
+                this.passingState = 'ready';
+              }
+
+              // STAY STOPPED
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+
+            case 'ready':
+              // Execute the crisp pass
+              console.log(`${this.player.username} ✅ executing FIFA-like crisp pass`);
+              const passSuccess = this.passBall();
+
+              if (passSuccess) {
+                this.passingState = 'passed';
+                this.passingStateStartTime = Date.now();
+              } else {
+                // Pass failed, reset and try dribbling
+                console.log(`${this.player.username} ❌ pass failed, resetting`);
+                this.resetPassingState();
+              }
+
+              // STILL STOPPED during pass execution
+              targetPos = {
+                x: myPosition.x,
+                y: myPosition.y,
+                z: myPosition.z
+              };
+              break;
+
+            case 'passed':
+              // Move to support position after pass
+              const timeSincePass = Date.now() - this.passingStateStartTime!;
+
+              if (timeSincePass >= this.PASS_RECOVERY_TIME) {
+                console.log(`${this.player.username} 🏃 moving to support position`);
+                this.resetPassingState();
+              }
+
+              // Move to intelligent support position
+              targetPos = this.calculateSupportPosition(myPosition, ballPosition);
+              break;
+          }
+        } else {
+          // Not passing - dribble forward normally, reset passing state
+          this.resetPassingState();
+          console.log(`Striker ${this.player.username} dribbling toward goal`);
+          // Dribble toward goal, slightly favoring the center
+          const centralizing = 0.3; // How much to move toward center while dribbling
+          targetPos = {
+            x: opponentGoalLineX,
+            y: myPosition.y,
+            z: myPosition.z * (1 - centralizing) + AI_FIELD_CENTER_Z * centralizing
+          };
         }
-        
-        // Dribble toward goal, slightly favoring the center
-        const centralizing = 0.3; // How much to move toward center while dribbling
-        targetPos = { 
-          x: opponentGoalLineX, 
-          y: myPosition.y, 
-          z: myPosition.z * (1 - centralizing) + AI_FIELD_CENTER_Z * centralizing 
-        };
       }
     }
     // Striker doesn't have the ball - position for attack
@@ -2814,20 +3095,20 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
     // Ensure PASS_FORCE is defined, if not, use a sensible default
     const baseForce = typeof PASS_FORCE === 'number' ? PASS_FORCE : 10;
     
-    // SAFETY: Cap the maximum multiplier for all players to avoid extreme forces
-    let effectiveMultiplier = Math.min(powerMultiplier, 1.0);
-    
-    // Additional cap for different roles to prevent flying balls
+    // FIFA-LIKE: Increased pass force caps for crisper passes
+    let effectiveMultiplier = Math.min(powerMultiplier, 1.3); // Increased from 1.0
+
+    // Role-based caps (increased for all roles)
     if (this.aiRole === 'goalkeeper') {
-      effectiveMultiplier = Math.min(effectiveMultiplier, 0.8); // Goalkeeper passes are safest
+      effectiveMultiplier = Math.min(effectiveMultiplier, 1.0); // Increased from 0.8
     } else if (this.aiRole === 'striker') {
-      effectiveMultiplier = Math.min(effectiveMultiplier, 0.9); // Strikers slightly stronger
+      effectiveMultiplier = Math.min(effectiveMultiplier, 1.2); // Increased from 0.9
     } else {
-      effectiveMultiplier = Math.min(effectiveMultiplier, 0.85); // Other players moderate
+      effectiveMultiplier = Math.min(effectiveMultiplier, 1.1); // Increased from 0.85
     }
-    
+
     // Calculate the final force, with an absolute maximum cap
-    const effectivePassForce = Math.min(baseForce * effectiveMultiplier, 8);  // Reduced hard cap from 12 to 8
+    const effectivePassForce = Math.min(baseForce * effectiveMultiplier, 10);  // Increased hard cap from 8 to 10
     
     // Add vertical dampening to prevent high arcs for longer distances
     const verticalComponent = direction.y * effectivePassForce;
@@ -2912,6 +3193,61 @@ export default class AIPlayerEntity extends SoccerPlayerEntity {
       y: targetPoint.y,
       z: clampedZ
     };
+  }
+
+  /**
+   * Reset passing state machine (call when player loses ball or pass is complete)
+   */
+  private resetPassingState(): void {
+    this.passingState = 'none';
+    this.passingStateStartTime = null;
+  }
+
+  /**
+   * Calculate intelligent support position after making a pass
+   * FIFA-like positioning: Move to space, provide passing option
+   */
+  private calculateSupportPosition(myPosition: Vector3Like, ballPosition: Vector3Like): Vector3Like {
+    const roleDefinition = ROLE_DEFINITIONS[this.aiRole];
+    const opponentGoalX = this.team === 'red' ? AI_GOAL_LINE_X_BLUE : AI_GOAL_LINE_X_RED;
+    const forwardDirection = this.team === 'red' ? -1 : 1;
+
+    // Role-based support positioning
+    switch (this.aiRole) {
+      case 'left-back':
+      case 'right-back':
+        // Backs: Move slightly forward but maintain defensive shape
+        return {
+          x: myPosition.x + (forwardDirection * 5),  // 5 units forward
+          y: myPosition.y,
+          z: myPosition.z  // Stay on same flank
+        };
+
+      case 'central-midfielder-1':
+      case 'central-midfielder-2':
+        // Midfielders: Move forward and to the side for passing option
+        const sideOffset = (Math.random() - 0.5) * 10;  // Random side movement
+        return {
+          x: myPosition.x + (forwardDirection * 8),  // 8 units forward
+          y: myPosition.y,
+          z: myPosition.z + sideOffset  // Drift to space
+        };
+
+      case 'striker':
+        // Striker: Move into space near goal
+        return {
+          x: opponentGoalX + (forwardDirection * -15),  // Near penalty area
+          y: myPosition.y,
+          z: AI_FIELD_CENTER_Z + ((Math.random() - 0.5) * 20)  // Wide positioning
+        };
+
+      case 'goalkeeper':
+        // Goalkeeper: Stay in position
+        return myPosition;
+
+      default:
+        return myPosition;
+    }
   }
 
   /**

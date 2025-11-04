@@ -494,14 +494,14 @@ export default function createSoccerBall(world: World) {
       const ballSpeed = Math.sqrt(ballVelocity.x * ballVelocity.x + ballVelocity.z * ballVelocity.z);
 
       // IMPROVED PASS RECEPTION FORGIVENESS (much more forgiving for better gameplay)
-      let PROXIMITY_POSSESSION_DISTANCE = 2.0; // INCREASED base distance (was 1.5)
-      let MAX_BALL_SPEED_FOR_PROXIMITY = 4.0; // INCREASED base speed (was 3.0)
+      let PROXIMITY_POSSESSION_DISTANCE = 2.5; // INCREASED from 2.0 to 2.5 for easier ball pickup
+      let MAX_BALL_SPEED_FOR_PROXIMITY = 5.0; // INCREASED from 4.0 to 5.0 for better stationary ball pickup
 
       // RECEPTION ASSISTANCE: If ball is moving (likely a pass), increase reception assistance significantly
       if (ballSpeed > 1.0) {
         // Ball is moving - likely a pass, so provide enhanced reception assistance
-        PROXIMITY_POSSESSION_DISTANCE = 3.0; // INCREASED from 2.2 to 3.0 for very forgiving pass reception
-        MAX_BALL_SPEED_FOR_PROXIMITY = 8.0; // INCREASED from 6.0 to 8.0 to help with all pass speeds
+        PROXIMITY_POSSESSION_DISTANCE = 3.5; // INCREASED from 3.0 to 3.5 for very forgiving pass reception
+        MAX_BALL_SPEED_FOR_PROXIMITY = 10.0; // INCREASED from 8.0 to 10.0 to help with all pass speeds
         console.log(`📥 Pass reception mode active: radius=${PROXIMITY_POSSESSION_DISTANCE}u, max_speed=${MAX_BALL_SPEED_FOR_PROXIMITY}`);
       }
       
