@@ -4405,201 +4405,10 @@
     }
   }
 
-  /* ===== PHASE 1 MOBILE CONTROLS (ZERO DESKTOP IMPACT) ===== */
-  
-  /* Mobile Device Detection & Base Mobile Styles */
-  .mobile-controls {
-    display: none; /* Hidden by default - only shown on mobile */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-    pointer-events: none; /* Let touches pass through container to children */
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-  }
-
-  /* Enable pointer events on child elements */
-  .mobile-controls > * {
-    pointer-events: auto;
-  }
-
-  /* Force mobile controls to show when mobile is detected by JavaScript */
-  /* DISABLED: Now using .game-active class instead */
-  /* .mobile-controls.mobile-active {
-    display: block !important;
-  } */
-
-  /* Hide mobile controls during opening/team selection screens */
-  /* DISABLED: Now using .game-active class instead */
-  /* .mobile-controls.mobile-gameplay {
-    display: block !important;
-  } */
-  
-  /* Virtual Joystick for Movement */
-  .virtual-joystick {
-    position: fixed !important;
-    bottom: 30px !important;
-    left: 30px !important;
-    width: 120px !important;
-    height: 120px !important;
-    background: rgba(0, 0, 0, 0.3);
-    border: 3px solid rgba(255, 255, 255, 0.4);
-    border-radius: 50%;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 10000 !important;
-  }
-  
-  .joystick-knob {
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    position: relative;
-    transition: all 0.1s ease;
-  }
-  
-  /* Action Buttons */
-  .mobile-actions {
-    position: fixed !important;
-    bottom: 20px !important;
-    right: 20px !important;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr auto;
-    gap: 8px;
-    max-width: 140px;
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 10000 !important;
-  }
-  
-  .mobile-action-btn {
-    width: 50px;
-    height: 50px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    color: white;
-    font-size: 9px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    opacity: 0.85;
-    backdrop-filter: blur(5px);
-  }
-  
-  .mobile-action-btn:active {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(0.95);
-    opacity: 1;
-  }
-  
-  /* Auto-fade during gameplay for better visibility */
-  .mobile-actions.gameplay-fade {
-    opacity: 0.6;
-    transition: opacity 0.3s ease;
-  }
-  
-  .mobile-actions.gameplay-fade:hover {
-    opacity: 1;
-  }
-  
-  /* Compact mode for smaller screens */
-  .mobile-actions.compact {
-    gap: 5px;
-    max-width: 120px;
-  }
-  
-  .mobile-actions.compact .mobile-action-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 8px;
-  }
-  
-  .mobile-actions.compact .mobile-action-btn.power-up {
-    height: 35px;
-    font-size: 10px;
-  }
-  
-  .mobile-action-btn.primary {
-    background: linear-gradient(135deg, rgba(255, 69, 58, 0.9), rgba(255, 45, 85, 0.9));
-    border-color: rgba(255, 69, 58, 1);
-    color: white;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    box-shadow: 0 4px 15px rgba(255, 69, 58, 0.4);
-  }
-  
-  .mobile-action-btn.primary:active {
-    background: linear-gradient(135deg, rgba(255, 45, 85, 0.9), rgba(255, 69, 58, 0.9));
-    box-shadow: 0 6px 20px rgba(255, 69, 58, 0.6);
-  }
-  
-  .mobile-action-btn.secondary {
-    background: linear-gradient(135deg, rgba(52, 199, 89, 0.9), rgba(48, 209, 88, 0.9));
-    border-color: rgba(52, 199, 89, 1);
-    color: white;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    box-shadow: 0 4px 15px rgba(52, 199, 89, 0.4);
-  }
-  
-  .mobile-action-btn.secondary:active {
-    background: linear-gradient(135deg, rgba(48, 209, 88, 0.9), rgba(52, 199, 89, 0.9));
-    box-shadow: 0 6px 20px rgba(52, 199, 89, 0.6);
-  }
-  
-  .mobile-action-btn.power-up {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.8), rgba(255, 165, 0, 0.8));
-    border-color: rgba(255, 215, 0, 1);
-    color: #000;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
-    grid-column: 1 / -1;
-    width: auto;
-    border-radius: 25px;
-    height: 40px;
-    font-size: 11px;
-  }
-  
-  .mobile-action-btn.power-up:active {
-    background: linear-gradient(135deg, rgba(255, 165, 0, 0.9), rgba(255, 215, 0, 0.9));
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
-  }
-  
-
-
-  /* Mobile Performance Indicator */
-  .mobile-performance-indicator {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 11px;
-    font-family: 'Inter', sans-serif;
-  }
-  
-  /* Hytopia SDK .mobile class support */
-  /* DISABLED: Controls now require .game-active class to prevent showing during opening screen */
-  /* body.mobile .mobile-controls {
-    display: block !important;
-  } */
+  /* ===== OLD MOBILE CONTROLS STYLES - REMOVED =====
+     All custom joystick/action button CSS removed.
+     Hytopia SDK now handles movement joystick and camera controls automatically.
+     Mobile action buttons are defined at the bottom of this file. */
   
   body.mobile .desktop-only {
     display: none !important;
@@ -5990,6 +5799,94 @@
 
   // Initialize mobile auto-start detection
   initMobileAutoStart();
+
+  // ===== ENHANCED MOBILE UI IMPROVEMENTS =====
+  // Improve opening UI responsiveness and touch handling
+  (function enhanceOpeningUI() {
+    if (typeof hytopia === 'undefined' || !hytopia.isMobile) {
+      return; // Only run on mobile devices
+    }
+
+    console.log('[Mobile UI] Enhancing opening screen for better touch experience');
+
+    // Function to optimize UI for current viewport
+    function optimizeForViewport() {
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      const isLandscape = vw > vh;
+
+      console.log(`[Mobile UI] Viewport: ${vw}x${vh} (${isLandscape ? 'landscape' : 'portrait'})`);
+
+      // Get opening screen container
+      const openingScreen = document.getElementById('opening-ui-overlay');
+      if (!openingScreen) return;
+
+      // Optimize all buttons for touch
+      const allButtons = openingScreen.querySelectorAll('button, .btn, .team-btn, .game-mode-btn');
+      allButtons.forEach(btn => {
+        // Ensure minimum touch target size (44x44px recommended)
+        const currentHeight = parseInt(window.getComputedStyle(btn).minHeight) || 0;
+        if (currentHeight < 44) {
+          btn.style.minHeight = '44px';
+          btn.style.minWidth = '44px';
+        }
+
+        // Add touch feedback
+        btn.style.webkitTapHighlightColor = 'transparent';
+        btn.style.touchAction = 'manipulation';
+
+        // Ensure proper padding for readability
+        if (isLandscape && vh < 600) {
+          btn.style.padding = '12px 20px';
+          btn.style.fontSize = '16px';
+        }
+      });
+
+      // Prevent body scrolling on iOS
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
+      document.body.style.overflow = 'hidden';
+
+      console.log('[Mobile UI] ✅ Opening screen optimized for viewport');
+    }
+
+    // Run optimization on load
+    optimizeForViewport();
+
+    // Re-optimize on orientation change or resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        console.log('[Mobile UI] Screen resized - re-optimizing');
+        optimizeForViewport();
+      }, 250);
+    });
+
+    // Add visual touch feedback to all interactive elements
+    const addTouchFeedback = (element) => {
+      element.addEventListener('touchstart', function(e) {
+        this.style.transform = 'scale(0.95)';
+        this.style.opacity = '0.8';
+      }, { passive: true });
+
+      element.addEventListener('touchend', function(e) {
+        this.style.transform = 'scale(1)';
+        this.style.opacity = '1';
+      }, { passive: true });
+
+      element.addEventListener('touchcancel', function(e) {
+        this.style.transform = 'scale(1)';
+        this.style.opacity = '1';
+      }, { passive: true });
+    };
+
+    // Apply touch feedback to all buttons
+    document.querySelectorAll('button, .btn, .team-btn, .game-mode-btn, [onclick]').forEach(addTouchFeedback);
+
+    console.log('[Mobile UI] ✅ Enhanced touch handling enabled');
+  })();
 
   // ===== GPU MEMORY MANAGEMENT =====
   // Client-side GPU memory management and WebGL context recovery
@@ -10300,50 +10197,11 @@
   window.forcePassToTeammate = forcePassToTeammate;
 
   // ===== MOBILE CONTROLS =====
-  // Mobile controls (joystick, camera, sprint) are handled entirely by the Hytopia SDK
-  // No custom implementation needed - Hytopia automatically provides:
-  // - Virtual joystick for movement (bottom-left)
-  // - Touch drag for camera rotation (anywhere on screen)
-  // - Sprint by pulling joystick all the way out
-
-  // Placeholder functions for backwards compatibility (empty implementations)
-  function initializeMobileControls() {
-    // Hytopia SDK handles all mobile controls automatically
-    console.log('📱 Mobile controls handled by Hytopia SDK');
-  }
-
-  function handleMobileAction() { /* Handled by Hytopia SDK */ }
-  function handleMobileQuickAction() { /* Handled by Hytopia SDK */ }
-  function detectMobileDevice() {
-    return typeof hytopia !== 'undefined' && hytopia.isMobile === true;
-  }
-  function testMobileControls() { console.log('📱 Mobile controls: Use Hytopia SDK'); }
-  function checkMobileControlsStatus() { return { message: 'Using Hytopia SDK mobile controls' }; }
-  function setJoystickSensitivity() { /* Handled by Hytopia SDK */ }
-  function setJoystickDeadzone() { /* Handled by Hytopia SDK */ }
-  function setCameraSensitivity() { /* Handled by Hytopia SDK */ }
-  function resetMobileControls() { /* Handled by Hytopia SDK */ }
-  function getMobileControlsConfig() { return {}; }
-  function initializeJoystickEvents() { /* Handled by Hytopia SDK */ }
-  function initializeMobileCameraControls() { /* Handled by Hytopia SDK */ }
-  function showMobileControls() {
-    // Show message that Hytopia SDK handles controls
-    console.log('📱 Mobile controls are handled by Hytopia SDK');
-  }
-
-  // Make mobile functions globally accessible for backwards compatibility
-  window.initializeMobileControls = initializeMobileControls;
-  window.handleMobileAction = handleMobileAction;
-  window.handleMobileQuickAction = handleMobileQuickAction;
-  window.detectMobileDevice = detectMobileDevice;
-  window.testMobileControls = testMobileControls;
-  window.checkMobileControlsStatus = checkMobileControlsStatus;
-  window.setJoystickSensitivity = setJoystickSensitivity;
-  window.setJoystickDeadzone = setJoystickDeadzone;
-  window.setCameraSensitivity = setCameraSensitivity;
-  window.resetMobileControls = resetMobileControls;
-  window.getMobileControlsConfig = getMobileControlsConfig;
-  window.showMobileControls = showMobileControls;
+  // Mobile controls (joystick, camera) are handled entirely by the Hytopia SDK
+  // Hytopia automatically provides:
+  // - Virtual joystick for movement (left ~40% of screen)
+  // - Touch drag for camera rotation (right ~60% of screen)
+  // We only need to add custom action buttons (see bottom of this file)
   // ===== TOURNAMENT SYSTEM FUNCTIONS =====
 
   // Tournament Creation Handler
@@ -11665,39 +11523,232 @@
   window.selectMobileTeam = selectMobileTeam;
   window.showMobileGameMenu = showMobileGameMenu;
 
-  // DISABLED: Old mobile controls initialization (replaced with static HTML implementation below)
-  // setTimeout(function() {
-  //   console.log('📱 Starting mobile controls initialization...');
-  //   initializeMobileControls();
-  // }, 1000);
+  // Mobile action buttons are initialized below in the static HTML section
 </script>
 
 <!-- ========================================
-  HYTOPIA SDK-COMPLIANT MOBILE CONTROLS
+  HYTOPIA SDK MOBILE ACTION BUTTONS
 
-  This file contains simple mobile action buttons that work
-  with Hytopia's automatic mobile movement and camera controls.
+  Hytopia SDK automatically provides:
+  - Movement joystick (left ~40% of screen)
+  - Camera touch controls (right ~60% of screen)
 
-  Hytopia automatically provides:
-  - Movement joystick (left 40% of screen)
-  - Camera controls (right 60% of screen)
-
-  We only need to add custom action buttons.
+  We only add custom action buttons for game-specific actions.
 ======================================== -->
 
-<!-- ========================================
-     MOBILE CONTROLS
-     ======================================== -->
-<!--
-  Mobile controls are handled entirely by the Hytopia SDK:
-  - Movement: Virtual joystick (bottom-left)
-  - Camera: Touch drag (anywhere on screen)
-  - Sprint: Pull joystick all the way out
+<!-- Mobile Action Buttons (only visible on mobile devices) -->
+<div class="mobile-controls">
+  <button id="mobile-shoot-button" class="mobile-button mobile-shoot">
+    SHOOT
+  </button>
 
-  Custom action buttons (shoot, pass, tackle) could not be reliably
-  implemented due to z-index/rendering conflicts with the Hytopia canvas.
-  Mobile players can use the keyboard overlay feature on their devices
-  to access game actions if needed.
--->
+  <button id="mobile-pass-button" class="mobile-button mobile-pass">
+    PASS
+  </button>
 
-<!-- No custom CSS needed - Hytopia SDK handles all mobile controls -->
+  <button id="mobile-sprint-button" class="mobile-button mobile-sprint">
+    SPRINT
+  </button>
+
+  <button id="mobile-tackle-button" class="mobile-button mobile-tackle">
+    TACKLE
+  </button>
+</div>
+
+<style>
+  /* Hide mobile controls by default */
+  .mobile-controls {
+    display: none;
+  }
+
+  /* Show mobile controls only when Hytopia adds body.mobile class */
+  body.mobile .mobile-controls {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allow touch-through to Hytopia's joystick/camera */
+    z-index: 999;
+  }
+
+  /* Mobile button base styles */
+  body.mobile .mobile-button {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 12vmin; /* Responsive size based on viewport */
+    height: 12vmin;
+    min-width: 50px;
+    min-height: 50px;
+    max-width: 80px;
+    max-height: 80px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: clamp(9px, 2vmin, 12px); /* Responsive font */
+    font-weight: bold;
+    text-transform: uppercase;
+    pointer-events: auto; /* Enable touch for buttons */
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 10000; /* Ensure buttons stay on top */
+  }
+
+  /* Button active state */
+  body.mobile .mobile-button:active,
+  body.mobile .mobile-button.active {
+    transform: scale(0.9);
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Shoot button - bottom right (safe positioning) */
+  body.mobile .mobile-shoot {
+    bottom: 20px;
+    right: 20px;
+    background: rgba(220, 50, 50, 0.7);
+  }
+
+  body.mobile .mobile-shoot:active {
+    background: rgba(250, 70, 70, 0.9);
+  }
+
+  /* Pass button - above shoot */
+  body.mobile .mobile-pass {
+    bottom: 100px;
+    right: 20px;
+    background: rgba(50, 150, 255, 0.7);
+  }
+
+  body.mobile .mobile-pass:active {
+    background: rgba(70, 170, 255, 0.9);
+  }
+
+  /* Sprint button - bottom left (clear of joystick) */
+  body.mobile .mobile-sprint {
+    bottom: 20px;
+    left: 160px;
+    background: rgba(255, 200, 50, 0.7);
+  }
+
+  body.mobile .mobile-sprint:active {
+    background: rgba(255, 220, 70, 0.9);
+  }
+
+  /* Tackle button - above pass */
+  body.mobile .mobile-tackle {
+    bottom: 180px;
+    right: 20px;
+    background: rgba(150, 80, 255, 0.7);
+  }
+
+  body.mobile .mobile-tackle:active {
+    background: rgba(170, 100, 255, 0.9);
+  }
+</style>
+
+<script>
+  // Initialize mobile action buttons (Hytopia SDK handles joystick and camera automatically)
+  (function initMobileButtons() {
+    // Helper function to setup button with input mapping
+    function setupMobileButton(buttonId, inputKey, label) {
+      const button = document.getElementById(buttonId);
+      if (!button) {
+        console.warn(`Mobile button ${buttonId} not found`);
+        return;
+      }
+
+      // Touch start - press input
+      button.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // Prevent mobile browser behaviors
+        button.classList.add('active');
+        hytopia.pressInput(inputKey, true);
+      });
+
+      // Touch end - release input
+      button.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        button.classList.remove('active');
+        hytopia.pressInput(inputKey, false);
+      });
+
+      // Touch cancel - also release
+      button.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        button.classList.remove('active');
+        hytopia.pressInput(inputKey, false);
+      });
+    }
+
+    // Setup all mobile action buttons with their input mappings
+    setupMobileButton('mobile-shoot-button', 'mr', 'Shoot');     // Right mouse = Shoot
+    setupMobileButton('mobile-pass-button', 'ml', 'Pass');       // Left mouse = Pass
+    setupMobileButton('mobile-sprint-button', 'sh', 'Sprint');   // Shift = Sprint
+    setupMobileButton('mobile-tackle-button', 'e', 'Tackle');    // E key = Tackle
+
+    // Ensure buttons stay visible during game (fix for buttons leaving screen)
+    function ensureButtonsVisible() {
+      const buttons = document.querySelectorAll('.mobile-button');
+
+      if (buttons.length === 0) {
+        console.warn('⚠️ Mobile buttons not found in DOM!');
+        return;
+      }
+
+      let hiddenCount = 0;
+      buttons.forEach(btn => {
+        const computed = window.getComputedStyle(btn);
+        const rect = btn.getBoundingClientRect();
+
+        // Check if button is hidden or off-screen
+        if (computed.display === 'none' || computed.visibility === 'hidden' || computed.opacity === '0') {
+          hiddenCount++;
+          console.warn(`⚠️ Mobile button hidden by CSS:`, btn.id, {
+            display: computed.display,
+            visibility: computed.visibility,
+            opacity: computed.opacity
+          });
+        }
+
+        if (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > window.innerWidth) {
+          console.warn(`⚠️ Mobile button off-screen:`, btn.id, {
+            position: { bottom: rect.bottom, top: rect.top, left: rect.left, right: rect.right },
+            viewport: { width: window.innerWidth, height: window.innerHeight }
+          });
+        }
+
+        // Force visibility
+        btn.style.display = 'flex !important';
+        btn.style.visibility = 'visible !important';
+        btn.style.opacity = '1 !important';
+        btn.style.zIndex = '10000';
+      });
+
+      if (hiddenCount > 0) {
+        console.log(`✅ Restored ${hiddenCount} hidden mobile buttons`);
+      }
+    }
+
+    // Initial check
+    ensureButtonsVisible();
+
+    // Check button visibility periodically
+    setInterval(ensureButtonsVisible, 2000);
+
+    // Also check when visibility might change
+    document.addEventListener('visibilitychange', ensureButtonsVisible);
+
+    console.log('✅ Mobile action buttons initialized (SDK handles joystick + camera)');
+    console.log('✅ Button visibility monitoring active');
+    console.log(`✅ Found ${document.querySelectorAll('.mobile-button').length} mobile buttons`);
+  })();
+</script>
